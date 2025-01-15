@@ -208,3 +208,144 @@
 2. **미니멀리즘**: 간단하고 깔끔한 디자인.
 3. **마이크로 인터랙션**: 작은 애니메이션으로 피드백 제공.
 4. **음성 인터페이스(VUI)**: 음성 명령으로 조작 가능.
+
+---
+<br>
+
+# 25.01.15 (수)
+
+## Web ide 동시편집 구현 테스트 (Monaco 라이브러리)
+
+```jsx
+import { useState, useRef } from 'react'
+import Editor from "@monaco-editor/react"
+import * as Y from "yjs"
+import { WebrtcProvider } from "y-webrtc"
+import { MonacoBinding } from "y-monaco"
+
+// 모나코 에디터 설정
+// YJS 텍스트를 모나코 에디터에 연결
+
+function App() {
+  const editorRef = useRef(null);
+
+  // 에디터 값 -> YJS 텍스트 값 (여러 명이 공유하는 텍스트 값)
+  // 한 사람이 텍스트를 삭제하면 -> 전체 공유 텍스트 값에서도 삭제됨
+  // 이 모든 과정은 YJS에서 처리함
+
+  // YJS 초기화, 모나코 인스턴스의 변화를 감지하도록 설정
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor
+    // YJS 초기화
+    const doc = new Y.Doc() // 공유 객체 모음 -> 텍스트
+
+    // WebRTC를 통해 다른 피어들과 연결(또는 연결 시작)
+    const provider = new WebrtcProvider("test-room", doc) // room1, room2
+    const type = doc.getText("monaco") // doc { "monaco": "IDE에서 보여주고 있는 내용" }
+
+    // YJS를 모나코 에디터와 연결
+    const binding = new MonacoBinding(
+      type, 
+      editorRef.current.getModel(),
+      new Set([editorRef.current]),
+      provider.awareness
+    );
+    console.log(provider.awareness);
+  }
+
+  return (
+    <Editor
+      height="100vh"
+      width="100vw"
+      theme="vs-dark"
+      onMount={handleEditorDidMount}
+    />
+  )
+}
+
+export default App
+
+```
+## 코드 분석
+
+**React**와 **Monaco 에디터**, 그리고 **YJS**(실시간 협업을 지원하는 라이브러리)를 연동해 **실시간 협업 에디터**를 구현하는 예시
+
+---
+
+### 1. 라이브러리 임포트
+
+```jsx
+import { useState, useRef } from 'react'
+import Editor from "@monaco-editor/react"
+import * as Y from "yjs"
+import { WebrtcProvider } from "y-webrtc"
+import { MonacoBinding } from "y-monaco"
+```
+- **@monaco-editor/react** <br>
+   : VScode 편집기 엔진을 React 환경에서 사용할 수 있도록 만든 라이브러리
+- **YJS** <br>
+   : CRDT(Conflict-free Replicated Data Type) 기반으로 실시간 협업을 지원하는 라이브러리
+- **y-webrtc** <br>
+   : WebRTC를 통해 네트워크 상의 다른 클라이언트들과 YJS 문서를 동기화할 수 있게 해주는 라이브러리
+- **y-monaco** <br>
+   : YJS의 텍스트 객체와 Monaco 에디터를 바인딩해주는 어댑터로 에디터 내용을 실시간으로 공유할 수 있도록 해주는 라이브러리
+
+---
+### 2. APP 컴포넌트 선언
+
+```jsx
+function App() {
+  const editorRef = useRef(null);
+  ...
+  return (
+    <Editor
+      height="100vh"
+      width="100vw"
+      theme="vs-dark"
+      onMount={handleEditorDidMount}
+    />
+  )
+}
+```
+- **editorRef** <br>
+   : 모나코 에디터 인스턴스를 참조하기 위한 변수
+- **Editor** <br>
+   : @monaco-editor/react에서 제공하는 컴포넌트
+
+---
+### 3. handleEditorDidMount 함수
+
+```jsx
+function handleEditorDidMount(editor, monaco) {
+  editorRef.current = editor
+
+  const doc = new Y.Doc()
+  const provider = new WebrtcProvider("test-room", doc)
+  const type = doc.getText("monaco")
+  const binding = new MonacoBinding(
+    type, 
+    editorRef.current.getModel(),
+    new Set([editorRef.current]),
+    provider.awareness
+  );
+  console.log(provider.awareness);
+}
+```
+- **const doc = new Y.Doc()** <br>
+   : YJS에서 협업데이터(텍스트, 맵, 배열 등)를 담는 공유 문서 생성해 다수의 사용자가 동시에 작성하는 데이터를 동기화할 수 있음
+- **const provider = new WebrtcProvider("test-room", doc)** <br>
+   : "test-room"이라는 방을 통해 webRTC 연결 <br>
+   doc을 전달해 다른 클라이언트와 동기화하도록 만듦 <br>
+   실제 배포 시에는 방 이름을 동적으로 할당하거나, 서버를 통해 관리할 수도 있음
+- **const type = doc.getText("monaco")** <br>
+   : doc 에서 "monaco라는 키로 텍스트를 가져옮 <br>
+   이 텍스트 객체를 모나코 에디터의 내용과 동기화하게 됨
+- **MonacoBinding** <br>
+   : YJS의 텍스트와 모나코 에디터 모델을 연결해주는 어댑터
+- **new Set([editorRef.current])** <br>
+   : 에디터의 selection / 커서 등의 정보를 공유할 수 있도록 Monaco 에디터 인스턴스(집합 형태) 전달
+- **provider.awareness** <br>
+   : WebrtcProvider가 제공하는 awareness 객체. 사용자 커서 위치나 다른 메타정보(이 사용자는 현재 어떤 색상 테마를 쓰는지, 닉네임은 무엇인지 등)를 공유
+
+
+
