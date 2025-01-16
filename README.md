@@ -210,19 +210,19 @@
 <br />
 
 ### 2.2 요구사항 명세서
-![erd](src/img/요구사항명세서.jpg)
+![요구사항 명세서](src/img/requests.jpg)
 - 자세한 내용은 **[요구사항 분석 노션 링크](https://aback-mandolin-01e.notion.site/0b42961363c04c7fac6482ae7508692e)** 와  **[요구사항 명세서 파일](src/data/요구사항명세서.xlsx)** 을 참고해주세요
 
 <br />
 
 ### 2.3 플로우 차트
-![erd](src/img/flow.png)
+![플로우 차트](src/img/flow.png)
 > 자세한 내용은 **[플로우 차트 노션 링크](https://aback-mandolin-01e.notion.site/b49e5dbc958949a1874266e5083a31d1)** 를 참고해주세요.  
 
 <br />
 
 ### 2.4 화면 설계
-![erd](src/img/screen.png)
+![화면 설계](src/img/screen.png)
 > 자세한 내용은 **[화면 설계 노션 링크](https://aback-mandolin-01e.notion.site/2d4f9c566af44270b77e12771d103db1)** 를 참고해주세요.  
 
 <br />
