@@ -347,5 +347,167 @@ function handleEditorDidMount(editor, monaco) {
 - **provider.awareness** <br>
    : WebrtcProvider가 제공하는 awareness 객체. 사용자 커서 위치나 다른 메타정보(이 사용자는 현재 어떤 색상 테마를 쓰는지, 닉네임은 무엇인지 등)를 공유
 
+---
+<br>
 
+# 25.01.16 (목)
 
+## TypeScript 학습 내용 정리
+
+### 1. 기본 타입 (Basic Types)
+TypeScript에서 변수에 할당할 수 있는 기본적인 타입들은 다음과 같습니다:
+
+- **string**: 문자열 타입  
+  ```typescript
+  let name: string = "John";
+  ```
+- **number**: 숫자 타입 (정수, 부동소수 포함)  
+  ```typescript
+  let age: number = 30;
+  ```
+- **boolean**: 논리 타입 (true/false)  
+  ```typescript
+  let isActive: boolean = true;
+  ```
+- **null**: null 값  
+  ```typescript
+  let nothing: null = null;
+  ```
+- **undefined**: 값이 정의되지 않음  
+  ```typescript
+  let notAssigned: undefined = undefined;
+  ```
+- **bigint**: 큰 정수 값을 표현  
+  ```typescript
+  let bigNumber: bigint = 9007199254740991n;
+  ```
+- **symbol**: 고유한 식별자 생성  
+  ```typescript
+  let sym: symbol = Symbol("unique");
+  ```
+
+---
+
+### 2. 원시 타입과 리터럴 타입 (Primitive and Literal Types)
+- **원시 타입 (Primitive Types)**:  
+  기본 타입인 `string`, `number`, `boolean` 등의 데이터 타입.
+
+- **리터럴 타입 (Literal Types)**:  
+  값 자체가 타입으로 사용되는 것. 특정 값만 허용하도록 타입을 제한할 수 있음.
+  ```typescript
+  let direction: "left" | "right" | "up" | "down";
+  direction = "left"; // 가능
+  direction = "forward"; // 오류
+  ```
+
+---
+
+### 3. 배열과 튜플 (Arrays and Tuples)
+- **배열 (Array)**:  
+  같은 타입의 데이터를 여러 개 저장하는 자료 구조.
+  ```typescript
+  let numbers: number[] = [1, 2, 3];
+  let strings: Array<string> = ["a", "b", "c"];
+  ```
+
+- **튜플 (Tuple)**:  
+  고정된 크기와 타입 순서를 가지는 배열.
+  ```typescript
+  let tuple: [string, number, boolean];
+  tuple = ["hello", 42, true]; // 가능
+  ```
+
+---
+
+### 4. 객체 (Objects)
+- 객체는 여러 속성과 값을 가지며, 속성의 타입을 지정할 수 있음.
+  ```typescript
+  let person: { name: string; age: number; isActive: boolean } = {
+    name: "John",
+    age: 30,
+    isActive: true,
+  };
+  ```
+
+- **선택적 속성**:  
+  속성 이름 뒤에 `?`를 추가하여 선택적으로 속성을 가질 수 있음.
+  ```typescript
+  let user: { id: number; username?: string } = { id: 1 };
+  ```
+
+---
+
+### 5. 타입 별칭과 인덱스 시그니처 (Type Aliases and Index Signatures)
+- **타입 별칭 (Type Alias)**:  
+  복잡한 타입을 재사용하기 위해 별칭을 만듦.
+  ```typescript
+  type User = { id: number; name: string };
+  let admin: User = { id: 1, name: "Alice" };
+  ```
+
+- **인덱스 시그니처 (Index Signature)**:  
+  객체가 동적으로 속성을 가질 때 사용.
+  ```typescript
+  let data: { [key: string]: number } = { a: 1, b: 2 };
+  data["c"] = 3; // 가능
+  ```
+
+---
+
+### 6. Enum 타입
+- 열거형으로, 이름이 있는 상수 집합을 정의.
+  ```typescript
+  enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+  }
+  let dir: Direction = Direction.Up;
+  ```
+
+- 숫자 기반 또는 문자열 기반 Enum 가능.
+  ```typescript
+  enum Status {
+    Success = "SUCCESS",
+    Failure = "FAILURE",
+  }
+  ```
+
+---
+
+### 7. Any와 Unknown 타입
+- **Any**:  
+  모든 타입을 허용. 타입 검사를 비활성화.
+  ```typescript
+  let random: any = 42;
+  random = "Hello"; // 가능
+  ```
+
+- **Unknown**:  
+  `any`와 유사하지만, 타입을 명시적으로 확인해야 사용 가능.
+  ```typescript
+  let value: unknown = "Hello";
+  if (typeof value === "string") {
+    console.log(value.toUpperCase()); // 가능
+  }
+  ```
+
+---
+
+### 8. Void와 Never 타입
+- **Void**:  
+  함수에서 반환값이 없음을 의미.
+  ```typescript
+  function logMessage(message: string): void {
+    console.log(message);
+  }
+  ```
+
+- **Never**:  
+  절대 반환하지 않는 함수의 타입. (예: 에러 발생, 무한 루프)
+  ```typescript
+  function throwError(errorMsg: string): never {
+    throw new Error(errorMsg);
+  }
+  
