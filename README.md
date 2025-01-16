@@ -210,7 +210,7 @@
 <br />
 
 ### 2.2 요구사항 명세서
-![요구사항 명세서](src/img/requests.jpg)
+![요구사항 명세서](src/img/요구사항명세서.jpg)
 - 자세한 내용은 **[요구사항 분석 노션 링크](https://aback-mandolin-01e.notion.site/0b42961363c04c7fac6482ae7508692e)** 와  **[요구사항 명세서 파일](src/data/요구사항명세서.xlsx)** 을 참고해주세요
 
 <br />
