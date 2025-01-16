@@ -1,7 +1,9 @@
 # 학습 기록
 ## 목차
-1. [1일차 01-13 학습 목표](#1일차-01-13-학습-목표)
-2. [2일차 01-14 학습 목표](#2일차-01-14-학습-목표)
+1. [1일차 01-13 학습 목표](#1일차-01-13-학습)
+2. [2일차 01-14 학습 목표](#2일차-01-14-학습)
+3. [3일차 01-15 학습 목표](#2일차-01-15-학습)
+3. [4일차 01-16 학습 목표](#2일차-01-16-학습)
 ## 기술 스택
 1. React
 2. Typescript
@@ -489,3 +491,165 @@ TypeScript의 현재 트렌드와 사용 이유에 대해 알게됐다.
 2. 인터페이스
 3. 클래스
 4. 제네릭
+
+## 4일차 학습 01-16
+
+### 오늘 학습 내용
+타입스크립트의 심화 내용을 학습했다.
+
+### 1. 타입스크립트 이해
+
+- 타입은 집합이다
+- 타입 계층도와 함께 기본타입 살펴보기
+- 대수 타입
+    - 여러개의 타입을 합성해서 새롭게 만들어낸 타입
+    - 합집합 타입과 교집합 타입이 존재한다.
+    
+    ```tsx
+    let a: string | number | boolean;
+    a= 1;
+    a = "hello";
+    a = true;
+    
+    let varialbe: number & string;
+    -> 교집할일 수가 없어 never 타입이 나온다
+    
+    ```
+    
+- 타입 단언
+    
+    ```tsx
+    type Person = {
+    	name : string,
+    	age: number
+    }
+    
+    let person = {} as Person;
+    person.name = "신희원";
+    person.age = 27;
+    
+    ```
+    
+    - 규칙
+        - 값 as 단언
+        - A as B
+        - A가 B의 슈퍼타입이거나
+        - A가 B의 서브타입이어야
+
+### 2. 함수와 타입
+
+- 함수 타입
+    - 화살표 함수의 타입을 정의하는 방법
+        
+        ```tsx
+        const add = (a:number, b:number) => a+b;
+        ```
+        
+
+- 함수 타입 표현식과 호출 시그니처
+    - 함수 타입 표현식
+        
+        ```tsx
+        type Operation= (a:number, b:number) => number;
+        const add: Operation = (a,b) => a+b;
+        const sub: Operation = (a,b) => a-b;
+        const multiply: Operation = (a,b) => a*b;
+        ```
+        
+    
+    - 호출 시그니쳐 (콜 시그니쳐)
+        
+        ```tsx
+        type Operation2 = {
+        	(a:number, b:number): number;	
+        }
+        ```
+        
+
+### 3. 인터페이스
+
+- 인터페이스
+    - 타입에 이름을 지어주는 또 다른 문법
+        
+        ```tsx
+        interface Person {
+        	name: string;
+        	age?: number;
+        }
+        
+        const person: Person = {
+        	name: "이정한",
+        }
+        ```
+        
+
+### 4. 제네릭
+
+- 제네릭 소개
+    - 제네럴 : 일반적인
+
+- 제네릭 함수
+    
+    ```tsx
+    function func<T>(value: T): T {
+    	return value;
+    }
+    
+    튜플 타입
+    let arr = func<[number, number, number]>([1,2,3]);
+    ```
+    
+
+- 타입 변수 응용하기
+    
+    ```tsx
+    // 매개변수의 타입이 다를 때
+    function swap<T, U>(a: T, b: U) {
+    	return [b, a];
+    }
+    
+    const [a, b] = swap("1", 2);
+    
+    function returnFirstValue<T>(data: [T, ...unknown[]]) {
+    	return data[0];
+    }
+    
+    let str = returnFirstValue([1, "hello"])
+    
+    // 매개변수의 메서드를 사용할 때
+    function getLength<T extends { length: number }>(data: T) {
+    	return data.length;
+    }
+    
+    ```
+    
+
+- map, forEach 메서드 타입 정의하기
+    - map
+        
+        ```tsx
+        const arr = [1,2,3]
+        const newArr = arr.map((it) => it *2)
+        
+        function map<T>(arr: T[], callback: (item: T) => T) {
+        	let result = [];
+        	for (let i = 0; i < arr.length; i++) {
+        		result.push(callback(arr[i]))
+        	}
+        	
+        	return result;
+        }
+        ```
+        
+    - forEach
+        ```typescript
+        function forEach<T> (arr: T[], callback:(item: T) => void){
+	        for (let i = 0; i < arr.length; i++) {
+		        callback(arr[i])
+	        }
+        }
+
+        forEach(arr, (it) => {
+	        console.log(it.toFixed());
+        });
+        ```
