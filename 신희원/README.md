@@ -653,3 +653,24 @@ TypeScript의 현재 트렌드와 사용 이유에 대해 알게됐다.
 	        console.log(it.toFixed());
         });
         ```
+
+## 5일차 학습 01-17
+### 학습 내용
+피그마
+1. Component 생성
+2. Prototype 구조 생성
+
+### 목표
+로그인 와이어프레임 작성
+### 구현 결과
+
+- 로그인 메인
+
+![alt text](image-1.png)
+- Kakao, Google, Naver
+
+![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+![alt text](image-4.png)
