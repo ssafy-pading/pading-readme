@@ -221,13 +221,13 @@
 
 <br />
 
-### 2.4 화면 설계
-![화면 설계](src/img/screen.png)
-> 자세한 내용은 **[화면 설계 노션 링크](https://aback-mandolin-01e.notion.site/2d4f9c566af44270b77e12771d103db1)** 를 참고해주세요.  
+### 2.4 와이어 프레임(v 1.0까지)
+![와이어 프레임](src/img/screen.png)
+> 자세한 내용은 **[와이어 프레임 노션 링크](https://aback-mandolin-01e.notion.site/2d4f9c566af44270b77e12771d103db1)** 를 참고해주세요.  
 
 <br />
 
-### 2.5 erd 설계
+### 2.5 erd 설계(미완성)
 ![erd](src/img/erd.png)
 
 
