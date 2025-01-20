@@ -4,12 +4,13 @@ import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
 
+import { Link } from 'react-router-dom';
 // Yjs와 WebRTC 연결 설정
 const ydoc = new Y.Doc();
 const provider = new WebrtcProvider('monaco-room', ydoc);
 const type = ydoc.getText('monaco');
 
-function App() {
+function ProjectPage() {
   const [isDarkMode, setIsDarkMode] = useState(false); // 다크모드 상태
   const [theme, setTheme] = useState("light"); // 테마 상태
   const [terminalOutput, setTerminalOutput] = useState<string>(""); // 터미널 출력 상태
@@ -69,6 +70,7 @@ function App() {
 
   return (
     <div className="min-h-screen p-4 bg-gray-100 dark:bg-gray-800">
+      <Link to="/"> 홈으로 </Link>
       <div className="mt-4 flex justify-between">
         <button
           onClick={toggleDarkMode}
@@ -122,4 +124,4 @@ function App() {
   );
 }
 
-export default App;
+export default ProjectPage;
