@@ -1,7 +1,13 @@
+import GroupNavigationBar from "../widgets/GroupNavigationBar"
+import ProfileNavigationBar from "../widgets/ProfileNavigationBar"
 
 function NoGruopPage() {
   return (
-    <div>NoGruopPage</div>
+    <div>
+      <div>NoGruopPage</div>
+      <ProfileNavigationBar />
+      <GroupNavigationBar />
+    </div>
   )
 }
 
