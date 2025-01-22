@@ -21,14 +21,42 @@ function IdeEditor() {
         const provider = new WebrtcProvider("test-room", doc);
         const type = doc.getText("monaco");
         const binding = new MonacoBinding(type, editorRef.current.getModel(), new Set([editorRef.current]), provider.awareness);
-        console.log(provider.awareness);
+
+        monaco.languages.registerCompletionItemProvider('java', {
+          provideCompletionItems: (model, position) => {
+              return {
+                  suggestions: [
+                      {
+                          label: 'System.out.println',
+                          kind: monaco.languages.CompletionItemKind.Function,
+                          insertText: 'System.out.println();',
+                      },
+                      {
+                          label: 'int',
+                          kind: monaco.languages.CompletionItemKind.Keyword,
+                          insertText: 'int ',
+                      },
+                  ],
+              };
+          },
+      });
+
+
       };
     return (
         <div>
             <Editor
-            height="90vh"
+            height="60vh"
             width="100%"
             theme={"vs-dark"}
+            defaultLanguage='java'
+            options={{
+              fontSize:20,
+              minimap: {enabled: false},
+              // scrollbar: {
+              //   vertical: 'auto',
+              // }
+            }}
             onMount={handleEditorDidMount} // Editor 초기화
           />
         </div>

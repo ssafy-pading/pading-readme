@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Terminal } from "xterm";
+import { Terminal } from "@xterm/xterm";
 import "xterm/css/xterm.css";
 import { io } from 'socket.io-client'
 

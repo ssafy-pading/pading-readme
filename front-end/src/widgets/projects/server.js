@@ -1,19 +1,30 @@
+// Nods.js의 웹 서버 프레임워크, HTTP 서버를 만들고 정적 파일 서빙
 import express from 'express'
+
+// Node.js 내장 모듈로, Express 서버를 위한 HTTP 서버를 생성하는 데 사용
 import http from 'http';
-import {Server} from 'socket.io';
+
+// 클라이언트와 실시간 양방향 통신을 할 수 있도록 도와주는 라이브러리
+import { Server } from 'socket.io';
+
+// SSH 클라이언트를 Node.js에서 사용할 수 있도록 해주는 라이브러리 
+// 원격 서버에 SSH로 연결하여 셸을 실행하고 명령어를 주고받음음
 import { Client } from 'ssh2';
 
+// express()로 Express 애플리케이션을 만들고
+// http.createServer(app)로 HTTP 서버를 생성
 const app = express();
 const server = http.createServer(app);
+
 // socket.io CORS 설정
 const io = new Server(server, {
-    cors: {
-      origin: 'http://localhost:5173', // 프론트엔드 URL
-      methods: ['GET', 'POST'],
-      allowedHeaders: ['Content-Type'],
-      credentials: true, // 클라이언트에서 쿠키나 인증 정보를 포함하려면 true로 설정
-    }
-  });
+  cors: {
+    origin: 'http://localhost:5173', // 프론트엔드 URL
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true, // 클라이언트에서 쿠키나 인증 정보를 포함하려면 true로 설정
+  }
+});
 
 app.use(express.static('public')); // public 폴더 내 정적 파일 제공
 
@@ -44,7 +55,7 @@ io.on('connection', (socket) => {
     port: 22,
     username: 'heewon',
     password: '0000'
-});
+  });
 
   socket.on('disconnect', () => {
     console.log('클라이언트 연결 종료');
