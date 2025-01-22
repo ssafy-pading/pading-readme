@@ -3,7 +3,7 @@ import { Terminal } from "xterm";
 import "xterm/css/xterm.css";
 import { io } from 'socket.io-client'
 
-
+// 터미널
 function ProjectTerminal() {
   const terminalRef: React.MutableRefObject<null> = useRef(null);
   useEffect(() => {

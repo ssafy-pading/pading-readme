@@ -33,6 +33,7 @@ const routes: RouteObject[] = [
             </Suspense>
         )
     },
+    // 언어, OS, 성능을 넣어줘야함함
     {
         path: 'project',
         element: (

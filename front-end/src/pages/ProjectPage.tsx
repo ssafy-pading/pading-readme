@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 import TerminalComponent from '../widgets/projects/ProjectTerminal'
-import IdeEditor from '../widgets/projects/IdeEditor';
+import ProjectEditor from '../widgets/projects/ProjectEditor';
 
-const TerminalTabs = ({ terminals, activeTab, onTabClick, onDeleteTab }) => {
+const TerminalTabs = ({ terminals, activeTab, onTabClick, onDeleteTab }: any) => {
   return (
     <div className="flex space-x-2 mb-2">
       {terminals.map((_, index) => (
@@ -35,6 +35,11 @@ function ProjectPage() {
   const [isDarkMode, setIsDarkMode] = useState(false); // 다크모드 상태
   // const [theme, setTheme] = useState("light"); // 테마 상태
 
+  // 에디터
+
+
+
+  // 터미널
   const [terminals, setTerminals] = useState([<TerminalComponent key={0} />]); // 기본 터미널 하나
   const [activeTab, setActiveTab] = useState(0); // 활성화된 탭의 인덱스
 
@@ -104,7 +109,7 @@ function ProjectPage() {
         </div>
         {/* IDE */}
         <div className="flex-1">
-          <IdeEditor />
+          <ProjectEditor/>
         </div>
       </div>
 
