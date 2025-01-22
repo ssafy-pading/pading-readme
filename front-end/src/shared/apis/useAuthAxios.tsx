@@ -1,6 +1,7 @@
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createAxiosInstance, setupInterceptors } from './axiosInstance';
+import { AxiosInstance } from 'axios';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -11,65 +12,19 @@ const useAuthAxios = () => {
   /**
    * Axios 인스턴스를 생성하는 함수
    */
-  const createAxiosInstance = (): AxiosInstance => {
-    return axios.create({
-      baseURL: process.env.REACT_APP_AUTH_API_BASE_URL || 'http://localhost:3000',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  };
+  const authAxios : AxiosInstance = createAxiosInstance(); // Axios 인스턴스 생성
 
-  const authAxios = createAxiosInstance(); // Axios 인스턴스 생성
-
-  /**
-   * 요청 인터셉터 설정
-   */
-  const setupRequestInterceptor = (): number => {
-    return authAxios.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
-        const token = localStorage.getItem('accessToken'); // 토큰 가져오기
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`; // 인증 헤더 추가
-        }
-        return config;
-      },
-      (error) => Promise.reject(error) // 요청 에러 처리
-    );
-  };
-
-  /**
-   * 응답 인터셉터 설정
-   */
-  const setupResponseInterceptor = (): number => {
-    return authAxios.interceptors.response.use(
-      (response: AxiosResponse) => response, // 정상 응답 그대로 반환
-      (error) => {
-        if (error.response?.status === 401) {
-          // 인증 실패 처리
-          localStorage.removeItem('accessToken'); // 토큰 제거
-          navigate('/login'); // 로그인 페이지로 이동
-        }
-        return Promise.reject(error); // 에러 전달
-      }
-    );
-  };
-
-  /**
-   * useEffect로 인터셉터 초기화 및 클린업
-   */
   useEffect(() => {
-    const requestInterceptorId = setupRequestInterceptor(); // 요청 인터셉터 설정
-    const responseInterceptorId = setupResponseInterceptor(); // 응답 인터셉터 설정
+    
+    // 인터셉터 설정 및 ID 반환
+    const { requestInterceptorId, responseInterceptorId } = setupInterceptors(authAxios, navigate);
 
     // 클린업: 컴포넌트 언마운트 시 인터셉터 제거
     return () => {
       authAxios.interceptors.request.eject(requestInterceptorId);
       authAxios.interceptors.response.eject(responseInterceptorId);
-    };
+    };// 인터셉터 설정
   }, [authAxios, navigate]);
-
-
 
   ////////------------이곳에서 추가------------////////
 
@@ -118,6 +73,7 @@ const useAuthAxios = () => {
   /**
    * JWT 재발급
    * @returns 새로운 JWT 토큰
+   * 
    */
   const refreshJwt = async (): Promise<Record<string, unknown>> => {
     try {
