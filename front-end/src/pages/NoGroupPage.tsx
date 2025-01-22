@@ -1,14 +1,14 @@
 import GroupNavigationBar from "../widgets/GroupNavigationBar"
 import ProfileNavigationBar from "../widgets/ProfileNavigationBar"
 
-function NoGruopPage() {
+function NoGroupPage() {
   return (
     <div>
-      <div>NoGruopPage</div>
+      <div>NoGroupPage</div>
       <ProfileNavigationBar />
       <GroupNavigationBar />
     </div>
   )
 }
 
-export default NoGruopPage
+export default NoGroupPage
