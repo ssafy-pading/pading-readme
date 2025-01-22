@@ -6,7 +6,7 @@ import { createBrowserRouter, RouteObject } from 'react-router-dom'
 const Loading = <div>로딩중입니다...</div>
 
 // 그룹 X 페이지
-const NoGruopPage = lazy(() => import("../../pages/NoGruopPage"))
+const NoGroupPage = lazy(() => import("../../pages/NoGroupPage"))
 // NotFoundPage
 const NotFoundPage = lazy(() => import("../../pages/NotFoundPage"))
 // 프로젝트 리스트 페이지
@@ -33,6 +33,7 @@ const routes: RouteObject[] = [
             </Suspense>
         )
     },
+    // 언어, OS, 성능을 넣어줘야함함
     {
         path: 'project',
         element: (
@@ -42,10 +43,10 @@ const routes: RouteObject[] = [
         )
     },
     {
-        path: 'nogruop',
+        path: 'nogroup',
         element: (
             <Suspense fallback={Loading}>
-                <NoGruopPage/>
+                <NoGroupPage/>
             </Suspense>
         )
     },

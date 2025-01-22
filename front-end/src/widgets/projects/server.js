@@ -11,6 +11,9 @@ import { Server } from 'socket.io';
 // 원격 서버에 SSH로 연결하여 셸을 실행하고 명령어를 주고받음음
 import { Client } from 'ssh2';
 
+// 일단 넣음
+import fs from 'fs'
+
 // express()로 Express 애플리케이션을 만들고
 // http.createServer(app)로 HTTP 서버를 생성
 const app = express();
@@ -47,14 +50,15 @@ io.on('connection', (socket) => {
 
       // 클라이언트 -> 서버
       socket.on('input', (data) => {
-        stream.write(data);
+        console.log('받은 명령어:', data); // 명령어 출력
+        stream.write(data + "\n"); // 원격 서버에서 명령어 실행
       });
     });
   }).connect({
-    host: '192.168.1.100',
+    host: '', // EC2 인스턴스의 IP
     port: 22,
-    username: 'heewon',
-    password: '0000'
+    username: 'ec2-user',
+    privateKey: fs.readFileSync('./src/widgets/projects/socketserver-pem.pem'), // 키 파일 경로
   });
 
   socket.on('disconnect', () => {
