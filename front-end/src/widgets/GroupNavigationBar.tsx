@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logo from '../assets/logo.png'
 import groupCreateIcon from '../assets/group_create_icon.svg'
+import GroupCreateModal from "./GroupCreateModal"
 
 interface Group {
     id: number;
@@ -8,6 +9,11 @@ interface Group {
 };
 
 const GroupNavigationBar: React.FC = () => {
+  
+  // 모달 상태 관리
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   // 그룹 이름이 버튼 크기를 넘어갈 때 한글이면 3글자 이후 ···, 영어면 5글자 이후 ···
   const truncateName = (name: string): string => {
@@ -43,10 +49,13 @@ const GroupNavigationBar: React.FC = () => {
 
       {/* 그룹 추가 버튼 */}
       <div className="mt-auto">
-        <button className="main-container w-12 h-12 relative mx-auto my-0 flex items-center justify-center">
+        <button 
+        onClick={openModal} 
+        className="main-container w-12 h-12 relative mx-auto my-0 flex items-center justify-center">
           <img src={groupCreateIcon} alt="group create icon" />
         </button>
       </div>
+      <GroupCreateModal isOpen={isModalOpen} onClose={closeModal} /> 
     </nav>
   );
 };
