@@ -1,0 +1,62 @@
+stages:
+  - build
+  # - deploy
+
+variables:
+  # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}   # AWS 자격증명 환경변수
+  # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}   # AWS 자격증명 환경변수
+  # AWS_REGION: ${AWS_REGION}  # AWS 리전
+  # ECR_REPOSITORY: ${ECR_REPOSITORY}  # ECR 저장소 이름
+  # ECR_REGISTRY: ${ECR_REGISTRY}
+  # AWS_ACCOUNT_ID: ${AWS_ACCOUNT_ID}
+  # IMAGE_TAG: "latest"  # 이미지 태그: 브랜치 이름
+  PROD_IMAGE_TAG: "pading/prod:latest"
+  DEV_IMAGE_TAG: "pading/dev:latest"
+  APPLICATION_PROD_YML: ${APPLICATION_PROD_YML}
+  APPLICATION_DEV_YML: ${APPLICATION_DEV_YML}
+
+
+# before_script:
+#     - echo "Setting up AWS and Docker credentials..."
+#     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+# Build Job
+build:
+  stage: build
+  tags:
+    - home
+  script:
+    - |
+      cd back-end
+      if [ "$CI_COMMIT_REF_NAME" == "master" ]; then
+        export SPRING_PROFILES=prod
+        echo "$APPLICATION_PROD_YML" > src/main/resources/application.yml
+        docker build -t $PROD_IMAGE_TAG .  # 도커 이미지 빌드
+        docker rm -f prod-container && docker run -d --name prod-container -p 8200:8080 $PROD_IMAGE_TAG
+      elif [ "$CI_COMMIT_REF_NAME" == "develop" ]; then
+        export SPRING_PROFILES=dev
+        echo "$APPLICATION_DEV_YML" > src/main/resources/application.yml
+        docker build -t $DEV_IMAGE_TAG .  # 도커 이미지 빌드
+        docker rm -f dev-container && docker run -d --name dev-container -p 8100:8080 $DEV_IMAGE_TAG
+      fi
+      echo "Building Docker image with profile: $SPRING_PROFILES"
+      # docker rmi $ECR_REPOSITORY:$IMAGE_TAG
+      # docker build -t $ECR_REPOSITORY:$IMAGE_TAG .  # 도커 이미지 빌드
+      # docker rm -f test-container && docker run -d --name test-container -p 8080:8080 $ECR_REPOSITORY:$IMAGE_TAG
+  only:
+    - master
+    - develop
+
+# Deploy Job
+# deploy:
+#   stage: deploy
+#   tags:
+#     - home
+#   script:
+#     - echo "Pushing Docker image to ECR"
+#     - docker tag $ECR_REPOSITORY:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+#     - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG  # ECR에 도커 이미지 푸시
+#   only:
+#     - master
+#     - develop
+
