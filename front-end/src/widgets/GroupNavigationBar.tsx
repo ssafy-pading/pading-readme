@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import logo from '../assets/logo.png'
-import groupCreateIcon from '../assets/group_create_icon.svg'
-import GroupCreateModal from "./GroupCreateModal"
+import React, { useState } from 'react';
+import logo from '../assets/logo.png';
+import groupCreateIcon from '../assets/group_create_icon.svg';
+import GroupCreateModal from './GroupCreateModal';
+import GroupJoinModal from './GroupJoinModal';
 
 interface Group {
-    id: number;
-    name: string;
-};
+  id: number;
+  name: string;
+}
 
 const GroupNavigationBar: React.FC = () => {
-  
   // 모달 상태 관리
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const [activeModal, setActiveModal] = useState<'create' | 'join' | null>(null);
+
+  // 모달 열기/닫기 함수
+  const openCreateModal = () => setActiveModal('create');
+  const openJoinModal = () => setActiveModal('join');
+  const closeModal = () => setActiveModal(null);
 
   // 그룹 이름이 버튼 크기를 넘어갈 때 한글이면 3글자 이후 ···, 영어면 5글자 이후 ···
   const truncateName = (name: string): string => {
     const isKorean: boolean = /[\u3131-\uD79D]/ug.test(name);
     if (isKorean) {
-      return name.length > 3 ? `${name.slice(0,3)}···` : name;
+      return name.length > 3 ? `${name.slice(0, 3)}···` : name;
     }
     return name.length > 5 ? `${name.slice(0, 5)}···` : name;
   };
@@ -49,13 +52,35 @@ const GroupNavigationBar: React.FC = () => {
 
       {/* 그룹 추가 버튼 */}
       <div className="mt-auto">
-        <button 
-        onClick={openModal} 
-        className="main-container w-12 h-12 relative mx-auto my-0 flex items-center justify-center">
+        <button
+          onClick={openCreateModal}
+          className="main-container w-12 h-12 relative mx-auto my-0 flex items-center justify-center"
+        >
           <img src={groupCreateIcon} alt="group create icon" />
         </button>
       </div>
-      <GroupCreateModal isOpen={isModalOpen} onClose={closeModal} /> 
+
+      {/* 모달 컨테이너 */}
+      {activeModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="relative w-[500px] h-[300px] bg-white rounded-xl shadow-lg">
+            {activeModal === 'create' && (
+              <GroupCreateModal
+                isOpen={true}
+                onClose={closeModal}
+                onSwitchToJoin={() => setActiveModal('join')}
+              />
+            )}
+            {activeModal === 'join' && (
+              <GroupJoinModal
+                isOpen={true}
+                onClose={closeModal}
+                onSwitchToCreate={() => setActiveModal('create')}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
