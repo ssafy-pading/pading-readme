@@ -1,20 +1,66 @@
-import { useState, useRef, useEffect } from 'react';
-import Editor from "@monaco-editor/react";
-import * as Y from 'yjs';
-import { WebrtcProvider } from 'y-webrtc';
-import { MonacoBinding } from 'y-monaco';
-
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// Yjs와 WebRTC 연결 설정
-const ydoc = new Y.Doc();
-const provider = new WebrtcProvider('monaco-room', ydoc);
-const type = ydoc.getText('monaco');
+
+import TerminalComponent from '../widgets/projects/ProjectTerminal'
+import ProjectEditor from '../widgets/projects/ProjectEditor';
+
+const TerminalTabs = ({ terminals, activeTab, onTabClick, onDeleteTab }: any) => {
+  return (
+    <div className="flex space-x-2 mb-2">
+      {terminals.map((_, index) => (
+        <div key={index} className="relative">
+          <button
+            className={`px-4 py-2 rounded ${activeTab === index ? 'bg-blue-500' : 'bg-gray-700'}`}
+            onClick={() => onTabClick(index)}
+          >
+            Terminal {index + 1}
+          </button>
+
+          {/* 삭제 버튼 */}
+          {terminals.length > 1 && (
+            <button
+              onClick={() => onDeleteTab(index)}
+              className="absolute top-0 right-0 bg-red-500 text-white text-sm px-2 py-1 rounded"
+            >
+              X
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 function ProjectPage() {
   const [isDarkMode, setIsDarkMode] = useState(false); // 다크모드 상태
-  const [theme, setTheme] = useState("light"); // 테마 상태
-  const [terminalOutput, setTerminalOutput] = useState<string>(""); // 터미널 출력 상태
-  const editorRef = useRef(null);
+  // const [theme, setTheme] = useState("light"); // 테마 상태
+
+  // 에디터
+
+
+
+  // 터미널
+  const [terminals, setTerminals] = useState([<TerminalComponent key={0} />]); // 기본 터미널 하나
+  const [activeTab, setActiveTab] = useState(0); // 활성화된 탭의 인덱스
+
+  const addNewTerminal = () => {
+    setTerminals([
+      ...terminals,
+      <TerminalComponent key={terminals.length} />
+    ]);
+    setActiveTab(terminals.length); // 새 터미널을 생성하면 해당 터미널로 활성화
+  };
+
+  const handleDeleteTerminal = (index) => {
+    // 터미널 삭제
+    const newTerminals = terminals.filter((_, i) => i !== index);
+    setTerminals(newTerminals);
+
+    // 활성화된 탭이 삭제된 터미널이라면 다른 탭으로 전환
+    if (activeTab >= newTerminals.length) {
+      setActiveTab(newTerminals.length - 1);
+    }
+  };
 
   useEffect(() => {
     if (isDarkMode) {
@@ -24,49 +70,13 @@ function ProjectPage() {
     }
   }, [isDarkMode]);
 
-  const handleEditorDidMount = (editor, monaco) => {
-    editorRef.current = editor;
-
-    // Yjs와 Monaco 연결
-    const doc = new Y.Doc();
-    const provider = new WebrtcProvider("test-room", doc);
-    const type = doc.getText("monaco");
-    const binding = new MonacoBinding(type, editorRef.current.getModel(), new Set([editorRef.current]), provider.awareness);
-    console.log(provider.awareness);
-  };
-
   const toggleDarkMode = () => {
     setIsDarkMode(prevMode => !prevMode); // 다크 모드 토글
   };
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "vs-dark" : "light")); // 테마 토글
-  };
-
-  // 터미널 명령어 처리
-  const handleTerminalInput = (e) => {
-    if (e.key === 'Enter') {
-      const command = e.target.value.trim();
-      if (command === '') return;
-
-      // 명령어 처리 (예: log, help, echo)
-      if (command === 'help') {
-        setTerminalOutput("Available commands: help, echo <message>, log");
-      } else if (command.startsWith('echo')) {
-        const message = command.slice(5).trim();
-        setTerminalOutput(message);
-      } else if (command === 'log') {
-        // Monaco Editor의 내용 출력
-        if (editorRef.current) {
-          const editorValue = editorRef.current.getValue(); // Monaco Editor의 내용 가져오기
-          setTerminalOutput(editorValue); // 터미널에 출력
-        }
-      } else {
-        setTerminalOutput(`Command not found: ${command}`);
-      }
-      e.target.value = ''; // 입력 필드 비우기
-    }
-  };
+  // const toggleTheme = () => {
+  //   setTheme((prevTheme) => (prevTheme === "light" ? "vs-dark" : "light")); // 테마 토글
+  // };
 
   return (
     <div className="min-h-screen p-4 bg-gray-100 dark:bg-gray-800">
@@ -78,17 +88,18 @@ function ProjectPage() {
         >
           Toggle Dark Mode
         </button>
-        <button
+        {/* <button
           onClick={toggleTheme}
           className="p-2 bg-green-500 text-white rounded dark:bg-green-700"
         >
           {theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
-        </button>
+        </button> */}
       </div>
 
+      {/*파일 탐색기 + IDE */}
       <div className="mt-8 flex">
+        {/* 파일 탐색기 */}
         <div className="w-1/4 bg-gray-200 dark:bg-gray-700 p-4">
-          {/* 파일 탐색기 */}
           <h3 className="text-lg font-bold">Explorer</h3>
           <ul className="mt-4 space-y-2">
             <li className="text-blue-500 cursor-pointer">index.js</li>
@@ -96,29 +107,36 @@ function ProjectPage() {
             <li className="text-blue-500 cursor-pointer">style.css</li>
           </ul>
         </div>
+        {/* IDE */}
         <div className="flex-1">
-          {/* Monaco Editor */}
-          <Editor
-            height="90vh"
-            width="100%"
-            theme={theme}
-            onMount={handleEditorDidMount} // Editor 초기화
-          />
+          <ProjectEditor/>
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-gray-900 text-white rounded">
-        <h3 className="text-lg font-bold">Terminal</h3>
-        <div className="mt-4 h-64 overflow-y-auto bg-black p-2">
-          {/* 터미널 출력 */}
-          <pre>{terminalOutput}</pre>
-        </div>
-        <input
-          type="text"
-          className="w-full p-2 mt-4 bg-gray-800 text-white border rounded"
-          placeholder="Enter command..."
-          onKeyDown={handleTerminalInput}
+      {/*터미널 */}
+      <div className="p-4">
+        {/* 새 터미널 버튼 */}
+        <button
+          className="mt-4 px-4 py-2 bg-green-500 text-white rounded"
+          onClick={addNewTerminal}
+        >
+          Add New Terminal
+        </button>
+
+        {/* 터미널 탭들 */}
+        <TerminalTabs
+          terminals={terminals}
+          activeTab={activeTab}
+          onTabClick={setActiveTab}
+          onDeleteTab={handleDeleteTerminal}
         />
+
+        {/* 활성화된 터미널 */}
+        <div className="mt-8 p-4 bg-gray-900 text-white rounded">
+
+          <h3 className="text-lg font-bold">Terminal {activeTab + 1}</h3>
+          {terminals[activeTab]}
+        </div>
       </div>
     </div>
   );
