@@ -1,64 +1,184 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Terminal } from "xterm";
 import "xterm/css/xterm.css";
 
 const ProjectTerminal: React.FC = () => {
-  const terminalRef = useRef<HTMLDivElement | null>(null); // ref를 사용하여 div 접근
-  const currentCommand = useRef<string>(''); // 현재 입력 중인 명령어 저장
+  const terminalRef = useRef<HTMLDivElement | null>(null);
+  const currentCommand = useRef<string>(""); // 현재 명령어 저장
+  const commandHistory = useRef<string[]>([]); // 명령어 기록
+  const historyIndex = useRef<number | null>(null); // 명령어 기록 인덱스
+  const cursorPosition = useRef<number>(0); // 커서 위치
+  const term = useRef<Terminal | null>(null);
+  const [fileList, setFileList] = useState<string[]>([]); // 파일 목록
 
   useEffect(() => {
-    // 소켓 서버와 연결
-    const socket = io("http://localhost:3000"); // 서버 주소는 기본적으로 현재 호스트로 연결됨
+    const socket = io("http://localhost:3000");
 
-    // xterm.js 터미널 초기화
-    const term = new Terminal({ cursorBlink: true });
+    term.current = new Terminal({
+      cursorBlink: true, // 커서 깜빡임
+      convertEol: true, // 줄바꿈 처리
+      theme: {
+        background: "#000000", // 배경색
+        foreground: "#ffffff", // 텍스트 색상
+        cursor: "#00ff00", // 커서 색상
+      },
+      fontSize: 14,
+      fontFamily: '"Courier New", monospace',
+    });
 
     if (terminalRef.current) {
-      term.open(terminalRef.current); // `ref`를 사용하여 터미널을 DOM에 연결
+      term.current.open(terminalRef.current);
     }
 
-    // 입력 감지 -> 엔터 키가 눌렸을 때만 서버로 전송
-    term.onData((data) => {
-      if (data === '\r') {  // 엔터 키 감지
-        if (currentCommand.current.trim()) {
-          socket.emit('input', currentCommand.current); // 명령어 전송
-          currentCommand.current = ''; // 명령어 초기화
-        }
-      } else if (data === '\x08') { // 백스페이스 처리
-        currentCommand.current = currentCommand.current.slice(0, -1); // 명령어에서 마지막 문자 삭제
-        term.write('\x08'); // 터미널에서 백스페이스 처리
-      } else if (data === '\t') { // 탭 키 (자동완성)
-        socket.emit('complete', currentCommand.current); // 서버로 자동완성 요청
-      }
-      else {
-        currentCommand.current += data; // 명령어에 입력된 값 추가
-        term.write(data); // 터미널에 입력값 표시
+    term.current?.onData((data) => {
+      switch (data) {
+        case "\r": // Enter 입력
+          if (currentCommand.current.trim()) {
+            socket.emit("input", currentCommand.current); // 서버로 명령어 전송
+            commandHistory.current.push(currentCommand.current); // 명령어 저장
+            historyIndex.current = null;
+            term.current?.write("\r\n"); // 줄바꿈
+            currentCommand.current = ""; // 명령어 초기화
+            cursorPosition.current = 0;
+          } else {
+            term.current?.write("\r\n$ ");
+          }
+          break;
+
+        case "\x7F": // 백스페이스 처리
+          if (cursorPosition.current > 0) {
+            currentCommand.current =
+              currentCommand.current.slice(0, cursorPosition.current - 1) +
+              currentCommand.current.slice(cursorPosition.current);
+            cursorPosition.current--;
+            term.current?.write("\b \b");
+          } refreshCommandLine();
+          break;
+
+        case "\x1b[3~": // Delete key
+          if (cursorPosition.current < currentCommand.current.length) {
+            currentCommand.current =
+              currentCommand.current.slice(0, cursorPosition.current) +
+              currentCommand.current.slice(cursorPosition.current + 1);
+            refreshCommandLine();
+          }
+          break;
+
+        case "\x1b[A": // 위 방향키 (이전 명령어)
+          if (historyIndex.current === null) {
+            historyIndex.current = commandHistory.current.length - 1;
+          } else if (historyIndex.current > 0) {
+            historyIndex.current--;
+          }
+          loadHistoryCommand();
+          break;
+
+        case "\x1b[B": // 아래 방향키 (다음 명령어)
+          if (historyIndex.current !== null && historyIndex.current < commandHistory.current.length - 1) {
+            historyIndex.current++;
+            loadHistoryCommand();
+          } else if (historyIndex.current === commandHistory.current.length - 1) {
+            historyIndex.current = null;
+            currentCommand.current = "";
+            cursorPosition.current = 0;
+            refreshCommandLine();
+          }
+          break;
+
+        case "\x1b[D": // 왼쪽 방향키
+          if (cursorPosition.current > 0) {
+            cursorPosition.current--;
+            term.current?.write("\x1b[D");
+          }
+          break;
+
+        case "\x1b[C": // 오른쪽 방향키
+          if (cursorPosition.current < currentCommand.current.length) {
+            cursorPosition.current++;
+            term.current?.write("\x1b[C");
+          }
+          break;
+
+        case "\t": // 탭 완성
+          handleTabCompletion();
+          break;
+
+        case "\x1b[2~": // Shift+Insert (붙여넣기)
+          navigator.clipboard.readText().then((text) => {
+            currentCommand.current =
+              currentCommand.current.slice(0, cursorPosition.current) +
+              text +
+              currentCommand.current.slice(cursorPosition.current);
+            cursorPosition.current += text.length;
+            refreshCommandLine();
+          });
+          break;
+
+        default:
+          if (data >= " " && data <= "~") {
+            // 출력 가능한 문자 처리
+            currentCommand.current =
+              currentCommand.current.slice(0, cursorPosition.current) +
+              data +
+              currentCommand.current.slice(cursorPosition.current);
+            cursorPosition.current++;
+            term.current?.write(data);
+            refreshCommandLine();
+          }
+          break;
       }
     });
 
-    // 서버에서 받은 출력 -> 터미널에 표시
-    socket.on('output', (data) => {
-      // 서버에서 받은 출력만 터미널에 표시
-      console.log(data);
-      
-      term.write(data); // 서버로부터 받은 출력 표시
+    // 서버로부터 결과 출력
+    socket.on("output", (data) => {
+      term.current?.write(data);
     });
 
-    // 컴포넌트가 언마운트되면 소켓 연결 종료
+    // 파일 목록 업데이트
+    socket.on("fileList", (files) => {
+      setFileList(files);
+    });
+
+    socket.emit("getFileList"); // 초기 파일 목록 요청
+
     return () => {
       socket.disconnect();
+      term.current?.dispose();
     };
-  }, []); // 컴포넌트가 마운트 될 때만 실행
+  }, []);
 
-  return (
-    <div>
-      <div
-        ref={terminalRef}
-        style={{ width: "800px", height: "400px" }} // 터미널의 크기 설정
-      ></div>
-    </div>
-  );
+  const refreshCommandLine = () => {
+    if (term.current) {
+      term.current.write("\x1b[2K\r$ " + currentCommand.current);
+      term.current.write(`\x1b[${cursorPosition.current + 3}G`); // '$ ' 뒤에 커서를 놓음
+    }
+  };
+
+  const loadHistoryCommand = () => {
+    if (historyIndex.current === null) {
+      currentCommand.current = "";
+    } else {
+      currentCommand.current = commandHistory.current[historyIndex.current];
+    }
+    cursorPosition.current = currentCommand.current.length;
+    refreshCommandLine();
+  };
+
+  const handleTabCompletion = () => {
+    const currentInput = currentCommand.current.split(" ").pop() || "";
+    const matches = fileList.filter((file) => file.startsWith(currentInput));
+    if (matches.length === 1) {
+      const completedCommand =
+        currentCommand.current.slice(0, currentCommand.current.lastIndexOf(currentInput)) +
+        matches[0];
+      currentCommand.current = completedCommand;
+      cursorPosition.current = completedCommand.length;
+      refreshCommandLine();
+    }
+  };
+
+  return <div ref={terminalRef} style={{ width: "800px", height: "400px" }} />;
 };
 
 export default ProjectTerminal;

@@ -44,14 +44,14 @@ io.on('connection', (socket) => {
         return console.error('SSH 셸 할당 오류:', err);
       }
       // 서버 -> 클라이언트
-      stream.on('data', (data) => {
+      stream.on('data', (data) => {        
         socket.emit('output', data.toString());
       });
 
       // 클라이언트 -> 서버
       socket.on('input', (data) => {
         console.log('받은 명령어:', data); // 명령어 출력
-        stream.write(data + "\n"); // 원격 서버에서 명령어 실행
+        // stream.write("\n\n\n"); // 원격 서버에서 명령어 실행
       });
     });
   }).connect({
