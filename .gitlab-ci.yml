@@ -30,11 +30,13 @@ build:
       cd back-end
       if [ "$CI_COMMIT_REF_NAME" == "master" ]; then
         export SPRING_PROFILES=prod
+        mkdir -p src/main/resources
         echo "$APPLICATION_PROD_YML" > src/main/resources/application.yml
         docker build -t $PROD_IMAGE_TAG .  # 도커 이미지 빌드
         docker rm -f prod-container && docker run -d --name prod-container -p 8200:8080 $PROD_IMAGE_TAG
       elif [ "$CI_COMMIT_REF_NAME" == "develop" ]; then
         export SPRING_PROFILES=dev
+        mkdir -p src/main/resources
         echo "$APPLICATION_DEV_YML" > src/main/resources/application.yml
         docker build -t $DEV_IMAGE_TAG .  # 도커 이미지 빌드
         docker rm -f dev-container && docker run -d --name dev-container -p 8100:8080 $DEV_IMAGE_TAG
