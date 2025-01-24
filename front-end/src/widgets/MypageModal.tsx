@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
+import { useDropzone } from 'react-dropzone';
 import Plus from "/src/assets/plus.svg";
 import cross from "/src/assets/cross.svg"
-
+// 모달 속성 타입
 interface MypageProps {
     isOpen: boolean;
     onClose: () => void;
-    onSwitchToLeave?: () => void; // 추가
+    onSwitchToLeave?: () => void; // 삭제 모달
+    onSwitchToPictureChange?: () => void; // 프로필 사진 변경 모달
 }
-
+// 프로필 객체 타입
 interface Profile {
     username: string;
+    profilePath: string;
     email: string;
     joinDate: string;
     groupCount: number;
     projectCount: number;
-    onEditProfile: () => void;
-    onLeave: () => void;
 }
 
 Modal.setAppElement("#root");
@@ -25,6 +26,7 @@ const MypageModal: React.FC<MypageProps> = ({
     isOpen,
     onClose,
     onSwitchToLeave,
+    onSwitchToPictureChange,
 }) => {
 
 
@@ -33,23 +35,18 @@ const MypageModal: React.FC<MypageProps> = ({
     // 임시 user정보
     const [userProfile, setUserProfile] = useState<Profile>({
       username: '김싸피',
+      profilePath: 'https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg',
       email: 'ssafykim@ssafy.com',
       joinDate: '2025-01-24',
       groupCount: 5,
       projectCount: 40,
-      onEditProfile() {
-          
-      },
-      onLeave() {
-          
-      },
     })
 
   // 이름 변경 상태관리
   const [isEditing, setIsEditing] = useState(false); // 편집 모드 여부
   const [inputValue, setInputValue] = useState(''); // 입력 값
 
-
+  
   useEffect(() => {
     setInputValue(userProfile.username);
   }, [userProfile.username]);
@@ -74,6 +71,7 @@ const MypageModal: React.FC<MypageProps> = ({
     setIsEditing(false); // 편집 모드 비활성화
   };
 
+
   return (
     <Modal
       isOpen={isOpen}
@@ -96,13 +94,13 @@ const MypageModal: React.FC<MypageProps> = ({
         <div className="flex items-start">
           <div className="relative w-[60px] mb-4">
             <img
-              src="https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg"
+              src={userProfile.profilePath}
               alt="프로필 사진"
               className="w-full h-full rounded-full border border-gray-300 object-cover"
             />
             <button
               className="absolute bottom-0 right-0 bg-[#5C8290] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm"
-              onClick={handleEditClick}
+              onClick={onSwitchToPictureChange}
             >
               <img src={Plus} alt="plus.svg" />
             </button>
