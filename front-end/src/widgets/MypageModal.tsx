@@ -6,7 +6,7 @@ import cross from "/src/assets/cross.svg"
 interface MypageProps {
     isOpen: boolean;
     onClose: () => void;
-    onSwitchToCreate?: () => void; // 추가
+    onSwitchToLeave?: () => void; // 추가
 }
 
 interface Profile {
@@ -24,6 +24,7 @@ Modal.setAppElement("#root");
 const MypageModal: React.FC<MypageProps> = ({
     isOpen,
     onClose,
+    onSwitchToLeave,
 }) => {
 
 
@@ -166,7 +167,7 @@ const MypageModal: React.FC<MypageProps> = ({
         <div className="mt-5">
           <p
             className="py-2 w-full underline font-bold text-black text-opacity-70 cursor-pointer"
-            onClick={userProfile.onLeave}
+            onClick={onSwitchToLeave}
           >
             회원 탈퇴
           </p>
