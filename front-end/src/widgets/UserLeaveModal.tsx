@@ -1,5 +1,6 @@
 import React from "react";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
 
 interface LeaveModalProps {
   isOpen: boolean;
@@ -12,9 +13,13 @@ const LeaveModal: React.FC<LeaveModalProps> = ({
   onClose,
   onSwitchToMypage,
 }) => {
+  const navigate = useNavigate();
   const onConfirmLeave = ():void => {
     alert('탈퇴되었습니다.')
     // 여기에 탈퇴 로직
+
+    // 로그인 페이지로
+    navigate('/');
   }
 
 
