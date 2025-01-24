@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
 import Plus from "/src/assets/plus.svg";
+import cross from "/src/assets/cross.svg"
 
 interface MypageProps {
   isOpen: boolean;
@@ -57,14 +58,14 @@ const MypageModal: React.FC<MypageProps> = ({
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-300"
             onClick={onClose}
           >
-            ✖
+            <img src={cross} alt="close" className="w-5 h-5" />
           </button>
         </div>
         <div className="flex flex-col items-start">
-          <div>
-            <div className="relative w-16 h-16 mb-4 inline-block">
+          <div className="flex">
+            <div className="relative w-16 h-16 mb-4">
               <img
-                src="/default-avatar.png" // Replace with the avatar URL
+                src="https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg" // Replace with the avatar URL
                 alt="프로필 사진"
                 className="w-full h-full rounded-full border border-gray-300"
               />
@@ -77,7 +78,7 @@ const MypageModal: React.FC<MypageProps> = ({
                 />
               </button>
             </div>
-            <div className="mx-4 inline-block">
+            <div className="mx-4 relative top-0">
               <p className="text-lg font-bold">
                 {userProfile.username}
                 <button
@@ -114,7 +115,7 @@ const MypageModal: React.FC<MypageProps> = ({
         </div>
         <div className="mt-5">
           <p
-            className="py-2 w-full underline font-bold text-black text-opacity-70"
+            className="py-2 w-full underline font-bold text-black text-opacity-70 cursor-pointer"
             onClick={userProfile.onLeave}
           >
             회원 탈퇴
