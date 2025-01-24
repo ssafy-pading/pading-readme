@@ -42,10 +42,10 @@ io.on('connection', (socket) => {
       });
     });
   }).connect({
-    host: '', // 원격 서버 IP
+    host: 'i12c202.p.ssafy.io', // 원격 서버 IP
     port: 22, // SSH 포트
-    username: '', // SSH 사용자명
-    privateKey: fs.readFileSync(''), // 개인 키 경로
+    username: 'ubuntu', // SSH 사용자명
+    privateKey: fs.readFileSync('./src/widgets/projects/I12C202T.pem'), // 개인 키 경로
   });
 
   socket.on('disconnect', () => {
