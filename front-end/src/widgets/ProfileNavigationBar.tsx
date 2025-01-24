@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigation } from '../context/navigationContext';
 import RightIcon from '../assets/right_icon.svg';
 import LeftIcon from '../assets/left_icon.svg';
 
 const ProfileNavigationBar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(true); // Navigation 토글 상태
+  const { isProfileNavOpen, toggleProfileNav } = useNavigation(); // Navigation 상태 가져오기
   const [isMemberOpen, setIsMemberOpen] = useState(true); // Member 토글 상태
-  const [members, setMembers] = useState<any[]>([]); // 멤버 데이터 상태
-  // Navigation 토글
-  const toggleNavigationBar = () => {
-    setIsOpen(!isOpen); // 열기/닫기 상태 변경
-  };
+  const [members, setMembers] = useState<any[]>([
+    { id: 1, name: 'Alice', isOnline: true },
+    { id: 2, name: 'Bob', isOnline: false },
+    { id: 3, name: 'Charlie', isOnline: true },
+    { id: 4, name: 'Diana', isOnline: false },
+  ]); // 임시 멤버 데이터
 
   // Member 토글
   const toggleMemberList = () => {
@@ -19,9 +21,9 @@ const ProfileNavigationBar: React.FC = () => {
   return (
     <div className="relative">
       {/* 열기 토글 버튼 */}
-      {!isOpen && (
+      {!isProfileNavOpen && (
         <button
-          onClick={toggleNavigationBar}
+          onClick={toggleProfileNav}
           className="p-2 bg-gray-200 hover:bg-gray-400 fixed top-5 left-20"
         >
           <img src={RightIcon} alt="Right Icon" className="w-6 h-6" />
@@ -31,11 +33,11 @@ const ProfileNavigationBar: React.FC = () => {
       {/* 사이드 메뉴 */}
       <div
         className={`main-container w-[280px] h-full bg-[#d3dede] fixed left-[80px] top-0 shadow-lg z-5
-        transform transition-transform duration-1000 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        transform transition-transform duration-1000 ${isProfileNavOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         {/* 닫기 버튼 */}
         <button
-          onClick={toggleNavigationBar}
+          onClick={toggleProfileNav}
           className="p-2 hover:bg-gray-400 absolute top-5 right-2"
         >
           <img src={LeftIcon} alt="Left Icon" className="w-6 h-6" />
