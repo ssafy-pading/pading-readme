@@ -35,8 +35,25 @@ const PictureModal: React.FC<PictureChangeModalProps> = ({
   // 프로필 사진 변경 확인
   const onConfirmChange = (): void => {
     alert("프로필 사진이 변경되었습니다.");
-    // TODO: 여기에 파일 업로드 처리 로직 추가
-    onSwitchToMypage();
+    // 여기에 파일 업로드 처리 로직 추가
+
+
+    // 전역에서 관리하는 유저정보와 연동 필요( 프로필 사진 변경시, 페이지 로드 없이 프로필 경로 변경 예정)
+
+
+    // 새로고침이 되기 전까지 사용할 프로필 사진 임시 url
+    // if (file) {
+    //    // URL.createObjectURL(file)는 JavaScript에서 제공하는 API로, 파일 객체 또는 Blob 객체에 대한 임시 URL을 생성합니다.
+    //    // **파일 객체(예: File 또는 Blob)**는 브라우저의 메모리 내에 저장된 데이터
+    //   const newProfileImage = URL.createObjectURL(file); // 파일의 URL 생성
+    //   onProfileUpdate(newProfileImage); // 콜백 호출로 부모 컴포넌트에 전달
+    //   onSwitchToMypage(); // 마이페이지로 이동
+    // }
+
+    // const imageUrl = URL.createObjectURL(file);
+    // 사용 후 URL 해제
+    // URL.revokeObjectURL(imageUrl);
+    onSwitchToMypage(); // 마이페이지로 이동
   };
 
   return (
