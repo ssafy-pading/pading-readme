@@ -44,13 +44,13 @@ const LoginPage: React.FC = () => {
   return (
     <div className="flex h-screen">
       {/* Left Section */}
-      <div className="flex-[1.5] bg-gray-900 text-white flex flex-col items-center justify-center">
-        <div className="absolute">
-          <h1 className="text-5xl font-bold mb-4">Padding</h1>
+      <div className="flex-[1.8] bg-gray-900 text-white flex flex-col items-center justify-center">
+        <div id="particles-js" className="w-full h-full"></div>
+        {/* <div className="absolute w-[50%] h-[70%]"> */}
+        <div className="absolute w-[50%] h-[50%]">
+          <h1 className="text-5xl font-bold mb-[3rem]">Padding</h1>
           <TxtRotate className="text-lg" texts={["서비스 소개", "최고의 페어 프로그래밍 경험"]} period={2000} />
-          <p>서비스 소개</p>
         </div>
-        <div id="particles-js" className="absolute"></div>
       </div>
 
       {/* Right Section */}
