@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
+import { GoogleLoginResponse, RefreshJWTResponse } from '../types/authApiResponse';
+import { ApproveRequestResponse } from '../types/approveRequestResponse';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -12,10 +14,9 @@ const useAuthAxios = () => {
   /**
    * Axios 인스턴스를 생성하는 함수
    */
-  const authAxios : AxiosInstance = createAxiosInstance(); // Axios 인스턴스 생성
+  const authAxios: AxiosInstance = createAxiosInstance(); // Axios 인스턴스 생성
 
   useEffect(() => {
-    
     // 인터셉터 설정 및 ID 반환
     const { requestInterceptorId, responseInterceptorId } = setupInterceptors(authAxios, navigate);
 
@@ -23,7 +24,7 @@ const useAuthAxios = () => {
     return () => {
       authAxios.interceptors.request.eject(requestInterceptorId);
       authAxios.interceptors.response.eject(responseInterceptorId);
-    };// 인터셉터 설정
+    }; // 인터셉터 설정
   }, [authAxios, navigate]);
 
   ////////------------이곳에서 추가------------////////
@@ -32,21 +33,21 @@ const useAuthAxios = () => {
    * 카카오 로그인
    * @returns 카카오 로그인 응답 데이터
    */
-  const loginWithKakao = async (): Promise<Record<string, unknown>> => {
-    try {
-      const response = await authAxios.get('/v1/auth/login/kakao');
-      return response.data;
-    } catch (error) {
-      console.error('Error during Kakao login:', error);
-      throw error;
-    }
-  };
+  // const loginWithKakao = async (): Promise<Record<string, unknown>> => {
+  //   try {
+  //     const response = await authAxios.get('/v1/auth/login/kakao');
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error during Kakao login:', error);
+  //     throw error;
+  //   }
+  // };
 
   /**
    * 구글 로그인
    * @returns 구글 로그인 응답 데이터
    */
-  const loginWithGoogle = async (): Promise<Record<string, unknown>> => {
+  const loginWithGoogle = async (): Promise<GoogleLoginResponse> => {
     try {
       const response = await authAxios.get('/v1/auth/login/google');
       return response.data;
@@ -60,7 +61,7 @@ const useAuthAxios = () => {
    * JWT 유효성 검사
    * @returns 유효성 검사 결과
    */
-  const validateJwt = async (): Promise<Record<string, unknown>> => {
+  const validateJwt = async (): Promise<ApproveRequestResponse> => {
     try {
       const response = await authAxios.get('/v1/auth/validate');
       return response.data;
@@ -73,9 +74,8 @@ const useAuthAxios = () => {
   /**
    * JWT 재발급
    * @returns 새로운 JWT 토큰
-   * 
    */
-  const refreshJwt = async (): Promise<Record<string, unknown>> => {
+  const refreshJwt = async (): Promise<RefreshJWTResponse> => {
     try {
       const response = await authAxios.get('/v1/auth/refresh');
       const newToken = response.data?.accessToken;
@@ -94,7 +94,7 @@ const useAuthAxios = () => {
   // 필요한 메서드와 Axios 인스턴스를 반환
   return {
     authAxios,
-    loginWithKakao,
+    // loginWithKakao,
     loginWithGoogle,
     validateJwt,
     refreshJwt,
