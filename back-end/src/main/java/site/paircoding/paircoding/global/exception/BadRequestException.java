@@ -7,18 +7,13 @@ import site.paircoding.paircoding.global.error.ErrorCode;
 public class BadRequestException extends CustomException {
   private final ErrorCode errorCode;
 
-  public BadRequestException(String message, ErrorCode errorCode) {
-    super(errorCode.getMessage() + message);
-    this.errorCode = errorCode;
+  public BadRequestException () {
+    super(ErrorCode.BAD_REQUEST_EXCEPTION.getMessage());
+    this.errorCode = ErrorCode.BAD_REQUEST_EXCEPTION;
+  }
+  public BadRequestException (String message) {
+    super(ErrorCode.BAD_REQUEST_EXCEPTION.getMessage()+" : "+message);
+    this.errorCode = ErrorCode.BAD_REQUEST_EXCEPTION;
   }
 
-  public BadRequestException(ErrorCode errorCode) {
-    super(errorCode.getMessage());
-    this.errorCode = errorCode;
-  }
-
-  public BadRequestException(ErrorCode errorCode, Object... args) {
-    super(String.format(errorCode.getMessage(), args));
-    this.errorCode = errorCode;
-  }
 }

@@ -7,19 +7,12 @@ import site.paircoding.paircoding.global.error.ErrorCode;
 public class UnauthorizedException extends CustomException {
   private final ErrorCode errorCode;
 
-
-  public UnauthorizedException(String message, ErrorCode errorCode) {
-    super(errorCode.getMessage() + message);
+  public UnauthorizedException (ErrorCode errorCode) {
+    super(ErrorCode.UNAUTHORIZED_EXCEPTION.getMessage());
     this.errorCode = errorCode;
   }
-
-  public UnauthorizedException(ErrorCode errorCode) {
-    super(errorCode.getMessage());
-    this.errorCode = errorCode;
-  }
-
-  public UnauthorizedException(ErrorCode errorCode, Object... args) {
-    super(String.format(errorCode.getMessage(), args));
-    this.errorCode = errorCode;
+  public UnauthorizedException (String message) {
+    super(ErrorCode.UNAUTHORIZED_EXCEPTION.getMessage() + " : " + message);
+    this.errorCode = ErrorCode.UNAUTHORIZED_EXCEPTION;
   }
 }

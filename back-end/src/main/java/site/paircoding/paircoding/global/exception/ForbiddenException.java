@@ -7,19 +7,12 @@ import site.paircoding.paircoding.global.error.ErrorCode;
 public class ForbiddenException extends CustomException {
   private final ErrorCode errorCode;
 
-
-  public ForbiddenException(String message, ErrorCode errorCode) {
-    super(errorCode.getMessage() + message);
-    this.errorCode = errorCode;
+  public ForbiddenException () {
+    super(ErrorCode.FORBIDDEN_EXCEPTION.getMessage());
+    this.errorCode = ErrorCode.FORBIDDEN_EXCEPTION;
   }
-
-  public ForbiddenException(ErrorCode errorCode) {
-    super(errorCode.getMessage());
-    this.errorCode = errorCode;
-  }
-
-  public ForbiddenException(ErrorCode errorCode, Object... args) {
-    super(String.format(errorCode.getMessage(), args));
-    this.errorCode = errorCode;
+  public ForbiddenException (String message) {
+    super(ErrorCode.FORBIDDEN_EXCEPTION.getMessage() + " : " + message);
+    this.errorCode = ErrorCode.FORBIDDEN_EXCEPTION;
   }
 }
