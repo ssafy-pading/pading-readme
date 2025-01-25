@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
 import { GetMyPageResponse, UpdateNameResponse } from '../types/mypageApiResponse';
-import { ApproveRequestResponse } from '../types/approveRequestResponse';
 
 /**
  * Custom hook for handling mypage-related API requests.
@@ -62,10 +61,10 @@ const useMypageAxios = () => {
    * 로그아웃
    * @returns 로그아웃 결과
    */
-  const logout = async (): Promise<ApproveRequestResponse> => {
+  const logout = async (): Promise<boolean> => {
     try {
       const response = await mypageAxios.delete('/v1/mypage/logout');
-      return response.data;
+      return response.data = true;
     } catch (error) {
       console.error('Error during logout:', error);
       throw error;
@@ -76,10 +75,10 @@ const useMypageAxios = () => {
    * 회원탈퇴
    * @returns 회원탈퇴 결과
    */
-  const deleteAccount = async (): Promise<ApproveRequestResponse> => {
+  const deleteAccount = async (): Promise<boolean> => {
     try {
       const response = await mypageAxios.delete('/v1/mypage');
-      return response.data;
+      return response.data = true;
     } catch (error) {
       console.error('Error deleting account:', error);
       throw error;

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
 import { GoogleLoginResponse, RefreshJWTResponse } from '../types/authApiResponse';
-import { ApproveRequestResponse } from '../types/approveRequestResponse';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -61,10 +60,10 @@ const useAuthAxios = () => {
    * JWT 유효성 검사
    * @returns 유효성 검사 결과
    */
-  const validateJwt = async (): Promise<ApproveRequestResponse> => {
+  const validateJwt = async (): Promise<boolean> => {
     try {
       const response = await authAxios.get('/v1/auth/validate');
-      return response.data;
+      return response.data = true;
     } catch (error) {
       console.error('Error validating JWT:', error);
       throw error;

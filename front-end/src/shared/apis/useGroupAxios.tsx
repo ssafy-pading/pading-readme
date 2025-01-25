@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { ApproveRequestResponse } from '../types/approveRequestResponse';
 import { CheckGroupNameDuplicateResponse, GetGroupDetailsResponse, GetGroupListResponse, GetGroupMembersResponse, GroupInviteLinkResponse, JoinGroupResponse, UpdateMemberRoleResponse } from '../types/groupApiResponse';
 
 /**
@@ -55,22 +54,22 @@ const useGroupAxios = () => {
   /**
    * 그룹 생성
    */
-  const createGroup = async (data: Record<string, unknown>): Promise<ApproveRequestResponse> => {
-    return groupAxios.post('/v1/groups', data).then((response) => response.data);
+  const createGroup = async (data: Record<string, unknown>): Promise<boolean> => {
+    return groupAxios.post('/v1/groups', data).then(() => true);
   };
 
   /**
    * 그룹명 변경
    */
-  const updateGroupName = async (groupId: string, name: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.patch(`/v1/groups/${groupId}`, { name }).then((response) => response.data);
+  const updateGroupName = async (groupId: string, name: string): Promise<boolean> => {
+    return groupAxios.patch(`/v1/groups/${groupId}`, { name }).then(() => true);
   };
 
   /**
    * 그룹 삭제
    */
-  const deleteGroup = async (groupId: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.delete(`/v1/groups/${groupId}`).then((response) => response.data);
+  const deleteGroup = async (groupId: string): Promise<boolean> => {
+    return groupAxios.delete(`/v1/groups/${groupId}`).then(() => true);
   };
 
   /**
@@ -97,8 +96,8 @@ const useGroupAxios = () => {
   /**
    * 그룹 나가기
    */
-  const leaveGroup = async (groupId: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.delete(`/v1/groups/${groupId}/quit`).then((response) => response.data);
+  const leaveGroup = async (groupId: string): Promise<boolean> => {
+    return groupAxios.delete(`/v1/groups/${groupId}/quit`).then(() => true);
   };
 
   /**
@@ -115,22 +114,22 @@ const useGroupAxios = () => {
   /**
    * 멤버 추방
    */
-  const expelMember = async (groupId: string, userId: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.delete(`/v1/groups/${groupId}/users/${userId}`).then((response) => response.data);
+  const expelMember = async (groupId: string, userId: string): Promise<boolean> => {
+    return groupAxios.delete(`/v1/groups/${groupId}/users/${userId}`).then(() => true);
   };
 
   /**
    * 오너 위임
    */
-  const delegateOwner = async (groupId: string, newOwnerId: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.patch(`/v1/groups/${groupId}/users/delegation`, { newOwnerId }).then((response) => response.data);
+  const delegateOwner = async (groupId: string, newOwnerId: string): Promise<boolean> => {
+    return groupAxios.patch(`/v1/groups/${groupId}/users/delegation`, { newOwnerId }).then(() => true);
   };
 
   /**
    * 명세서 추가
    */
-  const addSpec = async (groupId: string, specData: Record<string, unknown>): Promise<ApproveRequestResponse> => {
-    return groupAxios.post(`/v1/groups/${groupId}/spec`, specData).then((response) => response.data);
+  const addSpec = async (groupId: string, specData: Record<string, unknown>): Promise<boolean> => {
+    return groupAxios.post(`/v1/groups/${groupId}/spec`, specData).then(() => true);
   };
 
   /**
@@ -140,15 +139,15 @@ const useGroupAxios = () => {
     groupId: string,
     specId: string,
     specData: Record<string, unknown>
-  ): Promise<ApproveRequestResponse> => {
-    return groupAxios.patch(`/v1/groups/${groupId}/spec/${specId}`, specData).then((response) => response.data);
+  ): Promise<boolean> => {
+    return groupAxios.patch(`/v1/groups/${groupId}/spec/${specId}`, specData).then(() => true);
   };
 
   /**
    * 명세서 삭제
    */
-  const deleteSpec = async (groupId: string, specId: string): Promise<ApproveRequestResponse> => {
-    return groupAxios.delete(`/v1/groups/${groupId}/spec/${specId}`).then((response) => response.data);
+  const deleteSpec = async (groupId: string, specId: string): Promise<boolean> => {
+    return groupAxios.delete(`/v1/groups/${groupId}/spec/${specId}`).then(() => true);
   };
 
   return {

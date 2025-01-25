@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
 import { AccessProjectResponse, CreateProjectResponse, GetLanguageListResponse, GetOSListResponse, GetProjectDetailsResponse, GetProjectListResponse, GetSpecificationListResponse } from '../types/projectApiResponse';
-import { ApproveRequestResponse } from '../types/approveRequestResponse';
 
 /**
  * Custom hook for handling Project-related API requests.
@@ -96,15 +95,15 @@ const useProjectAxios = () => {
     groupId: string,
     projectId: string,
     projectData: Record<string, unknown>
-  ): Promise<ApproveRequestResponse> => {
-    return projectAxios.patch(`/v1/groups/${groupId}/projects/${projectId}`, projectData).then((response) => response.data);
+  ): Promise<boolean> => {
+    return projectAxios.patch(`/v1/groups/${groupId}/projects/${projectId}`, projectData).then(() => true);
   };
 
   /**
    * 프로젝트 삭제
    */
-  const deleteProject = async (groupId: string, projectId: string): Promise<ApproveRequestResponse> => {
-    return projectAxios.delete(`/v1/groups/${groupId}/projects/${projectId}`).then((response) => response.data);
+  const deleteProject = async (groupId: string, projectId: string): Promise<boolean> => {
+    return projectAxios.delete(`/v1/groups/${groupId}/projects/${projectId}`).then(() => true);
   };
 
   return {
