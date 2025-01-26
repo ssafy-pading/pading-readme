@@ -1,0 +1,17 @@
+.scroll::-webkit-scrollbar {
+    height: 5px;
+  }
+  
+  .scroll::-webkit-scrollbar-thumb {
+    height: 5px; /* 스크롤바 길이는 유지 */
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px; /* 너비가 줄어든 만큼 radius도 줄임 */
+  }
+  
+  .scroll::-webkit-scrollbar-track {
+    background: none;
+  }
+  
+  .scroll {
+    cursor: pointer;
+  }
