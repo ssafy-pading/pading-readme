@@ -7,9 +7,6 @@ const ProjectPage = () => {
   const [activeTopTab, setActiveTopTab] = useState("TERMINAL"); // 상단 탭
   const [terminals, setTerminals] = useState([<TerminalComponent key={0} />]); // 터미널
   const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
-  const scrollRef = useRef<HTMLDivElement | null>(null); // 터미널 탭 스크롤 참조
-  const isDragging = useRef(false); // 드래그 상태
-  const startX = useRef(0); // 드래그 시작 위치
 
   const addNewTerminal = () => {
     setTerminals([...terminals, <TerminalComponent key={terminals.length} />]);
@@ -23,22 +20,6 @@ const ProjectPage = () => {
     if (activeTerminal >= updatedTerminals.length) {
       setActiveTerminal(updatedTerminals.length - 1);
     }
-  };
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    startX.current = e.clientX;
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging.current || !scrollRef.current) return;
-    const dx = e.clientX - startX.current;
-    scrollRef.current.scrollLeft -= dx;
-    startX.current = e.clientX;
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
   };
 
   return (
@@ -105,55 +86,56 @@ const ProjectPage = () => {
             </div>
           </div>
 
-
           {/* 터미널 화면 및 탭 */}
           <div className="flex flex-grow">
-            {/* 터미널 화면 */}
-            <div className="flex-grow bg-black mt-2">
-              {terminals[activeTerminal]}
-            </div>
+            {activeTopTab === "TERMINAL" && (
+              <div className="flex flex-grow">
+                {/* 터미널 화면 */}
+                <div className="flex-grow bg-black mt-2">
+                  {terminals[activeTerminal]}
+                </div>
 
-            {/* 터미널 탭 */}
-            {terminals.length > 1 && ( // 터미널이 2개 이상일 때만 탭 리스트 표시
-              <div
-                // className="flex flex-col justify-between w-40 bg-gray-800 px-2 py-4"
-                // ref={scrollRef}
-                // onMouseDown={handleMouseDown}
-                // onMouseMove={handleMouseMove}
-                // onMouseUp={handleMouseUp}
-                // onMouseLeave={handleMouseUp}
-              >
-                <div className="flex flex-col overflow-y-auto space-y-2 flex-1">
-                  {terminals.map((_, index) => (
-                    <div
-                      key={index}
-                      className={`flex items-center px-4 py-2 rounded-lg ${activeTerminal === index
+                {/* 터미널 탭 */}
+                {terminals.length > 1 && ( // 터미널이 2개 이상일 때만 탭 리스트 표시
+                  <div className="flex flex-col overflow-y-auto space-y-2 flex-1">
+                    {terminals.map((_, index) => (
+                      <div
+                        key={index}
+                        className={`flex items-center px-4 py-2 rounded-lg ${activeTerminal === index
                           ? "bg-blue-600 text-white"
                           : "bg-gray-700 text-gray-300"
-                        } cursor-pointer`}
-                      onClick={() => setActiveTerminal(index)}
-                    >
-                      Terminal {index + 1}
-                      {terminals.length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteTerminal(index);
-                          }}
-                          className="ml-2 text-red-500 hover:text-red-400"
-                        >
-                          ✖
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                          } cursor-pointer`}
+                        onClick={() => setActiveTerminal(index)}
+                      >
+                        Terminal {index + 1}
+                        {terminals.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteTerminal(index);
+                            }}
+                            className="ml-2 text-red-500 hover:text-red-400"
+                          >
+                            ✖
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTopTab === "OUTPUT" && (
+              <div className="flex-grow bg-black mt-2 p-4">
+                {/* OUTPUT 화면 */}
+                <p>Output content goes here...</p>
               </div>
             )}
           </div>
-
         </div>
       </div>
+
     </div>
   );
 };

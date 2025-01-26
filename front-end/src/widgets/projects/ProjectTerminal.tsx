@@ -65,7 +65,7 @@ const ProjectTerminal: React.FC = () => {
       ref={terminalRef}
       style={{
         width: "100%",
-        height: "40vh",
+        height: "30vh",
         border: "1px solid #ccc",
         padding: "0 8px",
         overflow: "hidden",
