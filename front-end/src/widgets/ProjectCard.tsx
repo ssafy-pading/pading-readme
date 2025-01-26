@@ -1,5 +1,6 @@
 // src/widgets/ProjectCard.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Project } from '../pages/ProjectListPage';
 import MenuDot from '../assets/menu-dots.png';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'; // Heroicons v2 경로로 변경
@@ -13,6 +14,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
   const { name, language_id, os_id, performance_id, users } = project;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const navigate = useNavigate(); // useNavigate 훅 사용
+
+  const handleEnterProject = () => {
+    navigate(`/project/${project.id}`); // 프로젝트 상세 페이지로 이동
+  };
 
   const toggleDropdown = () => {
     setIsDropdownOpen(prev => !prev);
@@ -102,7 +109,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onDelete }) => {
       </div>
       
       {/* 입장하기 버튼 */}
-      <button className="w-full h-10 font-inter text-base font-medium text-[#6893e8] rounded-lg bg-white border border-[#6893e8] hover:bg-[#6893e8] hover:text-white mt-3">
+      <button 
+      onClick={handleEnterProject} 
+      className="w-full h-10 font-inter text-base font-medium text-[#6893e8] rounded-lg bg-white border border-[#6893e8] hover:bg-[#6893e8] hover:text-white mt-3">
         <span className="flex justify-center">
           입장하기
         </span>
