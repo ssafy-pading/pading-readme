@@ -4,7 +4,7 @@ import lombok.Getter;
 import site.paircoding.paircoding.global.error.ErrorCode;
 
 @Getter
-public class ConflictException extends RuntimeException {
+public class ConflictException extends CustomException {
 
   private final ErrorCode errorCode;
 

@@ -51,8 +51,15 @@ public class ControllerExceptionHandler {
     return newResponseEntity(ex);
   }
 
+  //CustomException을 처리하는 메서드
+  @ExceptionHandler(CustomException.class)
+  public ResponseEntity<ApiResponse<?>> handleCustomException(CustomException ex) {
+    log.debug("CustomException occurred: {}", ex.getMessage(), ex);
+    return newResponseEntity(ex);
+  }
+
   // 일반적인 예외와 런타임 예외를 처리하는 메서드
-  @ExceptionHandler({Exception.class, RuntimeException.class})
+  @ExceptionHandler({Exception.class})
   public ResponseEntity<ApiResponse<?>> serverErrorHandler(Exception ex) {
     log.error("Unexpected exception occurred: {}", ex.getStackTrace(), ex);
     CustomException customException = new CustomException(ErrorCode.UNEXPECTED, ex.getMessage());
