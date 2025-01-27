@@ -4,14 +4,10 @@ import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
 
-
-import { LanguageSelector } from './LanguageSelector';
-
 // Yjs와 WebRTC 연결 설정
 const ydoc = new Y.Doc();
 const provider = new WebrtcProvider('monaco-room', ydoc);
 const type = ydoc.getText('monaco');
-
 
 function ProjectEditor() {
   const editorRef = useRef(null);
@@ -29,10 +25,6 @@ function ProjectEditor() {
 
   };
 
-  // 언어 셀렉터에 보낼 선택 함수
-  const onSelect = (language: string) => {
-    setlanguage(language)
-  }
   return (
     <div>
       {/* <LanguageSelector language={language} onSelect={onSelect} /> */}
