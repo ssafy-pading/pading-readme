@@ -1,12 +1,14 @@
 // ProjectCreateModal.tsx
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import Select, { SingleValue, MultiValue, ActionMeta } from "react-select";
 import cross from "../assets/cross.svg";
 import cpu from "/src/assets/cpu.svg";
 import memory from "/src/assets/memory.svg";
 import disk from "/src/assets/disk.svg";
+import { CreateProjectResponse } from "../shared/types/projectApiResponse";
+import useProjectAxios from "../shared/apis/useProjectAxios";
 
 /** 
  * props 예시:
@@ -14,6 +16,8 @@ import disk from "/src/assets/disk.svg";
  * onClose: 모달 닫기 동작
  */
 interface ProjectCreateModalProps {
+  // groupId: string;
+  // onProjectCreate: (project:CreateProjectResponse) => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -100,6 +104,8 @@ type MemberOption = {
 Modal.setAppElement("#root");
 
 const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
+  // groupId,
+  // onProjectCreate,
   isOpen,
   onClose,
 }) => {
@@ -112,34 +118,65 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   const [selectedSpec, setSelectedSpec] = useState<SpecOption | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<MemberOption[]>([]);
 
-  // react-select용 옵션 변환
-  const languageSelectOptions: LanguageOption[] = languageOptions.map((lang) => ({
-    value: lang.os_code,
-    label: lang.os_name,
-  }));
+  // 모달 활성화 시, 필요
+  const [languageSelectOptions, setLanguageOptions] = useState<LanguageOption[]>([]);
+  const [osSelectOptions, setOsOptions] = useState<OsOption[]>([]);
+  const [specSelectOptions, setSpecOptions] = useState<SpecOption[]>([]);
+  const [memberSelectOptions, setMemberOptions] = useState<MemberOption[]>([]);
 
-  const osSelectOptions: OsOption[] = osOptions.map((os) => ({
-    value: os.os_code,
-    label: os.os_name,
-  }));
+  // 로딩상태
+  // const [isLoading, setIsLoading] = useState(true);
 
-  const specSelectOptions = specOptions.map((spec) => ({
-    value: spec.code,
-    label:(
-        <>
-            <img src={cpu} alt="CPU" className="inline-block"/> {spec.cpu_core} vCPU{" "}
-            <img src={memory} alt="RAM" className="inline-block"/> {spec.ram}{" "}
-            <img src={disk} alt="Disk" className="inline-block"/> {spec.disk}
-        </>
-    )
-  }));
+  // api호출기
+  const projectApi = useProjectAxios();
 
-  // 구성원 data → react-select 옵션
-  const memberSelectOptions: MemberOption[] = memberData.map((member) => ({
-    value: member.email,
-    label: `${member.name} (${member.email})`,
-    image: member.image,
-  }));
+  useEffect(() => {
+    const loadData = () => {
+      // setIsLoading(true);
+      // 여기에 api로 데이터 불러오기를 합니다 
+
+
+      // 현재는 데이터가 없으므로 임시 데이터 사용
+      // 언어, os, 사양, member 담아주기
+      setLanguageOptions(
+        languageOptions.map((lang) => ({
+          value: lang.os_code,
+          label: lang.os_name,
+      })));
+
+      setOsOptions(
+        osOptions.map((os) => ({
+          value: os.os_code,
+          label: os.os_name,
+        }))
+      );
+      
+      // react-select에 이미지가 안들어가서 jsx element로 넣었습니다.... 
+      setSpecOptions(
+        specOptions.map((spec) => ({
+          value: spec.code,
+          label:(
+              <>
+                  {spec.code} {" "}
+                  <img src={cpu} alt="CPU" className="inline-block"/> {spec.cpu_core} vCPU{" "}
+                  <img src={memory} alt="RAM" className="inline-block"/> {spec.ram}{" "}
+                  <img src={disk} alt="Disk" className="inline-block"/> {spec.disk}
+              </>
+          )
+        }))
+      );
+
+      setMemberOptions(
+        memberData.map((member) => ({
+          value: member.email,
+          label: `${member.name} (${member.email})`,
+          image: member.image,
+        }))
+      );
+    }
+
+    loadData();
+  }, [])
 
   // 구성원 옵션 변경 처리
   const handleMemberChange = (
@@ -167,7 +204,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       alert("성능(사양)을 선택하세요.");
       return false;
     }
-    // XSS, SQL injection 간단 체크 예시(실무에선 더 강화해야 함)
+    // XSS, SQL injection 간단 체크 예시(더 강화해야 함)
     const invalidPatterns = [/<\/?script>/i, /select\s+\*\s+from/i];
     for (const pattern of invalidPatterns) {
       if (pattern.test(projectName)) {
@@ -180,6 +217,8 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   };
 
   // 폼 제출 시
+  // api 사용시 async 붙여주세요!
+  // const handleSubmit = async() => {
   const handleSubmit = () => {
     if (!validateForm()) {
       return;
@@ -197,19 +236,24 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     };
 
     console.log("보낼 폼 데이터:", formData);
-    alert(formData);
+    alert("프로젝트 생성 완료");
 
-    // 실제 API 호출 로직 (axios 등) - 백엔드 미완성으로 주석 처리
-    // axios.post("/api/project/create", formData)
-    //   .then(response => {
-    //     console.log(response.data);
-    //   })
-    //   .catch(error => {
+    // // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
+    //   try{
+    //     const newProject:CreateProjectResponse = await projectApi.createProject(groupId, formData);
+    //     console.log(newProject);
+
+    //     // 새로운 프로젝트를 상위객체로 
+    //     onProjectCreate(newProject);
+
+    //     // 완료 후 모달 닫기
+    //     onClose();
+        
+    //   }catch(error){
     //     console.error(error);
-    //   });
+    //     alert("작업 중 오류가 발생했습니다.");
+    //   };
 
-    // 완료 후 모달 닫기
-    onClose();
   };
 
 
