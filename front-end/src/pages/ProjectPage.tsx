@@ -16,7 +16,6 @@ function ProjectPage() {
 
 
   {/*//////////////////////////////// 터미널 변수, 함수  ////////////////////////////////////////*/ }
-  const [activeTopTab, setActiveTopTab] = useState("TERMINAL"); // 상단 탭
   const [terminals, setTerminals] = useState([<TerminalComponent key={0} />]); // 터미널 리스트
   const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
 
@@ -107,82 +106,57 @@ function ProjectPage() {
               >
                 {/* 터미널 */}
                 <div className="absolute bottom-0 left-0 right-0 bg-[#0F172A] h-full">
-                  <h2 className="text-white p-4">터미널</h2>
-                  {/*/////////////////////////////////////////////////////////////////////////*/}
-                  {/* Row-3-1 Col-1 상단 탭 */}
-                  <div className="flex bg-gray-800 px-4 py-2 items-center">
-                    <div className="flex space-x-4">
-                      {["TERMINAL", "OUTPUT", "DEBUG CONSOLE"].map((tab) => (
-                        <button
-                          key={tab}
-                          onClick={() => setActiveTopTab(tab)}
-                          className={`px-4 py-2 text-sm rounded-md ${activeTopTab === tab
-                            ? "bg-gray-700 text-white border-b-2 border-blue-500"
-                            : "text-gray-400 hover:bg-gray-700 hover:text-white transition"
-                            }`}
+                  {/* 상단 탭과 + 버튼 */}
+                  <div className="flex bg-gray-800 px-4 py-2 items-center space-x-2">
+                    {/* 터미널 탭들 */}
+                    <div className="flex items-center space-x-2 overflow-x-auto flex-grow">
+                      {terminals.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${activeTerminal === index
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-700 text-gray-300"
+                            } cursor-pointer`}
+                          onClick={() => setActiveTerminal(index)}
                         >
-                          {tab}
-                        </button>
+                          Terminal 
+                          {terminals.length > 1 &&
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteTerminal(index);
+                            }}
+                            className="ml-2 text-red-500 hover:text-red-400"
+                          >
+                            ✖
+                          </button>
+                          }
+                        </div>
                       ))}
                     </div>
-                    {/* Row-3-1 Col-2 상단 탭의 + 버튼 */}
-                    <div className="ml-auto">
+
+                    {/* + 버튼 */}
+                    <div className="flex-none">
                       <button
-                        onClick={addNewTerminal}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                        onClick={() => {
+                          addNewTerminal();
+                          setActiveTerminal(terminals.length); // 새로 추가된 터미널로 포커싱
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition shrink-0"
                         title="Add new terminal"
+                        style={{ position: 'sticky', right: 0 }}
                       >
                         +
                       </button>
                     </div>
                   </div>
-                  {/* Row-3-2 Col-1 터미널 화면 */}
-                  {activeTopTab === "TERMINAL" && (
-                    <div className="flex flex-row w-full h-full max-h-[400px]">
-                      {/* Row-3-2 Col-1: 터미널 화면 */}
-                      <div className="flex-grow bg-black p-4 overflow-auto">
-                        {terminals[activeTerminal]}
-                      </div>
 
-                      {/* Row-3-2 Col-2: 터미널 탭 */}
-                      {terminals.length > 1 && ( // 터미널이 2개 이상일 때만 탭 리스트 표시
-                        <div className="flex flex-col overflow-y-auto space-y-2 flex-none w-1/4 max-h-[400px] bg-gray-800 p-2">
-                          {terminals.map((_, index) => (
-                            <div
-                              key={index}
-                              className={`flex items-center px-4 py-2 rounded-lg ${activeTerminal === index
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-700 text-gray-300"
-                                } cursor-pointer`}
-                              onClick={() => setActiveTerminal(index)}
-                            >
-                              Terminal {index + 1}
-                              {terminals.length > 1 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteTerminal(index);
-                                  }}
-                                  className="ml-2 text-red-500 hover:text-red-400"
-                                >
-                                  ✖
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTopTab === "OUTPUT" && (
-                    <div className="flex-grow bg-black mt-2 p-4">
-                      {/* OUTPUT 화면 */}
-                      <p>Output content goes here...</p>
-                    </div>
-                  )}
-
+                  {/* 터미널 화면 */}
+                  <div className="flex flex-grow w-full h-full bg-black p-4 overflow-auto">
+                    {terminals[activeTerminal]}
+                  </div>
                 </div>
+
               </ResizableBox>
             </div>
           </div>
