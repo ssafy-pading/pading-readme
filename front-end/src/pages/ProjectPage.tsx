@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import ProjectEditor from "../widgets/projects/ProjectEditor";
+import TerminalComponent from "../widgets/projects/ProjectTerminal";
+
 import { ResizableBox } from 'react-resizable';
-import { Link } from 'react-router-dom';
+
 import 'react-resizable/css/styles.css';
 import '../assets/css/ProjectPage.css'
 
@@ -9,6 +13,27 @@ function ProjectPage() {
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [isVerticalDragging, setIsVerticalDragging] = useState(false); // 드래그 상태 관리
   const [isHorizontalDragging, setIsHorizontalDragging] = useState(false); // 드래그 상태 관리
+
+
+  {/*//////////////////////////////// 터미널 변수, 함수  ////////////////////////////////////////*/ }
+  const [terminals, setTerminals] = useState([<TerminalComponent key={0} />]); // 터미널 리스트
+  const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
+
+  const addNewTerminal = () => {
+    setTerminals([...terminals, <TerminalComponent key={terminals.length} />]);
+    setActiveTerminal(terminals.length);
+  };
+
+  const deleteTerminal = (index: number) => {
+    if (terminals.length === 1) return;
+    const updatedTerminals = terminals.filter((_, i) => i !== index);
+    setTerminals(updatedTerminals);
+    if (activeTerminal >= updatedTerminals.length) {
+      setActiveTerminal(updatedTerminals.length - 1);
+    }
+  };
+  {/*//////////////////////////////// 터미널 변수, 함수  ////////////////////////////////////////*/ }
+
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
@@ -79,10 +104,59 @@ function ProjectPage() {
                 onResizeStart={() => setIsHorizontalDragging(true)}
                 onResizeStop={() => setIsHorizontalDragging(false)}
               >
-                {/* 터미널널 */}
+                {/* 터미널 */}
                 <div className="absolute bottom-0 left-0 right-0 bg-[#0F172A] h-full">
-                  <h2 className="text-white p-4">터미널</h2>
+                  {/* 상단 탭과 + 버튼 */}
+                  <div className="flex bg-gray-800 px-4 py-2 items-center space-x-2">
+                    {/* 터미널 탭들 */}
+                    <div className="flex items-center space-x-2 overflow-x-auto flex-grow">
+                      {terminals.map((_, index) => (
+                        <div
+                          key={index}
+                          className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${activeTerminal === index
+                              ? "bg-blue-600 text-white"
+                              : "bg-gray-700 text-gray-300"
+                            } cursor-pointer`}
+                          onClick={() => setActiveTerminal(index)}
+                        >
+                          Terminal 
+                          {terminals.length > 1 &&
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteTerminal(index);
+                            }}
+                            className="ml-2 text-red-500 hover:text-red-400"
+                          >
+                            ✖
+                          </button>
+                          }
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* + 버튼 */}
+                    <div className="flex-none">
+                      <button
+                        onClick={() => {
+                          addNewTerminal();
+                          setActiveTerminal(terminals.length); // 새로 추가된 터미널로 포커싱
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition shrink-0"
+                        title="Add new terminal"
+                        style={{ position: 'sticky', right: 0 }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 터미널 화면 */}
+                  <div className="flex flex-grow w-full h-full bg-black p-4 overflow-auto">
+                    {terminals[activeTerminal]}
+                  </div>
                 </div>
+
               </ResizableBox>
             </div>
           </div>
@@ -120,8 +194,11 @@ function ProjectPage() {
           </div>
         </div>
       </div>
+      {/*/////////////////////////////////////////////////////////////////////////*/}
+      {/*/////////////////////////////////////////////////////////////////////////*/}
+
     </div>
   );
-}
+};
 
 export default ProjectPage;

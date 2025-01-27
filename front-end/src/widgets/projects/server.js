@@ -1,19 +1,19 @@
-import express from 'express'
+import express from 'express';
 import http from 'http';
-import {Server} from 'socket.io';
+import { Server } from 'socket.io';
 import { Client } from 'ssh2';
+import fs from 'fs';
 
 const app = express();
 const server = http.createServer(app);
-// socket.io CORS 설정
 const io = new Server(server, {
-    cors: {
-      origin: 'http://localhost:5173', // 프론트엔드 URL
-      methods: ['GET', 'POST'],
-      allowedHeaders: ['Content-Type'],
-      credentials: true, // 클라이언트에서 쿠키나 인증 정보를 포함하려면 true로 설정
-    }
-  });
+  cors: {
+    origin: 'http://localhost:5173', // 허용할 클라이언트 도메인
+    methods: ['GET', 'POST'], // 허용할 HTTP 메서드
+    allowedHeaders: ['Content-Type'], // 허용할 헤더
+    credentials: true, // 인증 정보 포함 허용
+  },
+});
 
 app.use(express.static('public')); // public 폴더 내 정적 파일 제공
 
@@ -27,8 +27,10 @@ io.on('connection', (socket) => {
     // 셸 할당
     conn.shell((err, stream) => {
       if (err) {
-        return console.error('SSH 셸 할당 오류:', err);
+        console.error('SSH 셸 할당 오류:', err);
+        return;
       }
+
       // 서버 -> 클라이언트
       stream.on('data', (data) => {
         socket.emit('output', data.toString());
@@ -40,11 +42,11 @@ io.on('connection', (socket) => {
       });
     });
   }).connect({
-    host: '192.168.1.100',
-    port: 22,
-    username: 'heewon',
-    password: '0000'
-});
+    host: 'i12c202.p.ssafy.io', // 원격 서버 IP
+    port: 22, // SSH 포트
+    username: 'ubuntu', // SSH 사용자명
+    privateKey: fs.readFileSync('./src/widgets/projects/I12C202T.pem'), // 개인 키 경로
+  });
 
   socket.on('disconnect', () => {
     console.log('클라이언트 연결 종료');
