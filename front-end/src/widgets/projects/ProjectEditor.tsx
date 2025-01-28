@@ -4,11 +4,6 @@ import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
 
-// Yjs와 WebRTC 연결 설정
-const ydoc = new Y.Doc();
-const provider = new WebrtcProvider('monaco-room', ydoc);
-const type = ydoc.getText('monaco');
-
 function ProjectEditor() {
   const editorRef = useRef(null);
   const [value, setvalue] = useState('')
@@ -27,7 +22,6 @@ function ProjectEditor() {
 
   return (
     <div>
-      {/* <LanguageSelector language={language} onSelect={onSelect} /> */}
       <div>
         <Editor
           height="100vh"
@@ -37,6 +31,12 @@ function ProjectEditor() {
           onMount={handleEditorDidMount} // Editor 초기화
           value={value}
           onChange={(value) => setvalue(value)}
+          options={
+            {
+              mouseWheelZoom: true, // 마우스 휠로 줌
+              smoothScrolling: true, // 부드러운 스크롤
+            }
+          }
         />
       </div>
     </div>
