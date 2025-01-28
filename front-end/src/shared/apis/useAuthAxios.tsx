@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { GoogleLoginResponse, RefreshJWTResponse } from '../types/authApiResponse';
+import { GoogleLoginResponse } from '../types/authApiResponse';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -70,33 +70,12 @@ const useAuthAxios = () => {
     }
   };
 
-  /**
-   * JWT 재발급
-   * @returns 새로운 JWT 토큰
-   */
-  const refreshJwt = async (): Promise<RefreshJWTResponse> => {
-    try {
-      const response = await authAxios.get('/v1/auth/refresh');
-      const newToken = response.data?.accessToken;
-
-      if (newToken) {
-        localStorage.setItem('accessToken', newToken); // 새로운 토큰 저장
-      }
-
-      return response.data;
-    } catch (error) {
-      console.error('Error refreshing JWT:', error);
-      throw error;
-    }
-  };
-
   // 필요한 메서드와 Axios 인스턴스를 반환
   return {
     authAxios,
     // loginWithKakao,
     loginWithGoogle,
     validateJwt,
-    refreshJwt,
   };
 };
 
