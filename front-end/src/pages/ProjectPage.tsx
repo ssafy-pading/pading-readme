@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import ProjectEditor from "../widgets/projects/ProjectEditor";
 import TerminalComponent from "../widgets/projects/ProjectTerminal";
+import ProjectLeaveButton from "../widgets/projects/ProjectLeaveButton";
 
 import { ResizableBox } from 'react-resizable';
 
@@ -46,6 +47,9 @@ function ProjectPage() {
         <Link to="/">
           <b className="text-white">Home</b>
         </Link>
+        <div className="absolute right-1">
+          <ProjectLeaveButton />
+        </div>
       </div>
 
       {/* 네비게이션을 제외한 컨텐츠 */}
@@ -114,22 +118,22 @@ function ProjectPage() {
                         <div
                           key={index}
                           className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${activeTerminal === index
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-700 text-gray-300"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-700 text-gray-300"
                             } cursor-pointer`}
                           onClick={() => setActiveTerminal(index)}
                         >
-                          Terminal 
+                          Terminal
                           {terminals.length > 1 &&
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteTerminal(index);
-                            }}
-                            className="ml-2 text-red-500 hover:text-red-400"
-                          >
-                            ✖
-                          </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteTerminal(index);
+                              }}
+                              className="ml-2 text-red-500 hover:text-red-400"
+                            >
+                              ✖
+                            </button>
                           }
                         </div>
                       ))}
@@ -152,7 +156,7 @@ function ProjectPage() {
                   </div>
 
                   {/* 터미널 화면 */}
-                  <div className="flex flex-grow w-full h-full bg-black p-4 overflow-auto">
+                  <div className="flex flex-grow w-full bg-black p-4 overflow-auto">
                     {terminals[activeTerminal]}
                   </div>
                 </div>
