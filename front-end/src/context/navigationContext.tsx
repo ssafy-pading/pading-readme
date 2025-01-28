@@ -8,7 +8,7 @@ interface NavigationContextProps {
 const NavigationContext = createContext<NavigationContextProps | undefined>(undefined);
 
 export const NavigationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [isProfileNavOpen, setIsProfileNavOpen] = useState(false);
+    const [isProfileNavOpen, setIsProfileNavOpen] = useState(true);
 
     const toggleProfileNav = () => {
         setIsProfileNavOpen(prevState => !prevState);
