@@ -6,10 +6,12 @@ import { GetProjectListResponse } from '../shared/types/projectApiResponse';
 import ProjectCard from '../widgets/ProjectCard';
 import GroupNavigationBar from '../widgets/GroupNavigationBar';
 import ProfileNavigationBar from '../widgets/ProfileNavigationBar';
-import DeleteConfirmModal from '../widgets/DeleteComfirmModal';
+import DeleteConfirmModal from '../widgets/DeleteConfirmModal';
+import ExitConfirmModal from '../widgets/ExitConfirmModal';
+import ProjectCreateModal from '../widgets/ProjectCreateModal';
 import { NavigationProvider, useNavigation } from '../context/navigationContext';
 
-// API 호출을 위한 커스텀 훅 import
+// API 호출을 위한 커스텀 훅
 import useGroupAxios from '../shared/apis/useGroupAxios';
 import useProjectAxios from '../shared/apis/useProjectAxios';
 
@@ -17,18 +19,31 @@ import useProjectAxios from '../shared/apis/useProjectAxios';
 import group_create_icon from '../assets/group_create_icon.svg';
 
 // 타입 정의
-export type Project = GetProjectListResponse['projects'][number]; // 프로젝트 타입
+export type Project = GetProjectListResponse['projects'][number];
+
+interface RouteParams {
+  groupId: string;
+}
 
 const ProjectListPage: React.FC = () => {
+
+  // ───── 유저 역할 가져오기 ─────
+  const userRole = 'OWNER'; // 실제 로그인 로직에 따라 가져와야 함
+
+  // ───── API 훅 가져오기 ─────
   const { getGroupDetails } = useGroupAxios();
-  const { getProjects, deleteProject } = useProjectAxios();
+  const { getProjects, deleteProject, exitProject } = useProjectAxios(); 
 
-  const { groupId } = useParams<{ groupId: string }>(); // URL에서 groupId 추출
-  const [groupName, setGroupName] = useState<string>(''); // 그룹 이름 상태 초기값 ''
-  const [projects, setProjects] = useState<Project[]>([]); // 프로젝트 목록 상태
-  const { isProfileNavOpen } = useNavigation(); // 네비게이션 상태 가져오기
+  // ───── URL 파라미터 ─────
+  const { groupId } = useParams<RouteParams>(); 
+  const [groupName, setGroupName] = useState<string>('');
 
-  // 그룹 이름 가져오는 API 호출
+  const [projectList, setProjectList] = useState<Project[]>([]); 
+
+  // ───── 네비게이션 (사이드바) ─────
+  const { isProfileNavOpen } = useNavigation(); 
+
+  // ───── 그룹 정보 가져오기 ─────
   useEffect(() => {
     const fetchGroupDetails = async () => {
       if (!groupId) return;
@@ -39,22 +54,17 @@ const ProjectListPage: React.FC = () => {
         console.error('그룹 정보를 가져오는 데 실패했습니다:', err);
       }
     };
-
     fetchGroupDetails();
   }, [groupId, getGroupDetails]);
 
-  // 프로젝트 목록 가져오는 API 호출
+  // ───── 프로젝트 목록 가져오기 ─────
   useEffect(() => {
     const fetchProjects = async () => {
-      // 그룹 ID가 없으면 API 호출하지 않음
-      // if (!groupId) return;
-
       try {
-        // 실제 API 호출 (주석 처리됨)
         // const projectData = await getProjects(groupId);
-        // setProjects(projectData.projects);
+        // setProjectList(projectData.projects);
 
-        // 임시 데이터 반환
+        // 임시 목업 데이터
         const mockProjects: Project[] = [
           {
             id: 1,
@@ -113,60 +123,57 @@ const ProjectListPage: React.FC = () => {
               },
             ],
           },
-          {
-            id: 4,
-            os_id: 'linux',
-            language_id: 'go',
-            performance_id: 'medium',
-            name: 'Project Delta',
-            container_id: 'container_101',
-            status: 'inactive',
-            users: [
-              {
-                user_id: 104,
-                name: 'Bob Johnson',
-                email: 'bobjohnson@example.com',
-                role: 'MEMBER',
-                profile_image: 'https://example.com/images/bobjohnson.png',
-                status: false,
-              },
-            ],
-          },
         ];
-
-        setProjects(mockProjects);
+        setProjectList(mockProjects);
       } catch (err) {
         console.error('프로젝트 목록을 불러오는 데 실패했습니다:', err);
       }
     };
-
     fetchProjects();
-  }, [groupId, ]); // getProjects 무한 루프..
+  }, [groupId]);
 
-  // Delete 확인 모달 상태
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-
-  // Delete 모달 열기
-  const openDeleteModal = (project: Project) => {
-    setSelectedProject(project);
-    setIsModalOpen(true);
+  // ───── 프로젝트 생성 ─────
+  const handleCreateProject = (newProject: Project) => {
+    setProjectList((prevProjects) => [...prevProjects, newProject]);  // 새로운 프로젝트 추가
   };
 
-  // Delete 모달 닫기
-  const closeDeleteModal = () => {
-    setSelectedProject(null);
-    setIsModalOpen(false);
+  // ───── 모달 상태 관리 ─────
+  const [isCreateModalVisible, setCreateModalVisible] = useState(false);
+
+  // ───── 모달 열기 ─────
+  const openCreateModal = () => {
+    setCreateModalVisible(true);
   };
 
-  // 실제 Delete 액션 처리
+  // ───── 모달 닫기 ─────
+  const closeCreateModal = () => {
+    setCreateModalVisible(false);
+  };
+
+  // DELETE Confirm 모달 상태 & 로직
+  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] = useState(false);
+  const [selectedDeleteProject, setSelectedDeleteProject] = useState<Project | null>(null);
+
+  // Delete Confirm 모달 열기
+  const openDeleteConfirmModal = (project: Project) => {
+    setSelectedDeleteProject(project);
+    setIsDeleteConfirmModalOpen(true);
+  };
+
+  // Delete Confirm 모달 닫기
+  const closeDeleteConfirmModal = () => {
+    setSelectedDeleteProject(null);
+    setIsDeleteConfirmModalOpen(false);
+  };
+
+  // Delete 액션 처리
   const handleDelete = async () => {
-    if (!selectedProject || !groupId) return;
+    if (!selectedDeleteProject || !groupId) return;
 
     try {
-      await deleteProject(groupId, selectedProject.id.toString());
-      setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id));
-      closeDeleteModal();
+      await deleteProject(groupId, selectedDeleteProject.id.toString());
+      setProjectList((prev) => prev.filter((p) => p.id !== selectedDeleteProject.id));
+      closeDeleteConfirmModal();
       alert('프로젝트가 성공적으로 삭제되었습니다.');
     } catch (err) {
       console.error('프로젝트 삭제 실패:', err);
@@ -174,50 +181,99 @@ const ProjectListPage: React.FC = () => {
     }
   };
 
-  const userRole = 'OWNER'; // 예: 현재 사용자 권한
+  // EXIT Confirm 모달 상태 & 로직
+  const [isExitConfirmModalOpen, setIsExitConfirmModalOpen] = useState(false);
+  const [selectedExitProject, setSelectedExitProject] = useState<Project | null>(null);
+
+  // Exit Confirm 모달 열기
+  const openExitConfirmModal = (project: Project) => {
+    setSelectedExitProject(project);
+    setIsExitConfirmModalOpen(true);
+  };
+
+  // Exit Confirm 모달 닫기
+  const closeExitConfirmModal = () => {
+    setSelectedExitProject(null);
+    setIsExitConfirmModalOpen(false);
+  };
+
+  // Exit 액션 처리
+  const handleExit = async () => {
+    if (!selectedExitProject || !groupId) return;
+
+    try {
+      await exitProject(groupId, selectedExitProject.id.toString());
+      alert('프로젝트에서 나갔습니다.');
+      closeExitConfirmModal();
+    } catch (err) {
+      console.error('프로젝트 나가기 실패:', err);
+      alert('프로젝트 나가기에 실패했습니다.');
+    }
+  };
 
   return (
     <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
       <ProfileNavigationBar />
       <GroupNavigationBar />
+
       {/* 프로젝트 목록 */}
       <div className="pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32">
-        <p className="text-3xl text-[#4D4650] font-semibold mt-20 mb-10">그룹 이름: {groupName}</p>
+        <p className="text-3xl text-[#4D4650] font-semibold mt-20 mb-10">
+          그룹 이름: {groupName}
+        </p>
         <hr className="mb-10" />
+
         <div className="grid gap-16 grid-cols-[repeat(auto-fill,_minmax(325px,_1fr))]">
+          {/* OWNER, MANAGER만 프로젝트 생성 버튼 표시 */}
           {(userRole === 'OWNER' || userRole === 'MANAGER') && (
             <button
               className="w-full h-[216px] bg-[#e4e8e8] rounded-lg border border-[#d0d0d7] flex items-center justify-center relative group shadow-md transform transition-transform duration-300 hover:scale-110 p-5"
-              onClick={() => {
-                // 프로젝트 생성 모달 구현하기
-              }}
+              onClick={openCreateModal}
             >
               <img src={group_create_icon} alt="group create icon" />
             </button>
           )}
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} onDelete={openDeleteModal} />
+
+          {/* 실제 프로젝트 리스트 */}
+          {projectList.map((project) => (
+            <ProjectCard
+              key={project.id}
+              groupId={groupId}
+              project={project}
+              userRole={userRole}
+              // Delete 로직
+              onDelete={openDeleteConfirmModal}
+              // Exit 로직
+              onExit={openExitConfirmModal}
+            />
           ))}
         </div>
       </div>
 
+      {/* ProjectCreateModal */}
+      <ProjectCreateModal
+        isOpen={isCreateModalVisible}
+        onClose={closeCreateModal}
+        onProjectCreate={handleCreateProject}
+      />
+
+      {/* Delete Confirm Modal */}
       <DeleteConfirmModal
-        isOpen={isModalOpen}
-        onClose={closeDeleteModal}
+        isOpen={isDeleteConfirmModalOpen}
+        onClose={closeDeleteConfirmModal}
         onConfirm={handleDelete}
-        projectName={selectedProject ? selectedProject.name : ''}
+        projectName={selectedDeleteProject ? selectedDeleteProject.name : ''}
+      />
+
+      {/* Exit Confirm Modal */}
+      <ExitConfirmModal
+        isOpen={isExitConfirmModalOpen}
+        onClose={closeExitConfirmModal}
+        onConfirm={handleExit}
+        projectName={selectedExitProject ? selectedExitProject.name : ''}
       />
     </div>
   );
 };
 
-// 네비게이션 토글 상태를 공유하는 컴포넌트로 감싸기
-const WrappedProjectListPage: React.FC = () => {
-  return (
-    <NavigationProvider>
-      <ProjectListPage />
-    </NavigationProvider>
-  );
-};
-
-export default WrappedProjectListPage;
+export default ProjectListPage;
