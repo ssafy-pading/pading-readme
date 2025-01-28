@@ -11,11 +11,33 @@ import { CreateProjectResponse } from "../shared/types/projectApiResponse";
 import useProjectAxios from "../shared/apis/useProjectAxios";
 
 /** 
- * props 예시:
+ * 작동방식 
+ * 
+ * 1. 모달이 동작이 되면 useEffect에서 option에 필요한 정보들을 api로 호출(언어, os, 성능, 멤버 등)
+ * - 해당 호출 후 useEffect에서 각 select별 option 에 담아주기
+ * 2. 생성하기를 누를 때 handleSubmit() 함수 호출, 해당 함수에서 api로 프로젝트 생성하기 호출
+ * - api로 프로젝트 생성 정보를 전달한다면 새로운 프로젝트에 대한 정보(프로젝트 id 등등..)를 받을 수 있음
+ * - 여기서 새로운 프로젝트를 부모로 전달해야 하는데, 부모에서 사용하기에는 정보가 부족함. 
+ * -- 이 때문에 새로운 프로젝트에 해당 정보들을 넣는 것도 필요해보임
+ */
+
+/** 
+ * ProjectListPage에서 사용법 
+ * 
+ * 1. 기본적으로 다른 모달과 동일
+ * 2. props에 groupId와 onProjectCreate 콜백함수가 필요
+ * 3. 달리 처리해야 할 것은 콜백함수에서 새로운 Project 객체 정보가 날아오는걸 받아서 기존 프로젝트 그룹에 넣어줘야 함
+ */
+
+/** 
+ * props: 
+ * groupId: 프로젝트 생성시 필요한 파라미터
+ * onProjectCreate: 프로젝트 생성시 새로운 프로젝트의 정보를 담아 부모로 전송
  * isOpen: 모달 열림/닫힘 여부
  * onClose: 모달 닫기 동작
  */
 interface ProjectCreateModalProps {
+  // ProjectListPage와 연결할 때 주석 해제
   // groupId: string;
   // onProjectCreate: (project:CreateProjectResponse) => void;
   isOpen: boolean;
@@ -44,6 +66,7 @@ const specOptions = [
 ];
 
 // 구성원 검색/추가용 데이터
+// api에서는 4개의 정보만 보냄, ProjectListPage에서 멤버 정보와 속성명이나 개수가 차이가 있으니 체크 바람
 interface MemberData {
   name: string;
   image: string;
@@ -130,6 +153,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   // api호출기
   const projectApi = useProjectAxios();
 
+  // 1. api 호출하여 각 options에 담아주기
   useEffect(() => {
     const loadData = () => {
       // setIsLoading(true);
@@ -178,6 +202,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     loadData();
   }, [])
 
+
   // 구성원 옵션 변경 처리
   const handleMemberChange = (
     newValue: MultiValue<MemberOption>,
@@ -216,7 +241,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     return true;
   };
 
-  // 폼 제출 시
+  // 2. 폼 제출 시 함수
   // api 사용시 async 붙여주세요!
   // const handleSubmit = async() => {
   const handleSubmit = () => {
