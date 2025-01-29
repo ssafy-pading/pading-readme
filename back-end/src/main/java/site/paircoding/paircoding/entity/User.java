@@ -30,7 +30,7 @@ public class User extends BaseEntity {
   private String provider;
 
   @Column(nullable = false)
-  private Integer provider_id;
+  private String providerId;
 
   @Column(nullable = false)
   private String name;
@@ -40,10 +40,10 @@ public class User extends BaseEntity {
   private String email;
 
   @Builder
-  public User(Integer id, String provider, Integer provider_id, String name, String image, String email) {
+  public User(Integer id, String provider, String providerId, String name, String image, String email) {
     this.id = id;
     this.provider = provider;
-    this.provider_id = provider_id;
+    this.providerId = providerId;
     this.name = name;
     this.image = image;
     this.email = email;
