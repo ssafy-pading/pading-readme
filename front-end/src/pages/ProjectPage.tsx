@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import ProjectEditor from "../widgets/projects/ProjectEditor";
 import TerminalComponent from "../widgets/projects/ProjectTerminal";
 import ProjectLeaveButton from "../widgets/projects/ProjectLeaveButton";
+import ProjectMemberListButton from "../widgets/projects/ProjectMemberListButton";
 
 import { ResizableBox } from 'react-resizable';
 
@@ -44,9 +45,9 @@ function ProjectPage() {
     <div className="flex flex-col h-screen">
       {/* 네비게이션 바 */}
       <div className="flex flex-row items-center h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
-        <Link to="/">
-          <b className="text-white">Home</b>
-        </Link>
+        <div className="absolute left-1">
+          <ProjectMemberListButton/>
+        </div>
         <div className="absolute right-1">
           <ProjectLeaveButton />
         </div>
