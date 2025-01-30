@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { ProjectEditorProvider } from "../context/ProjectEditorContext";
 import ProjectEditor from "../widgets/projects/ProjectEditor";
 import TerminalComponent from "../widgets/projects/ProjectTerminal";
 import ProjectLeaveButton from "../widgets/projects/ProjectLeaveButton";
@@ -42,6 +42,7 @@ function ProjectPage() {
   };
 
   return (
+    <ProjectEditorProvider>
     <div className="flex flex-col h-screen">
       {/* 네비게이션 바 */}
       <div className="flex flex-row items-center h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
@@ -87,10 +88,11 @@ function ProjectPage() {
         {/* 중앙 컨텐츠 */}
         <div className="flex-1 flex-col">
           {/* 코드 에디터 */}
+              <ProjectEditor />
           <div className="relative h-full top-0 left-0 right-0 bg-[#1E293B] flex justify-center text-[#0F172A]">
-            <div className="mt-80">
+            {/* <div className="mt-80"> */}
               <p>코드 에디터</p>
-            </div>
+            {/* </div> */}
             <div className="absolute w-full bottom-0">
               <ResizableBox
                 width={Infinity}
@@ -203,6 +205,7 @@ function ProjectPage() {
       {/*/////////////////////////////////////////////////////////////////////////*/}
 
     </div>
+    </ProjectEditorProvider>
   );
 };
 
