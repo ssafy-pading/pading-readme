@@ -3,10 +3,12 @@ import Editor from "@monaco-editor/react";
 import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
+import { useProjectEditor } from '../../context/ProjectEditorContext';
+
 
 function ProjectEditor() {
   const editorRef = useRef(null);
-  const [value, setvalue] = useState('')
+  const {value, setValue} = useProjectEditor();
   const [language, setlanguage] = useState("javascript")
 
   const handleEditorDidMount = (editor: any) => {
@@ -30,7 +32,7 @@ function ProjectEditor() {
           language={language}
           onMount={handleEditorDidMount} // Editor 초기화
           value={value}
-          onChange={(value) => setvalue(value)}
+          onChange={(value) => setValue(value || "")}
           options={
             {
               mouseWheelZoom: true, // 마우스 휠로 줌
