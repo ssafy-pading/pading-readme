@@ -82,7 +82,7 @@ const GroupNavigationBar: React.FC = () => {
   // 그룹 클릭 시 상세 페이지로 이동하는 함수
   const handleGroupClick = (groupId: number) => {
     if (groupId) {
-      navigate(`/groups/${groupId}/projectlist`);
+      navigate(`/projectlist/${groupId}`);
     }
   };
 
