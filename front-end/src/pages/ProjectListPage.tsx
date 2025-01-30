@@ -41,7 +41,7 @@ const ProjectListPage: React.FC = () => {
   const [projectList, setProjectList] = useState<Project[]>([]); 
 
   // ───── 네비게이션 (사이드바) ─────
-  const { isProfileNavOpen } = useNavigation(); 
+  const { isProfileNavOpen, isHover } = useNavigation(); 
 
   // ───── 그룹 정보 가져오기 ─────
   useEffect(() => {
@@ -212,7 +212,13 @@ const ProjectListPage: React.FC = () => {
   };
 
   return (
-    <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
+    <div
+      className={`transition-all duration-1000 ${
+        (isProfileNavOpen || isHover)
+          ? 'ml-64' // 완전 열림 또는 호버 시
+          : 'ml-0'  // 닫힘
+      }`}
+    >
       <ProfileNavigationBar />
       <GroupNavigationBar />
 
@@ -276,4 +282,13 @@ const ProjectListPage: React.FC = () => {
   );
 };
 
-export default ProjectListPage;
+// 네비게이션 토글 상태를 공유하는 컴포넌트로 감싸기
+const WrappedProjectListPage: React.FC = () => {
+  return (
+    <NavigationProvider>
+      <ProjectListPage />
+    </NavigationProvider>
+  );
+};
+
+export default WrappedProjectListPage;
