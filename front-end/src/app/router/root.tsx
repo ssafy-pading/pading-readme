@@ -51,7 +51,7 @@ const routes: RouteObject[] = [
         )
     },
     {
-        path: 'notfound',
+        path: '*', // 404 페이지
         element: (
             <Suspense fallback={Loading}>
                 <NotFoundPage/>
