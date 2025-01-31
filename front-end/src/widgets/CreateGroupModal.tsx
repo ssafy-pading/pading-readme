@@ -3,13 +3,13 @@ import Modal from "react-modal";
 import cross from "../assets/cross.svg";
 import useGroupAxios from "../shared/apis/useGroupAxios"; // useGroupAxios 훅 가져오기
 
+Modal.setAppElement("#root");
+
 interface GroupCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToJoin: () => void; // GroupJoinModal로 전환
 }
-
-Modal.setAppElement("#root");
 
 const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ isOpen, onClose, onSwitchToJoin }) => {
   const [groupName, setGroupName] = useState(""); // 그룹 이름 상태 관리
@@ -35,7 +35,6 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ isOpen, onClose, on
 
     setIsLoading(true);
     try {
-      // 그룹 생성 API 호출
       const success = await createGroup({ name: groupName });
       if (success) {
         alert("그룹이 성공적으로 생성되었습니다!");
@@ -60,9 +59,10 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({ isOpen, onClose, on
     <Modal
       isOpen={isOpen}
       onRequestClose={handleClose}
-      contentLabel="그룹 생성하기"
+      contentLabel="Create Group"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       className="bg-white rounded-xl py-5 px-4 shadow-lg relative w-[500px] h-[350px]"
+      shouldCloseOnOverlayClick={true}
     >
       <div className="w-full h-full flex flex-col">
         <div className="flex justify-between items-center">
