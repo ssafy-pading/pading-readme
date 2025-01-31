@@ -24,37 +24,10 @@ public class ControllerExceptionHandler {
     return ResponseEntity.status(ex.getErrorCode().getStatus()).body(ApiResponse.error(ex.getErrorCode().getCode(), ex.getMessage()));
   }
 
-  // UnauthorizedException을 처리하는 메서드
-  @ExceptionHandler(UnauthorizedException.class)
-  public ResponseEntity<ApiResponse<?>> unauthorizedHandler(UnauthorizedException ex) {
-    log.debug("UnauthorizedException occurred: {}", ex.getMessage(), ex);
-    return newResponseEntity(ex);
-  }
-
-  // ForbiddenException을 처리하는 메서드
-  @ExceptionHandler(ForbiddenException.class)
-  public ResponseEntity<ApiResponse<?>> forbiddenHandler(ForbiddenException ex) {
-    log.debug("ForbiddenException occurred: {}", ex.getMessage(), ex);
-    return newResponseEntity(ex);
-  }
-  // NotFoundException을 처리하는 메서드
-  @ExceptionHandler(NotFoundException.class)
-  public ResponseEntity<ApiResponse<?>> notFoundHandler(NotFoundException ex) {
-    log.debug("NotFoundException occurred: {}", ex.getMessage(), ex);
-    return newResponseEntity(ex);
-  }
-
-  // BadRequestException을 처리하는 메서드
-  @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<ApiResponse<?>> badRequestException(BadRequestException ex) {
-    log.debug("BadRequestException occurred: {}", ex.getMessage(), ex);
-    return newResponseEntity(ex);
-  }
-
   //CustomException을 처리하는 메서드
   @ExceptionHandler(CustomException.class)
   public ResponseEntity<ApiResponse<?>> handleCustomException(CustomException ex) {
-    log.debug("CustomException occurred: {}", ex.getMessage(), ex);
+    log.debug(ex.getMessage(), ex);
     return newResponseEntity(ex);
   }
 
