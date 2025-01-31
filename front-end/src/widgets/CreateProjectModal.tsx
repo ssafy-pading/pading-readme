@@ -1,5 +1,3 @@
-// ProjectCreateModal.tsx
-
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import Select, { SingleValue, MultiValue, ActionMeta } from "react-select";
@@ -37,9 +35,7 @@ import useProjectAxios from "../shared/apis/useProjectAxios";
  * onClose: 모달 닫기 동작
  */
 interface ProjectCreateModalProps {
-  // ProjectListPage와 연결할 때 주석 해제
-  // groupId: string;
-  // onProjectCreate: (project:CreateProjectResponse) => void;
+  groupId: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -127,8 +123,7 @@ type MemberOption = {
 Modal.setAppElement("#root");
 
 const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
-  // groupId,
-  // onProjectCreate,
+  groupId,
   isOpen,
   onClose,
 }) => {
@@ -243,8 +238,8 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
   // 2. 폼 제출 시 함수
   // api 사용시 async 붙여주세요!
-  // const handleSubmit = async() => {
-  const handleSubmit = () => {
+  const handleSubmit = async() => {
+  // const handleSubmit = () => {
     if (!validateForm()) {
       return;
     }
@@ -263,21 +258,18 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     console.log("보낼 폼 데이터:", formData);
     alert("프로젝트 생성 완료");
 
-    // // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
-    //   try{
-    //     const newProject:CreateProjectResponse = await projectApi.createProject(groupId, formData);
-    //     console.log(newProject);
+    // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
+      try{
+        const newProject:CreateProjectResponse = await projectApi.createProject(groupId, formData);
+        console.log(newProject);
 
-    //     // 새로운 프로젝트를 상위객체로 
-    //     onProjectCreate(newProject);
-
-    //     // 완료 후 모달 닫기
-    //     onClose();
+        // 완료 후 모달 닫기
+        onClose();
         
-    //   }catch(error){
-    //     console.error(error);
-    //     alert("작업 중 오류가 발생했습니다.");
-    //   };
+      }catch(error){
+        console.error(error);
+        alert("작업 중 오류가 발생했습니다.");
+      };
 
   };
 
