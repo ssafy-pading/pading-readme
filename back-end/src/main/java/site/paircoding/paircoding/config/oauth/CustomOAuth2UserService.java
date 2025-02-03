@@ -30,9 +30,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     Map<String, Object> attributes = oAuth2User.getAttributes();
     String email = (String) attributes.get("email");
     String name = (String) attributes.get("name");
-    String image = (String) attributes.get("profile");
 
-    User user = getOrSave(provider, providerId, email, name, image);
+    User user = getOrSave(provider, providerId, email, name);
 
     return new CustomUserDetails(user, attributes);
   }
@@ -46,7 +45,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
    * @param name       이름
    * @return User
    */
-  public User getOrSave(String provider, String providerId, String email, String name, String image) {
+  public User getOrSave(String provider, String providerId, String email, String name) {
     Optional<User> user = userRepository.findByProviderAndProviderId(provider, providerId);
 
     if (user.isEmpty()) {
@@ -55,7 +54,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
           .providerId(providerId)
           .name(name)
           .email(email)
-          .image(image)
           .build();
 
       return userRepository.save(newUser);
