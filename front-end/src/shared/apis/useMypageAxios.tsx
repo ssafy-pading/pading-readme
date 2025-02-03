@@ -35,7 +35,7 @@ const useMypageAxios = () => {
   const getProfile = async (): Promise<GetMyPageResponse> => {
     try {
       const response = await mypageAxios.get('/v1/mypage');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching profile:', error);
       throw error;

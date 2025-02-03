@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
 import { GoogleLoginResponse } from '../types/authApiResponse';
+import { GetMyPageResponse } from '../types/mypageApiResponse';
+import useMypageAxios from './useMypageAxios';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -42,14 +44,24 @@ const useAuthAxios = () => {
   //   }
   // };
 
+  // 로그인 시 사용자 정보를 불러오는 데이터 
+  const {getProfile} = useMypageAxios();
+  
   /**
    * 구글 로그인
    * @returns 구글 로그인 응답 데이터
    */
-  const loginWithGoogle = async (): Promise<GoogleLoginResponse> => {
+  const loginWithGoogle = async (): Promise<void> => {
     try {
-      const response = await authAxios.get('/v1/auth/login/google');
-      return response.data;
+      // const response:GoogleLoginResponse = await authAxios.post('/oauth2/authorization/google');
+      
+      window.location.href = import.meta.env.VITE_APP_API_BASE_URL + "/oauth2/authorization/google";
+      // 로컬 스토리지에 토큰 저장
+      // localStorage.setItem("accessToken", response.accessToken);
+      // localStorage.setItem("refreshToken", response.refreshToken);
+      // const userProfile:GetMyPageResponse = await getProfile();
+
+      // return userProfile;
     } catch (error) {
       console.error('Error during Google login:', error);
       throw error;

@@ -7,7 +7,7 @@ import { NavigateFunction } from 'react-router-dom';
  */
 export const createAxiosInstance = (): AxiosInstance => {
   return axios.create({
-    baseURL: import.meta.env.REACT_APP_API_BASE_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_APP_API_BASE_URL,
     headers: {
       'Content-Type': 'application/json',
     },
