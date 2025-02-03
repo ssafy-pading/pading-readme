@@ -1,9 +1,8 @@
 // 로딩 기능
 import { Suspense, lazy } from "react";
-
 import { createBrowserRouter, RouteObject } from 'react-router-dom'
 
-const Loading = <div>로딩중입니다...</div>
+import ProjectSpinner from "../../widgets/projects/ProjectSpinner";
 
 // 그룹 X 페이지
 const NoGroupPage = lazy(() => import("../../pages/NoGroupPage"))
@@ -20,7 +19,7 @@ const routes: RouteObject[] = [
     {
         path: '/',
         element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner/>}>
                 <LoginPage/>
             </Suspense>
         )
@@ -28,7 +27,7 @@ const routes: RouteObject[] = [
     {
         path: 'projectlist',
         element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner/>}>
                 <ProjectListPage/>
             </Suspense>
         )
@@ -37,7 +36,7 @@ const routes: RouteObject[] = [
     {
         path: 'project',
         element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner/>}>
                 <ProjectPage/>
             </Suspense>
         )
@@ -45,7 +44,7 @@ const routes: RouteObject[] = [
     {
         path: 'nogroup',
         element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner/>}>
                 <NoGroupPage/>
             </Suspense>
         )
@@ -53,11 +52,11 @@ const routes: RouteObject[] = [
     {
         path: '*', // 404 페이지
         element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner/>}>
                 <NotFoundPage/>
             </Suspense>
         )
-    }
+    },
 ];
 
 
