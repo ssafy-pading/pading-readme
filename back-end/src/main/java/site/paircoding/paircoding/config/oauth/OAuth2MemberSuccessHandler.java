@@ -41,15 +41,15 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
     queryParams.add("refreshToken", refreshToken);
 
     // JSON 형식으로 응답을 설정합니다.
-    response.setContentType("application/json");
-    response.getWriter().write("{\"accessToken\":\"" + accessToken + "\",\"refreshToken\":\"" + refreshToken + "\"}");
+//    response.setContentType("application/json");
+//    response.getWriter().write("{\"accessToken\":\"" + accessToken + "\",\"refreshToken\":\"" + refreshToken + "\"}");
 
     // 리다이렉트 전략을 사용하여 리다이렉트할 수 있습니다. (주석 처리됨)
-//    URI uri = UriComponentsBuilder
-//        .fromUriString("http://localhost:3000")
-//        .queryParams(queryParams)
-//        .build()
-//        .toUri();
-//    getRedirectStrategy().sendRedirect(request, response, uri.toString());
+    URI uri = UriComponentsBuilder
+        .fromUriString("http://localhost:5173")
+        .queryParams(queryParams)
+        .build()
+        .toUri();
+    getRedirectStrategy().sendRedirect(request, response, uri.toString());
   }
 }
