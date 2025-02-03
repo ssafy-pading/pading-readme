@@ -1,4 +1,4 @@
-package site.paircoding.paircoding.contoller;
+package site.paircoding.paircoding.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

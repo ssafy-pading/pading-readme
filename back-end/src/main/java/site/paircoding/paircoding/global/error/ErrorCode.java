@@ -12,7 +12,9 @@ public enum ErrorCode {
   FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "C002", "Forbidden"),
   NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "C003", "Not found"),
   UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "C004", "Unauthorized"),
-  CONFLICT_EXCEPTION(HttpStatus.CONFLICT, "C005", "Conflict occurred");
+  CONFLICT_EXCEPTION(HttpStatus.CONFLICT, "C005", "Conflict occurred"),
+  EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "C006", "Token expired"),
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "C007", "Invalid token");
 
   private final HttpStatus status;
   private final String code;

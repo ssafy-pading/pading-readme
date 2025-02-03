@@ -1,13 +1,18 @@
 package site.paircoding.paircoding.util;
 
 // JWT 생성 및 검증
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +21,8 @@ import java.util.Date;
 import site.paircoding.paircoding.config.oauth.CustomOAuth2UserService;
 import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.User;
+import site.paircoding.paircoding.global.ApiResponse;
+import site.paircoding.paircoding.global.error.ErrorCode;
 import site.paircoding.paircoding.global.exception.UnauthorizedException;
 
 @Component
@@ -95,7 +102,7 @@ public class JwtUtil {
    * @param token 검증할 토큰
    * @return 토큰이 유효하면 true, 그렇지 않으면 false
    */
-  public boolean validateToken(String token) {
+  public boolean validateToken(String token, HttpServletResponse response) {
     if (token == null) return false;
 
     try {
@@ -107,9 +114,24 @@ public class JwtUtil {
           .getExpiration()
           .after(new Date());
     } catch (ExpiredJwtException e) {
-      throw new UnauthorizedException("만료된 토큰입니다.");
+      jwtExceptionHandler(response, ErrorCode.EXPIRED_TOKEN);
+      return false;
     } catch (Exception e) {
-      throw new UnauthorizedException("유효하지 않은 토큰입니다.");
+      jwtExceptionHandler(response, ErrorCode.INVALID_TOKEN);
+      return false;
+    }
+  }
+
+  public void jwtExceptionHandler(HttpServletResponse response, ErrorCode errorCode) {
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    response.setCharacterEncoding("UTF-8");
+    try {
+      String json = new ObjectMapper().writeValueAsString(
+          ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
+      response.getWriter().write(json);
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

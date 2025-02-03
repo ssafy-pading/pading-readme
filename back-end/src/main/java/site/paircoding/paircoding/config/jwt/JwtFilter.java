@@ -33,12 +33,14 @@ public class JwtFilter extends OncePerRequestFilter {
       String token = bearerToken.substring(7);
       User user;
 
-      if (jwtUtil.validateToken(token)) {
+      if (jwtUtil.validateToken(token, response)) {
         user = userRepository.findById(jwtUtil.getId(token)).orElseThrow(() -> new UnauthorizedException("Invalid token"));
         OAuth2User oAuth2User = new CustomUserDetails(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(oAuth2User, "", oAuth2User.getAuthorities());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+      }else{
+        return;
       }
     }
 
