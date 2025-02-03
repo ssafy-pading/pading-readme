@@ -35,7 +35,7 @@ const ProjectListPage: React.FC = () => {
 
   // ───── API 훅 가져오기 ─────
   const { getGroupDetails } = useGroupAxios();
-  const { getProjects, deleteProject, exitProject } = useProjectAxios(); 
+  const { getProjects, deleteProject, exitProject } = useProjectAxios();
 
   // ───── URL 파라미터 ─────
   // const { groupId } = useParams<RouteParams>(); // 추후에 사용
@@ -44,21 +44,25 @@ const ProjectListPage: React.FC = () => {
   const [projectList, setProjectList] = useState<Project[]>([]); 
 
   // ───── 네비게이션 (사이드바) ─────
-  const { isProfileNavOpen, isHover } = useNavigation(); 
+  const { isProfileNavOpen } = useNavigation(); 
 
   // ───── 그룹 정보 가져오기 ─────
-  // useEffect(() => {
-  //   const fetchGroupDetails = async () => {
-  //     if (!groupId) return;
-  //     try {
-  //       const groupDetails = await getGroupDetails(groupId);
-  //       setGroupName(groupDetails.name as string);
-  //     } catch (err) {
-  //       console.error('그룹 정보를 가져오는 데 실패했습니다:', err);
-  //     }
-  //   };
-  //   fetchGroupDetails();
-  // }, [groupId, getGroupDetails]);
+  useEffect(() => {
+      const fetchGroupDetails = async () => {
+        try {
+          // 실제 API 호출 예시:
+          // const data = await getGroupDetails(groupId);
+          // setGroupName(data.groupName);
+          
+          // 임시 데이터 예시
+          setGroupName('C202');
+        } catch (error) {
+          console.error('그룹 상세 정보 조회 중 오류:', error);
+        }
+      };
+  
+      fetchGroupDetails();
+    }, [groupId, ]);
 
   // ───── 프로젝트 목록 가져오기 ─────
   useEffect(() => {
@@ -201,7 +205,7 @@ const ProjectListPage: React.FC = () => {
     }
   };
 
-  // EXIT
+  // EXIT (아직 API 없음)
   const handleExit = async () => {
     if (!selectedExitProject || !groupId) return;
 
@@ -217,23 +221,12 @@ const ProjectListPage: React.FC = () => {
 
 
   return (
-    <div
-      className={`transition-all duration-1000 ${
-        (isProfileNavOpen || isHover)
-          ? 'ml-64' // 완전 열림 또는 호버 시
-          : 'ml-0'  // 닫힘
-      }`}
-    >
-      {/* 네비게이션 바 */}
-      <ProfileNavigationBar />
-      <GroupNavigationBar />
-
+    <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
       {/* 프로젝트 목록 */}
-      <div className="pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32">
+      <div className="relative pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
         <div className='flex justify-between items-center'>
-          <p className="text-3xl text-[#4D4650] font-semibold mt-20 mb-10">
-            {/* API 연결 시 삭제 및 수정 */}
-            그룹 이름: {groupName}
+          <p className="text-5xl text-[#4D4650] font-semibold mt-20 mb-8">
+            {groupName}
           </p>
 
           {/* Heroicons를 사용한 초대 링크 만들기 버튼 */}
@@ -304,11 +297,21 @@ const ProjectListPage: React.FC = () => {
         onConfirm={handleExit}
         projectName={selectedExitProject ? selectedExitProject.name : ''}
       />
+
+      {/* CreateLinkModal */}
       <CreateLinkModal
         isOpen={modalState.link}
         onClose={() => closeModal('link')}
         groupId={groupId}
       />
+      
+      {/* 네비게이션 바 */}
+      <div className='relative z-50'>
+      <ProfileNavigationBar />
+      <GroupNavigationBar />
+
+      </div>
+
     </div>
   );
 };
