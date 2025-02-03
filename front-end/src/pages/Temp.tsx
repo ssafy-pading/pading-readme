@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-import TerminalComponent from '../widgets/projects/ProjectTerminal'
-import ProjectEditor from '../widgets/projects/ProjectEditor';
+import TerminalComponent from '../features/projects/ProjectTerminal'
+import ProjectEditor from '../features/projects/ProjectEditor';
 
 const TerminalTabs = ({ terminals, activeTab, onTabClick, onDeleteTab }: any) => {
   return (
