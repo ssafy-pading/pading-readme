@@ -114,7 +114,7 @@ const LoginPage: React.FC = () => {
         <div id="particles-js" className="w-full h-full"></div>
         {/* <div className="absolute w-[50%] h-[70%]"> */}
         <div className="absolute w-[50%] h-[50%]">
-          <h1 className="text-5xl font-bold mb-[3rem]">Padding</h1>
+          <h1 className="text-5xl font-bold mb-[3rem]">Pading</h1>
           <TxtRotate className="text-lg" texts={["서비스 소개", "최고의 페어 프로그래밍 경험"]} period={2000} />
         </div>
       </div>
