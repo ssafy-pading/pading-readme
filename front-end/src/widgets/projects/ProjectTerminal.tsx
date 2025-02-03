@@ -81,7 +81,16 @@ const WebTerminal: React.FC = () => {
     };
   }, []);
 
-  return <div ref={terminalRef} style={{ width: '100%', height: '100vh' }} />;
+  return <div ref={terminalRef}
+  style={{
+    width: "100%",
+    height: "40vh",
+    border: "1px solid #ccc",
+    padding: "0 8px",
+    overflow: "hidden",
+    scrollbarWidth: "thin",
+    scrollbarColor: "#4a5568 #2d3748",
+  }} />;
 };
 
 export default WebTerminal;
