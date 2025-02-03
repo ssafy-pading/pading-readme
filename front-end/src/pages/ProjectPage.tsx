@@ -88,7 +88,7 @@ function ProjectPage() {
         {/* 중앙 컨텐츠 */}
         <div className="flex-1 flex-col">
           {/* 코드 에디터 */}
-              <ProjectEditor />
+              {/* <ProjectEditor /> */}
           <div className="relative h-full top-0 left-0 right-0 bg-[#1E293B] flex justify-center text-[#0F172A]">
             {/* <div className="mt-80"> */}
               <p>코드 에디터</p>
