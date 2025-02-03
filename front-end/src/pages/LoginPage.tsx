@@ -10,12 +10,12 @@ import useAuthAxios from '../shared/apis/useAuthAxios';
 import useMypageAxios from '../shared/apis/useMypageAxios';
 import { useNavigate } from 'react-router-dom';
 import { GetMyPageResponse } from '../shared/types/mypageApiResponse';
-
+import { useUser } from '../context/userContext';
 
 const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuthAxios();
   const { getProfile } = useMypageAxios();
-
+  const { userProfile, setUserProfile } = useUser();
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
   
@@ -32,9 +32,12 @@ const LoginPage: React.FC = () => {
   const setProfile = async() => {
     try{
       const profile: GetMyPageResponse = await getProfile();
-      localStorage.setItem("email", profile.email);
-      localStorage.setItem("name", profile.name);
-      localStorage.setItem("image", profile.image);
+      // localStorage.setItem("email", profile.email);
+      // localStorage.setItem("name", profile.name);
+      // localStorage.setItem("image", profile.image);
+
+      setUserProfile(profile);
+      console.log(userProfile);
       // alert('로그인 처리 완료');
       console.log('로그인 처리 완료');
       navigate("/projectlist");
