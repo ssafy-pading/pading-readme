@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class MypageDto {
+public class UserDto {
   private String name;
   private String image;
   private String email;
