@@ -6,11 +6,13 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -37,4 +39,13 @@ public class GroupUser extends BaseEntity{
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  @Builder
+  public GroupUser(User user, Group group, Role role) {
+    this.user = user;
+    this.group = group;
+    this.role = role;
+
+    // GroupUserId를 생성하여 설정
+    this.id = new GroupUserId(user.getId(), group.getId());
+  }
 }
