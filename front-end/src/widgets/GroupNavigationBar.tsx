@@ -1,12 +1,10 @@
-// src/components/GroupNavigationBar.tsx
-
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // useNavigate 임포트
-import GroupCreateModal from './GroupCreateModal';
-import GroupJoinModal from './GroupJoinModal';
+import { useNavigate } from 'react-router-dom';
+import GroupCreateModal from './CreateGroupModal';
+import GroupJoinModal from './JoinGroupModal';
 
-import useGroupAxios from '../shared/apis/useGroupAxios'; // useGroupAxios 훅을 올바르게 임포트
-import { GetGroupListResponse } from '../shared/types/groupApiResponse'; // GetGroupListResponse 타입 임포트
+import useGroupAxios from '../shared/apis/useGroupAxios';
+import { GetGroupListResponse } from '../shared/types/groupApiResponse';
 
 import logo from '../assets/logo.png';
 import groupCreateIcon from '../assets/group_create_icon.svg';
@@ -29,7 +27,7 @@ const GroupNavigationBar: React.FC = () => {
 
   // 모달 열기/닫기 함수
   const openCreateModal = () => setActiveModal('create');
-  // const openJoinModal = () => setActiveModal('join');  // 참가 링크를 통해 바로 여는 모달 -> 당장 사용하지 않음
+  const openJoinModal = () => setActiveModal('join');
   const closeModal = () => setActiveModal(null);
 
   // 그룹 이름이 버튼 크기를 넘어갈 때 한글이면 3글자 이후 ···, 영어면 5글자 이후 ···
@@ -41,7 +39,7 @@ const GroupNavigationBar: React.FC = () => {
     return name.length > 5 ? `${name.slice(0, 5)}···` : name;
   };
 
-  // 임시 데이터 - 실제 데이터 사용시 삭제 예정정
+  // 임시 데이터 - 실제 데이터 사용시 삭제 예정
   const mockGroups: Group[] = [
     { id: 1, name: '개발팀', capacity: 10 },
     { id: 2, name: '디자인팀', capacity: 8 },
@@ -62,7 +60,6 @@ const GroupNavigationBar: React.FC = () => {
         //   navigate('/nogroup'); // NoGroupPage 경로로 이동
         // }
 
-
         // 임시데이터 사용 -> 실제 데이터 사용시 삭제
         setGroups(mockGroups);
 
@@ -70,14 +67,13 @@ const GroupNavigationBar: React.FC = () => {
         if (mockGroups.length === 0) {
           navigate('/nogroup'); // NoGroupPage 경로로 이동
         }
-
       } catch (err) {
         console.error('그룹 목록을 불러오는 데 실패했습니다.', err);
       }
     };
 
     fetchGroups();
-  }, [navigate,  ]); // 실제 데이터 시 getGroups 추가
+  }, [navigate]); // 실제 데이터 시 getGroups 추가
 
   // 그룹 클릭 시 상세 페이지로 이동하는 함수
   const handleGroupClick = (groupId: number) => {
@@ -123,25 +119,21 @@ const GroupNavigationBar: React.FC = () => {
       </div>
 
       {/* 모달 컨테이너 */}
-      {activeModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="relative w-[500px] h-[300px] bg-white rounded-xl shadow-lg">
-            {activeModal === 'create' && (
-              <GroupCreateModal
-                isOpen={true}
-                onClose={closeModal}
-                onSwitchToJoin={() => setActiveModal('join')}
-              />
-            )}
-            {activeModal === 'join' && (
-              <GroupJoinModal
-                isOpen={true}
-                onClose={closeModal}
-                onSwitchToCreate={() => setActiveModal('create')}
-              />
-            )}
-          </div>
-        </div>
+      {/* react-modal 포털을 활용하므로 별도의 오버레이 `div`를 제거 */}
+      {activeModal === 'create' && (
+        <GroupCreateModal
+          isOpen={true}
+          onClose={closeModal}
+          onSwitchToJoin={openJoinModal}
+          // groupId={/* 현재 그룹 ID를 전달할 수 있다면 전달 */}
+        />
+      )}
+      {activeModal === 'join' && (
+        <GroupJoinModal
+          isOpen={true}
+          onClose={closeModal}
+          onSwitchToCreate={openCreateModal}
+        />
       )}
     </nav>
   );
