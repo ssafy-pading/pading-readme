@@ -41,10 +41,10 @@ const GroupNavigationBar: React.FC = () => {
 
   // 임시 데이터 - 실제 데이터 사용시 삭제 예정
   const mockGroups: Group[] = [
-    { id: 1, name: '개발팀', capacity: 10 },
-    { id: 2, name: '디자인팀', capacity: 8 },
-    { id: 3, name: '마케팅', capacity: 5 },
-    { id: 4, name: '운영팀', capacity: 12 },
+    { id: 1, name: 'C202', capacity: 10 },
+    { id: 2, name: '광주2반', capacity: 8 },
+    { id: 3, name: '알고리즘 스터디', capacity: 5 },
+    { id: 4, name: '해커톤', capacity: 12 },
   ];
 
   // 그룹 목록 불러오기 (useGroupAxios의 getGroups 사용)

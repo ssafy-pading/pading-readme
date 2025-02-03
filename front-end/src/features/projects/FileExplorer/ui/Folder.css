@@ -1,0 +1,71 @@
+  .context-menu {
+    border: 1px solid #e2e8f0;
+    padding: 8px 0;
+  }
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #334155;
+  }
+  
+  .menu-item:hover {
+    background-color: #f1f5f9;
+  }
+  
+  .menu-icon {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+  }
+  
+  .node-container {
+    display: flex;
+    align-items: center;
+    margin: 2px 0;
+  }
+  
+  .node-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .chevron-icon {
+    display: flex;
+    align-items: center;
+  }
+  
+  .file-icon {
+    display: flex;
+    align-items: center;
+    color: #94a3b8;
+  }
+  
+  .node-name {
+    user-select: none;
+  }
+  
+  .rename-input, .new-item-input input {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    outline: none;
+  }
+  
+  .rename-input:focus, .new-item-input input:focus {
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 1px #3B82F6;
+  }
+  
+  .new-item-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+  }
+  
