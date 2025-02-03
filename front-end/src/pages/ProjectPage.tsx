@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { ProjectEditorProvider } from "../context/ProjectEditorContext";
-import ProjectEditor from "../widgets/projects/ProjectEditor";
-import TerminalComponent from "../widgets/projects/ProjectTerminal";
-import ProjectLeaveButton from "../widgets/projects/ProjectLeaveButton";
-import ProjectMemberListButton from "../widgets/projects/ProjectMemberListButton";
+import ProjectEditor from "../features/projects/ProjectEditor";
+import TerminalComponent from "../features/projects/ProjectTerminal";
+import ProjectLeaveButton from "../features/projects/ProjectLeaveButton";
+import ProjectMemberListButton from "../features/projects/ProjectMemberListButton";
+import FileExplorer from "../features/projects/FileExplorer";
 
 import { ResizableBox } from 'react-resizable';
 
@@ -80,7 +81,7 @@ function ProjectPage() {
             </div>
             <div className="w-full overflow-x-auto scroll pr-[10px]">
               {/* 파일 탐색기 들어갈 자리 */}
-              {/* <FolderTree /> */}
+              <FileExplorer />
             </div>
           </div>
         </ResizableBox>
