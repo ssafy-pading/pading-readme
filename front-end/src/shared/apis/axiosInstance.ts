@@ -17,12 +17,11 @@ export const createAxiosInstance = (): AxiosInstance => {
 
 const refreshJwt = async (): Promise<string | null> => {
   try {
-    // post확인 해야 함
-    const response = await axios.post(`${import.meta.env.REACT_APP_API_BASE_URL}/v1/auth/refresh`, {refreshToken: localStorage.getItem('refreshToken'),});
-    const newToken = response.data?.accessToken;
-
+    const response = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/v1/auth/refresh`, {refreshToken: `Bearer ${localStorage.getItem('refreshToken')}`,});
+    const newToken = response.data?.data;
     if (newToken) {
-      localStorage.setItem('accessToken', newToken); // 새로운 토큰 저장
+      localStorage.setItem('accessToken', newToken.accessToken); // 새로운 토큰 저장
+      localStorage.setItem('refreshToken', newToken.refreshToken); // 새로운 토큰 저장
     }
 
     return newToken;
@@ -66,10 +65,8 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
           // 이미 리프레시 시도한 요청인지 확인
           if (!originalRequest._retry) {
             originalRequest._retry = true;
-
             // 리프레시 토큰으로 액세스 토큰 갱신
             const newAccessToken = await refreshJwt();
-
             if (newAccessToken) {
               // 새로운 액세스 토큰을 Authorization 헤더에 추가
               originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -80,7 +77,8 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
               // 리프레시 실패 시 로그아웃 처리
               localStorage.removeItem('accessToken');
               localStorage.removeItem('refreshToken');
-              navigate('/login');
+              // alert('다시 로그인 해 주세요.');
+              navigate('/');
             }
           }
         }
