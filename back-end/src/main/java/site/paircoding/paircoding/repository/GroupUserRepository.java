@@ -19,5 +19,7 @@ public interface GroupUserRepository extends JpaRepository<GroupUser, Integer> {
 
   Optional<GroupUser> findByGroupIdAndUserId(Integer groupId, Integer userId);
 
+  Integer countByGroupId(Integer groupId);
 
+  void deleteAllByGroupId(Integer groupId);
 }

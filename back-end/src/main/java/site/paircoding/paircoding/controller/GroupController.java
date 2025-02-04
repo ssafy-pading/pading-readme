@@ -3,6 +3,7 @@ package site.paircoding.paircoding.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,12 +16,13 @@ import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.CreateGroupRequest;
-import site.paircoding.paircoding.entity.dto.CreateGroupResponse;
+import site.paircoding.paircoding.entity.dto.GroupDto;
 import site.paircoding.paircoding.entity.dto.DuplicateResponse;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
 import site.paircoding.paircoding.entity.dto.GroupsResponse;
 import site.paircoding.paircoding.entity.dto.UpdateGroupRequest;
+import site.paircoding.paircoding.entity.dto.UpdateGroupRoleRequest;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.service.GroupService;
 
@@ -39,10 +41,10 @@ public class GroupController {
     }
 
     @PostMapping
-    public ApiResponse<CreateGroupResponse> createGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody CreateGroupRequest createGroupRequest) {
+    public ApiResponse<GroupDto> createGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody CreateGroupRequest createGroupRequest) {
         User user = customUserDetails.getUser();
-        CreateGroupResponse CreateGroupResponse = groupService.createGroup(user, createGroupRequest.getName(), createGroupRequest.getCapacity());
-        return ApiResponse.success(CreateGroupResponse);
+        GroupDto GroupDto = groupService.createGroup(user, createGroupRequest.getName(), createGroupRequest.getCapacity());
+        return ApiResponse.success(GroupDto);
     }
 
     @GetMapping("{groupId}")
@@ -66,11 +68,46 @@ public class GroupController {
         return ApiResponse.success(group);
     }
 
+    @DeleteMapping("{groupId}")
+    public ApiResponse<Void> deleteGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+        User user = customUserDetails.getUser();
+        groupService.deleteGroup(user, groupId);
+        return ApiResponse.success();
+    }
+
     @GetMapping("{groupId}/users")
     public ApiResponse<GroupUsersResponse> getGroupUsers(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
         User user = customUserDetails.getUser();
         List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
         GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
         return ApiResponse.success(groupUsersResponse);
+    }
+
+    @PostMapping("{groupId}/join")
+    public ApiResponse<Object> joinGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+        User user = customUserDetails.getUser();
+        Group group = groupService.joinGroup(user, groupId);
+        return ApiResponse.success(GroupDto.builder().id(group.getId()).name(group.getName()).capacity(group.getCapacity()).build());
+    }
+
+    @DeleteMapping("{groupId}/quit")
+    public ApiResponse<Void> quitGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+        User user = customUserDetails.getUser();
+        groupService.quitGroup(user, groupId);
+        return ApiResponse.success();
+    }
+
+    @PatchMapping("{groupId}/users/{userId}")
+    public ApiResponse<GroupUserResponse> updateGroupUserRole(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId, @PathVariable Integer userId, @RequestBody UpdateGroupRoleRequest updateGroupRoleRequest) {
+        User user = customUserDetails.getUser();
+        GroupUserResponse groupUserResponse = groupService.updateGroupUserRole(user, groupId, userId, updateGroupRoleRequest.getRole());
+        return ApiResponse.success(groupUserResponse);
+    }
+
+    @DeleteMapping("{groupId}/users/{userId}")
+    public ApiResponse<Void> deleteGroupUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId, @PathVariable Integer userId) {
+        User user = customUserDetails.getUser();
+        groupService.deleteGroupUser(user, groupId, userId);
+        return ApiResponse.success();
     }
 }

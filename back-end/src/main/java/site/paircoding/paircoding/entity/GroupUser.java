@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import site.paircoding.paircoding.entity.enums.Role;
 
@@ -36,6 +37,7 @@ public class GroupUser extends BaseEntity{
   @JoinColumn(name = "group_id", referencedColumnName = "id")
   private Group group;
 
+  @Setter
   @Enumerated(EnumType.STRING)
   private Role role;
 
