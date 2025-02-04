@@ -3,7 +3,7 @@
 // 마이페이지 조회
 export type GetMyPageResponse = {
   name: string;    // 사용자 이름
-  image: string;   // 사용자 프로필 이미지 URL
+  image: string|null;   // 사용자 프로필 이미지 URL
   email: string;   // 사용자 이메일
 };
 // 이름(닉네임) 변경

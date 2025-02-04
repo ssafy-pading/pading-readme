@@ -1,17 +1,37 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { NavigateFunction } from 'react-router-dom';
+// import { RefreshJWTResponse } from '../types/authApiResponse';
 
 /**
  * Axios 인스턴스 생성 함수
  */
 export const createAxiosInstance = (): AxiosInstance => {
   return axios.create({
-    baseURL: import.meta.env.REACT_APP_API_BASE_URL || 'http://localhost:3000',
+    baseURL: import.meta.env.VITE_APP_API_BASE_URL,
     headers: {
       'Content-Type': 'application/json',
     },
   });
 };
+
+
+const refreshJwt = async (): Promise<string | null> => {
+  try {
+    // post확인 해야 함
+    const response = await axios.post(`${import.meta.env.REACT_APP_API_BASE_URL}/v1/auth/refresh`, {refreshToken: localStorage.getItem('refreshToken'),});
+    const newToken = response.data?.accessToken;
+
+    if (newToken) {
+      localStorage.setItem('accessToken', newToken); // 새로운 토큰 저장
+    }
+
+    return newToken;
+  } catch (error) {
+    console.error('Error refreshing JWT:', error);
+    throw error;
+  }
+};
+
 
 /**
  * 인터셉터 설정 함수
@@ -32,7 +52,7 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
   // 응답 인터셉터
   const responseInterceptorId = axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,
-    (error) => {
+    async (error) => {
 
       if (error.response) {
         // 잘못된 요청
@@ -41,8 +61,28 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
         }
         // 인증 필요
         if (error.response?.status === 401) {
-          localStorage.removeItem('accessToken');
-          navigate('/login');
+          const originalRequest = error.config;
+
+          // 이미 리프레시 시도한 요청인지 확인
+          if (!originalRequest._retry) {
+            originalRequest._retry = true;
+
+            // 리프레시 토큰으로 액세스 토큰 갱신
+            const newAccessToken = await refreshJwt();
+
+            if (newAccessToken) {
+              // 새로운 액세스 토큰을 Authorization 헤더에 추가
+              originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+              // 실패했던 요청 재시도
+              return axiosInstance(originalRequest);
+            } else {
+              // 리프레시 실패 시 로그아웃 처리
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
+              navigate('/login');
+            }
+          }
         }
         // 권한 없음
         if (error.response?.status === 403) {

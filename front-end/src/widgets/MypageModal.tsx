@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
-import { useDropzone } from 'react-dropzone';
+import { useUser } from "../context/userContext";
 import Plus from "/src/assets/plus.svg";
 import cross from "/src/assets/cross.svg"
 // 모달 속성 타입
@@ -12,9 +12,9 @@ interface MypageProps {
 }
 // 프로필 객체 타입
 interface Profile {
-    username: string;
+    username: string|undefined;
     profilePath: string;
-    email: string;
+    email: string|undefined;
     joinDate: string;
     groupCount: number;
     projectCount: number;
@@ -32,24 +32,38 @@ const MypageModal: React.FC<MypageProps> = ({
 
   // 이곳에 user 정보를 불러올 수 있어야 함함
 
-    // 임시 user정보
-    const [userProfile, setUserProfile] = useState<Profile>({
-      username: '김싸피',
-      profilePath: 'https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg',
-      email: 'ssafykim@ssafy.com',
-      joinDate: '2025-01-24',
-      groupCount: 5,
-      projectCount: 40,
-    })
-
+  // 임시 user정보
+  const [profile, setProfile] = useState<Profile>({
+    username: '김싸피',
+    profilePath: '/src/assets/logo.png',
+    email: 'ssafykim@ssafy.com',
+    joinDate: '2025-01-24',
+    groupCount: 5,
+    projectCount: 40,
+  })
+  const { userProfile } = useUser();
   // 이름 변경 상태관리
   const [isEditing, setIsEditing] = useState(false); // 편집 모드 여부
   const [inputValue, setInputValue] = useState(''); // 입력 값
 
   
   useEffect(() => {
-    setInputValue(userProfile.username);
-  }, [userProfile.username]);
+    let image:string = "/src/assets/logo.png"
+    if(userProfile != null && userProfile.image != null){
+      image = userProfile.image;
+    }
+    setProfile({
+      username: userProfile?.name,
+      email: userProfile?.email,
+      profilePath: image,
+      joinDate: '2025-01-24',
+      groupCount: 5,
+      projectCount: 40,
+    });
+    if(profile.username != undefined){
+      setInputValue(profile.username);
+    }
+  }, [profile.username]);
   
   // 이름 편집 모드 활성화
   const handleEditClick = () => {
@@ -58,7 +72,7 @@ const MypageModal: React.FC<MypageProps> = ({
 
   // 저장 버튼 클릭 시
   const handleSaveClick = () => {
-    setUserProfile((prevProfile) => ({
+    setProfile((prevProfile) => ({
       ...prevProfile,
       username: inputValue,
     }));
@@ -94,7 +108,7 @@ const MypageModal: React.FC<MypageProps> = ({
         <div className="flex items-start">
           <div className="relative w-[60px] mb-4">
             <img
-              src={userProfile.profilePath}
+              src={profile.profilePath}
               alt="프로필 사진"
               className="w-full h-full rounded-full border border-gray-300 object-cover"
             />
@@ -131,12 +145,12 @@ const MypageModal: React.FC<MypageProps> = ({
             ) : (
               <div className="w-full">
                 <p className="text-lg font-bold">
-                  <span id="user-name">{userProfile.username}</span>
+                  <span id="user-name">{profile.username}</span>
                   <button className="ml-2" onClick={handleEditClick}>
                     ✏️
                   </button>
                 </p>
-                <p className="text-gray-500 text-sm">{userProfile.email}</p>
+                <p className="text-gray-500 text-sm">{profile.email}</p>
               </div>
             )}
           </div>
@@ -145,19 +159,19 @@ const MypageModal: React.FC<MypageProps> = ({
           <div className="text-sm space-y-2 mb-6">
             <p>
               <span className="font-bold inline-block w-[80px]">가입일</span>
-              : {userProfile.joinDate}
+              : {profile.joinDate}
             </p>
           <div className="text-sm space-y-2 mb-6">
             <p>
               <span className="font-bold inline-block w-[80px]">그룹</span>
-              : {userProfile.groupCount}
+              : {profile.groupCount}
               개
             </p>
           </div>
           <div className="text-sm space-y-2 mb-6">
             <p>
               <span className="font-bold inline-block w-[80px]">프로젝트</span>
-              : {userProfile.projectCount}
+              : {profile.projectCount}
               개
             </p>
           </div>
