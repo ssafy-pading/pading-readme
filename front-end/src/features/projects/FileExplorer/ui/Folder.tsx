@@ -112,21 +112,16 @@ const Folder: React.FC<FolderProps> = ({
 
   const renderContextMenu = () => (
     <div
-      className="context-menu bg-slate-600 text-white"
+      className="context-menu bg-[#0F172A] border border-[#273654] p-2 text-white fixed shadow-md rounded-lg z-[1000] min-w-[160px]"
       style={{
-        position: 'fixed',
         left: globalContextMenu.x,
         top: globalContextMenu.y,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-        borderRadius: '6px',
-        zIndex: 1000,
-        minWidth: '160px',
       }}
       onClick={(e) => e.stopPropagation()}
     >
       {explorerData.type === "FOLDER" ? (
-        <>
-          <div className="menu-item" 
+        <div className="flex-col gap-1">
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" 
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteNode(explorerData.id);
@@ -134,34 +129,34 @@ const Folder: React.FC<FolderProps> = ({
             }}>
             <VscTrash className="menu-icon" /> Delete
           </div>
-          <div className="menu-item" onClick={() => {
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" onClick={() => {
             handleRenameStart();
             closeGlobalContextMenu();
           }}>
             <VscEdit className="menu-icon" /> Rename
           </div>
-          <div className="menu-item" onClick={() => {
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" onClick={() => {
             handleNewItem("FOLDER");
             closeGlobalContextMenu();
           }}>
             <VscNewFolder className="menu-icon" /> New Folder
           </div>
-          <div className="menu-item" onClick={() => {
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" onClick={() => {
             handleNewItem("FILE");
             closeGlobalContextMenu();
           }}>
             <VscNewFile className="menu-icon" /> New File
           </div>
-        </>
+        </div>
       ) : (
         <>
-          <div className="menu-item" onClick={() => {
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" onClick={() => {
             handleDeleteNode(explorerData.id);
             closeGlobalContextMenu();
           }}>
             <VscTrash className="menu-icon" /> Delete
           </div>
-          <div className="menu-item" onClick={() => {
+          <div className="menu-item  flex flex-row items-center gap-2 px-2 py-1 hover:bg-[#3B82F6] rounded-md" onClick={() => {
             handleRenameStart();
             closeGlobalContextMenu();
           }}>
@@ -174,25 +169,22 @@ const Folder: React.FC<FolderProps> = ({
   
 
   return (
-    <div onContextMenu={handleContextMenu} style={{ position: 'relative' }}>
+    <div onContextMenu={handleContextMenu} className="relative w-full">
       <div
-        className="node-container"
-        style={{
-          cursor: 'pointer',
-          backgroundColor: selectedId === explorerData.id ? 'rgba(59,130,246,0.1)' : 'transparent',
-          border: selectedId === explorerData.id ? '2px solid #3B82F6' : 'none',
-          padding: '4px 8px',
-          borderRadius: '4px',
-        }}
+        className={`node-container cursor-pointer p-1 pl-2 w-full
+          ${selectedId === explorerData.id 
+            ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6] box-border" 
+            : "bg-transparent border-none"
+          }`}
         onClick={handleNodeClick}
       >
-        <div className="node-content">
+        <div className="node-content w-full flex items-center flex-nowrap">
           {explorerData.type === "FOLDER" && (
             <span className="chevron-icon">
               {expand ? <VscChevronDown /> : <VscChevronRight />}
             </span>
           )}
-          <span className="file-icon">
+          <span className="file-icon ml-1">
             {explorerData.type === "FOLDER" ? <VscFolder /> : <VscFile />}
           </span>
           
@@ -204,10 +196,12 @@ const Folder: React.FC<FolderProps> = ({
               autoFocus
               onBlur={() => setUpdateInput({ visible: false, type: null })}
               onKeyDown={handleRename}
-              className="rename-input"
+              className="rename-input bg-[#273654] border border-[#3B82F6] rounded-none"
             />
           ) : (
-            <span className="node-name">{explorerData.name}</span>
+            <span className="node-name ml-1 truncate flex-1 min-w-0 overflow-hidden text-ellipsis">
+              {explorerData.name}
+            </span>
           )}
         </div>
       </div>
@@ -215,9 +209,9 @@ const Folder: React.FC<FolderProps> = ({
       {globalContextMenu.visible && globalContextMenu.nodeId === explorerData.id && renderContextMenu()}
   
       {explorerData.type === "FOLDER" && expand && (
-        <div style={{ marginLeft: '24px' }}>
+        <div className="ml-6">
           {showInput.visible && (
-            <div className="new-item-input">
+            <div className="new-item-input flex flex-row items-center gap-2">
               <span className="file-icon">
                 {showInput.type === "FOLDER" ? <VscFolder /> : <VscFile />}
               </span>
@@ -227,6 +221,7 @@ const Folder: React.FC<FolderProps> = ({
                 onBlur={() => setShowInput({ visible: false, type: null })}
                 onKeyDown={handleAdd}
                 placeholder={`Enter ${showInput.type === "FOLDER" ? 'folder' : 'file'} name`}
+                className="bg-[#273654] border-[#3B82F6] rounded-none p-x-2"
               />
             </div>
           )}
