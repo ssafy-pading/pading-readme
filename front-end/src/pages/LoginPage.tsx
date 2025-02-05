@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
   // 페이지 처음 로드 시, 리프레시 토큰이 있는지 확인
   const refreshCheck = ():void => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
-    if(localStorage.getItem("refreshToken")){
+    if(sessionStorage.getItem("refreshToken")){
       // 임시 로직
       console.log("리프레시 토큰 있습니다");
     }
@@ -37,7 +37,6 @@ const LoginPage: React.FC = () => {
       // localStorage.setItem("image", profile.image);
 
       setUserProfile(profile);
-      console.log(userProfile);
       // alert('로그인 처리 완료');
       console.log('로그인 처리 완료');
       navigate("/projectlist");
@@ -92,8 +91,8 @@ const LoginPage: React.FC = () => {
     // 파라미터가 있을 경우, 컨텍스트와 로컬에 담아주기
     const tokenCheck = () => {
       if(accessToken&&refreshToken){
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
+        sessionStorage.setItem("accessToken", accessToken);
+        sessionStorage.setItem("refreshToken", refreshToken);
         setProfile();
       }
     } 
