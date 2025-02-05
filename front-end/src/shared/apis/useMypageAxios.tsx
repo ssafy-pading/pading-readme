@@ -35,7 +35,7 @@ const useMypageAxios = () => {
   const getProfile = async (): Promise<GetMyPageResponse> => {
     try {
       const response = await mypageAxios.get('/v1/mypage');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching profile:', error);
       throw error;
@@ -50,7 +50,7 @@ const useMypageAxios = () => {
   const updateNickname = async (nickname: string): Promise<UpdateNameResponse> => {
     try {
       const response = await mypageAxios.patch('/v1/mypage', { nickname });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error updating nickname:', error);
       throw error;

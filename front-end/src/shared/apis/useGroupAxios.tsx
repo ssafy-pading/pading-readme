@@ -36,7 +36,7 @@ const useGroupAxios = () => {
   const getGroups = async (): Promise<GetGroupListResponse> => {
     try {
       const response = await groupAxios.get('/v1/groups');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching group list:', error);
       throw error;
@@ -49,7 +49,7 @@ const useGroupAxios = () => {
   const getGroupDetails = async (groupId: string): Promise<GetGroupDetailsResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/${groupId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error fetching details for group ${groupId}:`, error);
       throw error;
@@ -62,7 +62,7 @@ const useGroupAxios = () => {
   const checkGroupNameDuplicate = async (name: string): Promise<CheckGroupNameDuplicateResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/check-duplicate`, { params: { name } });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error checking group name duplicate for name "${name}":`, error);
       throw error;
@@ -114,7 +114,7 @@ const useGroupAxios = () => {
   const getGroupMembers = async (groupId: string): Promise<GetGroupMembersResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/${groupId}/users`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error fetching members for group ${groupId}:`, error);
       throw error;
@@ -127,7 +127,7 @@ const useGroupAxios = () => {
   const createInvitationLink = async (groupId: string): Promise<GroupInviteLinkResponse> => {
     try {
       const response = await groupAxios.post(`/v1/groups/${groupId}/invitation`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error creating invitation link for group ${groupId}:`, error);
       throw error;
@@ -140,7 +140,7 @@ const useGroupAxios = () => {
   const joinGroup = async (groupId: string): Promise<JoinGroupResponse> => {
     try {
       const response = await groupAxios.post(`/v1/groups/${groupId}/join`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error joining group ${groupId}:`, error);
       throw error;
@@ -170,7 +170,7 @@ const useGroupAxios = () => {
   ): Promise<UpdateMemberRoleResponse> => {
     try {
       const response = await groupAxios.patch(`/v1/groups/${groupId}/users/${userId}`, { role });
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error updating role for user ${userId} in group ${groupId}:`, error);
       throw error;

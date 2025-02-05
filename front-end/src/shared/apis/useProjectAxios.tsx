@@ -35,7 +35,7 @@ const useProjectAxios = () => {
   const getLanguages = async (): Promise<GetLanguageListResponse> => {
     try {
       const response = await projectAxios.get('/v1/projects/language');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching language list:', error);
       throw error;
@@ -48,7 +48,7 @@ const useProjectAxios = () => {
   const getOSList = async (): Promise<GetOSListResponse> => {
     try {
       const response = await projectAxios.get('/v1/projects/os');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching OS list:', error);
       throw error;
@@ -61,7 +61,7 @@ const useProjectAxios = () => {
   const getPerformanceList = async (): Promise<GetSpecificationListResponse> => {
     try {
       const response = await projectAxios.get('/v1/projects/performance');
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error('Error fetching performance list:', error);
       throw error;
@@ -74,7 +74,7 @@ const useProjectAxios = () => {
   const getProjects = async (groupId: string): Promise<GetProjectListResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error fetching projects for group ${groupId}:`, error);
       throw error;
@@ -90,7 +90,7 @@ const useProjectAxios = () => {
   ): Promise<CreateProjectResponse> => {
     try {
       const response = await projectAxios.post(`/v1/groups/${groupId}/projects`, projectData);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error creating project for group ${groupId}:`, error);
       throw error;
@@ -106,7 +106,7 @@ const useProjectAxios = () => {
   ): Promise<GetProjectDetailsResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects/${projectId}`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error fetching details for project ${projectId} in group ${groupId}:`, error);
       throw error;
@@ -122,7 +122,7 @@ const useProjectAxios = () => {
   ): Promise<AccessProjectResponse> => {
     try {
       const response = await projectAxios.post(`/v1/groups/${groupId}/projects/${projectId}/join`);
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.error(`Error joining project ${projectId} in group ${groupId}:`, error);
       throw error;
