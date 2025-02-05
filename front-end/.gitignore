@@ -12,6 +12,17 @@ node_modules
 dist
 dist-ssr
 *.local
+build
+out/
+temp/
+tmp/
+
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.test
+.env.production
 
 # Editor directories and files
 .vscode/*
