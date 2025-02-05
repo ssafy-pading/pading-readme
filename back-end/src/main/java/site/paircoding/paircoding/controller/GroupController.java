@@ -18,6 +18,7 @@ import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.CreateGroupRequest;
 import site.paircoding.paircoding.entity.dto.GroupDto;
 import site.paircoding.paircoding.entity.dto.DuplicateResponse;
+import site.paircoding.paircoding.entity.dto.GroupInvitationDto;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
 import site.paircoding.paircoding.entity.dto.GroupsResponse;
@@ -83,10 +84,16 @@ public class GroupController {
         return ApiResponse.success(groupUsersResponse);
     }
 
+    @PostMapping("{groupId}/invitation")
+    public ApiResponse<Object> generateInvitation(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+        GroupInvitationDto groupInvitationDto = groupService.generateInvitation(customUserDetails.getUser(), groupId);
+        return ApiResponse.success(groupInvitationDto);
+    }
+
     @PostMapping("{groupId}/join")
-    public ApiResponse<Object> joinGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+    public ApiResponse<Object> joinGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId, @RequestBody GroupInvitationDto groupInvitationDto) {
         User user = customUserDetails.getUser();
-        Group group = groupService.joinGroup(user, groupId);
+        Group group = groupService.joinGroup(user, groupId, groupInvitationDto.getCode());
         return ApiResponse.success(GroupDto.builder().id(group.getId()).name(group.getName()).capacity(group.getCapacity()).build());
     }
 
@@ -110,4 +117,5 @@ public class GroupController {
         groupService.deleteGroupUser(user, groupId, userId);
         return ApiResponse.success();
     }
+
 }

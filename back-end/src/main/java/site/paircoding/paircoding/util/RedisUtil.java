@@ -1,5 +1,6 @@
 package site.paircoding.paircoding.util;
 
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -51,4 +52,5 @@ public class RedisUtil {
   public void setex(String key, Object value, long timeout) {
     redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
   }
+
 }

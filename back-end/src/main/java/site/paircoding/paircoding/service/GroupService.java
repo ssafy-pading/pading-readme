@@ -6,11 +6,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient.Builder;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupDto;
+import site.paircoding.paircoding.entity.dto.GroupInvitationDto;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.GroupUserRoleDto;
 import site.paircoding.paircoding.entity.enums.Role;
@@ -20,6 +20,8 @@ import site.paircoding.paircoding.global.exception.UnauthorizedException;
 import site.paircoding.paircoding.repository.GroupRepository;
 import site.paircoding.paircoding.repository.GroupUserRepository;
 import site.paircoding.paircoding.repository.UserRepository;
+import site.paircoding.paircoding.util.RandomUtil;
+import site.paircoding.paircoding.util.RedisUtil;
 
 @Slf4j
 @Service
@@ -28,7 +30,8 @@ public class GroupService {
   private final GroupRepository groupRepository;
   private final GroupUserRepository groupUserRepository;
   private final UserRepository userRepository;
-  private final Builder builder;
+  private final RedisUtil redisUtil;
+  private static final String INVITATION_PREFIX = "groupId=%d";
 
 
   public List<Group> getGroups(User user) {
@@ -111,8 +114,28 @@ public class GroupService {
     groupUserRepository.delete(groupUser);
   }
 
-  public Group joinGroup(User user, Integer groupId) {
+  public GroupInvitationDto generateInvitation(User user, Integer groupId) {
+    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to generate invitation code."));
+    if (groupUser.getRole().equals(Role.MEMBER)) {
+      throw new UnauthorizedException("Access denied. You do not have permission to generate invitation code.");
+    }
+    String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
+    if (link == null) {
+      String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
+      redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, 1800000);
+      return new GroupInvitationDto(randomCode);
+    }
+    return new GroupInvitationDto(link);
+  }
+
+  public Group joinGroup(User user, Integer groupId, String code) {
     Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    String redisCode = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
+    if(redisCode == null || !redisCode.equals(code)) {
+      throw new BadRequestException("유효하지 않은 초대 코드입니다.");
+    }
     if (groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).isPresent()) {
       throw new BadRequestException("이미 가입한 그룹입니다.");
     }
@@ -169,6 +192,5 @@ public class GroupService {
     }
     groupUserRepository.delete(targetUser);
   }
-
 
 }
