@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
+import useMypageAxios from "../shared/apis/useMypageAxios";
 
 interface LeaveModalProps {
   isOpen: boolean;
@@ -14,12 +15,18 @@ const LeaveModal: React.FC<LeaveModalProps> = ({
   onSwitchToMypage,
 }) => {
   const navigate = useNavigate();
-  const onConfirmLeave = ():void => {
-    alert('탈퇴되었습니다.')
-    // 여기에 탈퇴 로직
+  const { deleteAccount } = useMypageAxios();
+  const onConfirmLeave = async () => {
+    try{
+      alert('탈퇴되었습니다.')
+      // 여기에 탈퇴 로직
+      deleteAccount();
+      // 로그인 페이지로
+      navigate('/');
 
-    // 로그인 페이지로
-    navigate('/');
+    }catch(error){
+      console.log(error);
+    }
   }
 
 
