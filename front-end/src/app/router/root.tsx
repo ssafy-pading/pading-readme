@@ -1,7 +1,9 @@
 // 로딩 기능
 import { Suspense, lazy } from "react";
 
-import { createBrowserRouter, RouteObject } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
+
+import { UserProvider } from "../../context/userContext"; // 경로에 맞게 수정
 
 const Loading = <div>로딩중입니다...</div>
 
@@ -16,49 +18,65 @@ const ProjectPage = lazy(() => import("../../pages/ProjectPage"))
 // 로그인 페이지
 const LoginPage = lazy(() => import("../../pages/LoginPage"))
 
-const routes: RouteObject[] = [
+// UserProvider로 전체 앱을 감싸는 Layout 컴포넌트
+const AppLayout = () => (
+    <UserProvider>
+      <Outlet />
+    </UserProvider>
+  );
+  
+  const routes: RouteObject[] = [
     {
-        path: '/',
-        element: (
+      path: "/",
+      element: (
+        // 최상위에 UserProvider를 적용
+        // AppLayout의 Outlet은 자식요소가 있다면, 그 자식요소를 렌더링 하는 부분
+        <AppLayout />
+      ),
+      children: [
+        {
+          index: true,
+          element: (
             <Suspense fallback={Loading}>
-                <LoginPage/>
+              <LoginPage />
             </Suspense>
-        )
+          ),
+        },
+        {
+          path: "projectlist",
+          element: (
+            <Suspense fallback={Loading}>
+              <ProjectListPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "project",
+          element: (
+            <Suspense fallback={Loading}>
+              <ProjectPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "nogroup",
+          element: (
+            <Suspense fallback={Loading}>
+              <NoGroupPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "*",
+          element: (
+            <Suspense fallback={Loading}>
+              <NotFoundPage />
+            </Suspense>
+          ),
+        },
+      ],
     },
-    {
-        path: 'projectlist',
-        element: (
-            <Suspense fallback={Loading}>
-                <ProjectListPage/>
-            </Suspense>
-        )
-    },
-    // 언어, OS, 성능을 넣어줘야함함
-    {
-        path: 'project',
-        element: (
-            <Suspense fallback={Loading}>
-                <ProjectPage/>
-            </Suspense>
-        )
-    },
-    {
-        path: 'nogroup',
-        element: (
-            <Suspense fallback={Loading}>
-                <NoGroupPage/>
-            </Suspense>
-        )
-    },
-    {
-        path: '*', // 404 페이지
-        element: (
-            <Suspense fallback={Loading}>
-                <NotFoundPage/>
-            </Suspense>
-        )
-    }
-];
+  ];
 
 
 const root = createBrowserRouter(routes)
