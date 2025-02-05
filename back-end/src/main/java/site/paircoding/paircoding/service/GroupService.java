@@ -33,6 +33,7 @@ public class GroupService {
   private final UserRepository userRepository;
   private final RedisUtil redisUtil;
   private static final String INVITATION_PREFIX = "groupId=%d";
+
   @Value("${link.expire-time}")
   private long LINK_EXPIRE_TIME;
 
@@ -101,7 +102,7 @@ public class GroupService {
     List<GroupUserResponse> list = new ArrayList<>();
     for(GroupUserRoleDto groupUserRole : groupUserRoles) {
       User searchedUser = userRepository.findById(groupUserRole.getUserId()).orElseThrow(() -> new NotFoundException("User not found."));;
-      list.add(GroupUserResponse.builder().name(searchedUser.getName()).image(searchedUser.getImage()).email(searchedUser.getEmail()).role(groupUserRole.getRole()).build());
+      list.add(GroupUserResponse.builder().id(searchedUser.getId()).name(searchedUser.getName()).image(searchedUser.getImage()).email(searchedUser.getEmail()).role(groupUserRole.getRole()).build());
     }
     return list;
   }
