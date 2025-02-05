@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
@@ -32,7 +33,8 @@ public class GroupService {
   private final UserRepository userRepository;
   private final RedisUtil redisUtil;
   private static final String INVITATION_PREFIX = "groupId=%d";
-
+  @Value("${link.expire-time}")
+  private long LINK_EXPIRE_TIME;
 
   public List<Group> getGroups(User user) {
     List<Integer> groupIds = groupUserRepository.findGroupIdByUserId(user.getId());
@@ -65,16 +67,15 @@ public class GroupService {
   }
 
   public boolean checkDuplicate(String name) {
-    if(groupRepository.findByName(name).isPresent()) {
-      return true;
-    }
-    return false;
+    return groupRepository.findByName(name).isPresent();
   }
 
   public Group updateGroup(User user, Integer groupId, String name) {
     Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to update this group."))
-        .getRole().equals(Role.OWNER);
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to update this group."));
+    if (!groupUser.getRole().equals(Role.OWNER)) {
+      throw new UnauthorizedException("Access denied. You do not have permission to update this group.");
+    }
     if (checkDuplicate(name)) {
       throw new BadRequestException("중복된 그룹명입니다.");
     }
@@ -123,7 +124,7 @@ public class GroupService {
     String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
     if (link == null) {
       String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
-      redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, 1800000);
+      redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, LINK_EXPIRE_TIME);
       return new GroupInvitationDto(randomCode);
     }
     return new GroupInvitationDto(link);
@@ -151,7 +152,7 @@ public class GroupService {
     if(user.getId().equals(userId)) {
       throw new BadRequestException("자신의 권한은 변경할 수 없습니다.");
     }
-    Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
     GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to update this group."));
     GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId).orElseThrow(() -> new NotFoundException("User not found."));
 
@@ -179,7 +180,7 @@ public class GroupService {
     if(user.getId().equals(userId)) {
       throw new BadRequestException("자신을 추방할 수 없습니다.");
     }
-    Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
     GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to delete this user."));
     GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId).orElseThrow(() -> new NotFoundException("User not found."));
 
