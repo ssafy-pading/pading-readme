@@ -43,10 +43,10 @@ const InvitePage = () => {
 
     const handleJoinGroup = async () => {
         try {
-        // 그룹 참여 API 호출
-        navigate(`/group/${inviteCode}`); // 성공 시 그룹 페이지로 이동
+            // 그룹 참여 API 호출
+            navigate(`/group/${inviteCode}`); // 성공 시 그룹 페이지로 이동
         } catch (error) {
-        console.error("Failed to join the group");
+            console.error("Failed to join the group");
         }
     };
 
