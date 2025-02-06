@@ -60,13 +60,8 @@ public class GroupService {
   }
 
   public Group getGroup(User user, Integer groupId) {
-    List<Integer> groupIds = groupUserRepository.findGroupIdByUserId(user.getId());
     groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
 
-    if (!groupIds.contains(groupId)) {
-      throw new UnauthorizedException(
-          "Access denied. You do not have permission to view this group.");
-    }
     return groupRepository.findById(groupId)
         .orElseThrow(() -> new NotFoundException("Group not found."));
   }
@@ -118,10 +113,14 @@ public class GroupService {
     for (GroupUserRoleDto groupUserRole : groupUserRoles) {
       User searchedUser = userRepository.findById(groupUserRole.getUserId())
           .orElseThrow(() -> new NotFoundException("User not found."));
-      ;
-      list.add(GroupUserResponse.builder().id(searchedUser.getId()).name(searchedUser.getName())
-          .image(searchedUser.getImage()).email(searchedUser.getEmail())
-          .role(groupUserRole.getRole()).build());
+
+      list.add(GroupUserResponse.builder()
+          .id(searchedUser.getId())
+          .name(searchedUser.getName())
+          .image(searchedUser.getImage())
+          .email(searchedUser.getEmail())
+          .role(groupUserRole.getRole())
+          .build());
     }
     return list;
   }

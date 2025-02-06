@@ -26,12 +26,13 @@ public class MypageController {
   public ApiResponse<Object> getUserById(
       @AuthenticationPrincipal CustomUserDetails customUserDetails) {
     User user = customUserDetails.getUser();
-    UserDto mypageDto = UserDto.builder()
+    UserDto userDto = UserDto.builder()
+        .id(user.getId())
         .name(user.getName())
         .image(user.getImage())
         .email(user.getEmail())
         .build();
-    return ApiResponse.success(mypageDto);
+    return ApiResponse.success(userDto);
   }
 
   @DeleteMapping("/logout")
