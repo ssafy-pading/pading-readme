@@ -117,7 +117,9 @@ public class JwtUtil {
       jwtExceptionHandler(response, ErrorCode.EXPIRED_TOKEN);
       return false;
     } catch (Exception e) {
-      jwtExceptionHandler(response, ErrorCode.INVALID_TOKEN);
+      if (response != null) {
+        jwtExceptionHandler(response, ErrorCode.INVALID_TOKEN);
+      }
       return false;
     }
   }
