@@ -1,4 +1,3 @@
-
 package site.paircoding.paircoding.global;
 
 import lombok.AccessLevel;

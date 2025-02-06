@@ -10,6 +10,7 @@ import site.paircoding.paircoding.entity.enums.Role;
 @Setter
 @AllArgsConstructor
 public class GroupUserRoleDto {
+
   private Integer userId;
   private Role role;
 }

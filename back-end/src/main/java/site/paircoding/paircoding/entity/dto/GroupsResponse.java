@@ -9,6 +9,7 @@ import site.paircoding.paircoding.entity.Group;
 @Getter
 @Setter
 public class GroupsResponse {
+
   private List<Group> groups;
 
   public GroupsResponse(List<Group> groups) {

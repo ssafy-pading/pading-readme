@@ -1,7 +1,6 @@
 package site.paircoding.paircoding.entity;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupUserId implements Serializable {
+
   private Integer userId;
   private Integer groupId;
 }

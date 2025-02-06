@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GroupInvitationDto {
+
   String code;
 
   public GroupInvitationDto(String code) {

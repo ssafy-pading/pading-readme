@@ -7,5 +7,6 @@ import site.paircoding.paircoding.entity.enums.Role;
 @Getter
 @Setter
 public class UpdateGroupRoleRequest {
-    private Role role;
+
+  private Role role;
 }

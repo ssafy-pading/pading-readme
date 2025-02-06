@@ -18,11 +18,13 @@ import site.paircoding.paircoding.util.JwtUtil;
 @RequiredArgsConstructor
 @RequestMapping("/v1/mypage")
 public class MypageController {
+
   private final UserService userService;
   private final JwtUtil jwtUtil;
 
   @GetMapping
-  public ApiResponse<Object> getUserById(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+  public ApiResponse<Object> getUserById(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
     User user = customUserDetails.getUser();
     UserDto mypageDto = UserDto.builder()
         .name(user.getName())
@@ -31,6 +33,7 @@ public class MypageController {
         .build();
     return ApiResponse.success(mypageDto);
   }
+
   @DeleteMapping("/logout")
   public ApiResponse<Object> logout() {
     //리프레시 토큰 삭제
@@ -39,7 +42,8 @@ public class MypageController {
   }
 
   @DeleteMapping
-  public ApiResponse<Object> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+  public ApiResponse<Object> deleteUser(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
     userService.deleteUser(customUserDetails.getUser().getId());
     return ApiResponse.success();
   }

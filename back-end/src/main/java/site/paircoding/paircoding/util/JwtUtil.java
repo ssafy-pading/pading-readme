@@ -1,6 +1,7 @@
 package site.paircoding.paircoding.util;
 
 // JWT 생성 및 검증
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -9,21 +10,18 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import java.security.Key;
-import java.util.Date;
 import site.paircoding.paircoding.config.oauth.CustomOAuth2UserService;
 import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.global.error.ErrorCode;
-import site.paircoding.paircoding.global.exception.UnauthorizedException;
 
 @Component
 @RequiredArgsConstructor
@@ -69,8 +67,8 @@ public class JwtUtil {
    * 주어진 인증 정보와 토큰 유형, 만료 시간을 사용하여 JWT 토큰을 생성합니다.
    *
    * @param authentication 인증 정보
-   * @param tokenType 토큰 유형 (액세스 또는 리프레시)
-   * @param expireTime 만료 시간
+   * @param tokenType      토큰 유형 (액세스 또는 리프레시)
+   * @param expireTime     만료 시간
    * @return 생성된 JWT 토큰
    */
   private String createToken(Authentication authentication, TokenType tokenType, long expireTime) {
@@ -103,7 +101,9 @@ public class JwtUtil {
    * @return 토큰이 유효하면 true, 그렇지 않으면 false
    */
   public boolean validateToken(String token, HttpServletResponse response) {
-    if (token == null) return false;
+    if (token == null) {
+      return false;
+    }
 
     try {
       return Jwts.parserBuilder()
@@ -162,7 +162,7 @@ public class JwtUtil {
   /**
    * 주어진 사용자 ID와 리프레시 토큰을 Redis에 저장합니다.
    *
-   * @param userId 사용자 ID
+   * @param userId       사용자 ID
    * @param refreshToken 리프레시 토큰
    */
   public void saveRefreshToken(String userId, String refreshToken) {

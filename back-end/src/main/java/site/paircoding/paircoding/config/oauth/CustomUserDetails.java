@@ -1,14 +1,13 @@
 package site.paircoding.paircoding.config.oauth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 import site.paircoding.paircoding.entity.User;
 
 @Getter
