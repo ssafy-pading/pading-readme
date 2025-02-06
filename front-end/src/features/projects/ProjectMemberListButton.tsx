@@ -20,7 +20,7 @@ function ProjectMemberList() {
         <div className="p-4">
             {/* 버튼 */}
             <button
-                className="text-white bg-green-600 rounded-md px-4 py-2"
+                className="text-white bg-[#059669] rounded-md px-4 py-2"
                 onClick={openModal}
             >
                 Member List
