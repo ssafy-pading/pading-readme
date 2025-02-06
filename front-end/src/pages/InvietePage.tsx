@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useGroupAxios from "../shared/apis/useGroupAxios";
-import { GetGroupDetailsResponse } from "../shared/types/groupApiResponse";
+import { GetGroupDetailsResponse, JoinGroupResponse } from "../shared/types/groupApiResponse";
 
 const InvitePage = () => {
     const navigate = useNavigate();
     // const { inviteCode } = useParams<{ inviteCode: string }>();
-    const { getGroupDetails } = useGroupAxios();
+    const { getGroupDetails, joinGroup } = useGroupAxios();
     const { groupId, inviteCode } = useParams<{ groupId:string, inviteCode:string }>();
 
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -44,9 +44,13 @@ const InvitePage = () => {
     const handleJoinGroup = async () => {
         try {
             // 그룹 참여 API 호출
-            navigate(`/group/${inviteCode}`); // 성공 시 그룹 페이지로 이동
+            if(groupId != undefined && inviteCode != undefined){
+                const groupDetails:JoinGroupResponse = await joinGroup(groupId, inviteCode);
+
+                navigate(`/proectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
+            }
         } catch (error) {
-            console.error("Failed to join the group");
+            console.error(error);
         }
     };
 
