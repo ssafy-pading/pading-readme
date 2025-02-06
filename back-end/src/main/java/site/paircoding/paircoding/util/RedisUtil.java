@@ -51,4 +51,7 @@ public class RedisUtil {
     redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
   }
 
+  public long getExpire(String key) {
+    return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+  }
 }
