@@ -137,6 +137,24 @@ public class GroupService {
     groupUserRepository.delete(groupUser);
   }
 
+  public GroupInvitationDto getInvitation(User user, Integer groupId) {
+    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to view invitation code."));
+    if (groupUser.getRole().equals(Role.MEMBER)) {
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to view invitation code.");
+    }
+    String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
+    if (link == null) {
+      throw new NotFoundException("Invitation code not found.");
+    }
+    long expirationTime = redisUtil.getExpire(INVITATION_PREFIX.formatted(groupId));
+
+    return new GroupInvitationDto(link, expirationTime);
+  }
+
   public GroupInvitationDto generateInvitation(User user, Integer groupId) {
     groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
     GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
@@ -147,12 +165,12 @@ public class GroupService {
           "Access denied. You do not have permission to generate invitation code.");
     }
     String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
-    if (link == null) {
-      String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
-      redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, LINK_EXPIRE_TIME);
-      return new GroupInvitationDto(randomCode);
+    if (link != null) {
+      throw new BadRequestException("이미 초대 코드가 생성되었습니다.");
     }
-    return new GroupInvitationDto(link);
+    String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
+    redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, LINK_EXPIRE_TIME);
+    return new GroupInvitationDto(randomCode, LINK_EXPIRE_TIME);
   }
 
   public Group joinGroup(User user, Integer groupId, String code) {

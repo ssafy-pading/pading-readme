@@ -94,6 +94,14 @@ public class GroupController {
     return ApiResponse.success(groupUsersResponse);
   }
 
+  @GetMapping("{groupId}/invitation")
+  public ApiResponse<Object> gentInvitation(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
+    GroupInvitationDto groupInvitationDto = groupService.getInvitation(
+        customUserDetails.getUser(), groupId);
+    return ApiResponse.success(groupInvitationDto);
+  }
+
   @PostMapping("{groupId}/invitation")
   public ApiResponse<Object> generateInvitation(
       @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
