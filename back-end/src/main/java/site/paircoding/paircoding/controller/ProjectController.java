@@ -1,0 +1,69 @@
+package site.paircoding.paircoding.controller;
+
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import site.paircoding.paircoding.config.oauth.CustomUserDetails;
+import site.paircoding.paircoding.entity.Performance;
+import site.paircoding.paircoding.entity.User;
+import site.paircoding.paircoding.entity.dto.GroupUserResponse;
+import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
+import site.paircoding.paircoding.global.ApiResponse;
+import site.paircoding.paircoding.service.GroupService;
+import site.paircoding.paircoding.service.ProjectService;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/v1/groups/{groupId}/projects")
+public class ProjectController {
+
+  @RestController
+  @RequestMapping("/v1/projects")
+  public class OptionController {
+
+    // 사용 가능한 언어 리스트 조회
+    @GetMapping("/language")
+    public ApiResponse<List<String>> getLanguage() {
+      return ApiResponse.success(projectService.getLanguage());
+    }
+
+    // 사용 가능한 OS 리스트 조회
+    @GetMapping("/os")
+    public ApiResponse<List<String>> getOS(@RequestParam String language) {
+      return ApiResponse.success(projectService.getOS(language));
+    }
+
+    // 사용 가능한 사양 리스트 조회
+    @GetMapping("/performance")
+    public ApiResponse<List<Performance>> getPerformance() {
+      return ApiResponse.success(projectService.getPerformance());
+    }
+  }
+
+  private final ProjectService projectService;
+  private final GroupService groupService;
+
+  // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버
+  @GetMapping("/users")
+  public ApiResponse<GroupUsersResponse> getUsers(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @PathVariable Integer groupId) {
+    User user = customUserDetails.getUser();
+    List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
+    GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
+    return ApiResponse.success(groupUsersResponse);
+  }
+
+  // 프로젝트 생성
+
+  // 그룹 내 참여중인 프로젝트 리스트 조회
+
+  // 프로젝트 상세 조회
+
+
+}
