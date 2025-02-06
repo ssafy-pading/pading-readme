@@ -17,6 +17,8 @@ const ProjectListPage = lazy(() => import("../../pages/ProjectListPage"))
 const ProjectPage = lazy(() => import("../../pages/ProjectPage"))
 // 로그인 페이지
 const LoginPage = lazy(() => import("../../pages/LoginPage"))
+// 초대 페이지
+const InvitePage = lazy(() => import("../../pages/InvietePage"))
 
 // UserProvider로 전체 앱을 감싸는 Layout 컴포넌트
 const AppLayout = () => (
@@ -63,6 +65,14 @@ const AppLayout = () => (
           element: (
             <Suspense fallback={Loading}>
               <NoGroupPage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "invite/:groupId/:inviteCode",
+          element: (
+            <Suspense fallback={Loading}>
+              <InvitePage />
             </Suspense>
           ),
         },
