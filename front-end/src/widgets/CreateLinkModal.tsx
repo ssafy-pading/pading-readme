@@ -46,7 +46,7 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         console.log(data);
         const { code, expirationTime } = data;
 
-        setInviteLink(`${window.location.origin}/${groupId}/${code}`);
+        setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
         setTimeLeftSec(expirationTime);
         setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
         console.log(expirationDate);
@@ -75,7 +75,7 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
       const data: GroupInviteLinkResponse = await createInvitationLink(groupId);
       const { code, expirationTime } = data;
 
-      setInviteLink(`${window.location.origin}/${groupId}/${code}`);
+      setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
       setTimeLeftSec(expirationTime);
       setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
     } catch (err) {
