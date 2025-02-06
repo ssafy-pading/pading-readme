@@ -64,6 +64,9 @@ const useMypageAxios = () => {
   const logout = async (): Promise<boolean> => {
     try {
       const response = await mypageAxios.delete('/v1/mypage/logout');
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
+      navigate('/');
       return response.data = true;
     } catch (error) {
       console.error('Error during logout:', error);
