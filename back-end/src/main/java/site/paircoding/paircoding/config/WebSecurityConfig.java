@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -46,7 +45,8 @@ public class WebSecurityConfig {
     http.cors(cors -> cors.configurationSource(corsConfigrationSource())) // CORS 설정
         .csrf(CsrfConfigurer::disable) // CSRF 비활성화
         .httpBasic(HttpBasicConfigurer::disable) // HTTP Basic 인증 비활성화
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 관리 설정
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 관리 설정
 //        .authorizeHttpRequests(request -> request
 //            .requestMatchers("v1/auth/**").permitAll() // 인증없이 허용 주소
 //            .anyRequest()

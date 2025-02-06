@@ -1,6 +1,5 @@
 package site.paircoding.paircoding.service;
 
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +17,7 @@ import site.paircoding.paircoding.util.JwtUtil;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
   private final JwtUtil jwtUtil;
   private final UserRepository userRepository;
 
@@ -33,14 +33,16 @@ public class AuthService {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
-    User user = userRepository.findById(jwtUtil.getId(token)).orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+    User user = userRepository.findById(jwtUtil.getId(token))
+        .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
 
     if (!jwtUtil.getRefreshToken(user.getId().toString()).equals(token)) {
       throw new UnauthorizedException("Invalid refresh token");
     }
 
     OAuth2User oAuth2User = new CustomUserDetails(user);
-    Authentication authentication = new UsernamePasswordAuthenticationToken(oAuth2User, "", oAuth2User.getAuthorities());
+    Authentication authentication = new UsernamePasswordAuthenticationToken(oAuth2User, "",
+        oAuth2User.getAuthorities());
     String newAccessToken = jwtUtil.createAccessToken(authentication);
     String newRefreshToken = jwtUtil.createRefreshToken(authentication);
     jwtUtil.saveRefreshToken(authentication.getName(), newRefreshToken);

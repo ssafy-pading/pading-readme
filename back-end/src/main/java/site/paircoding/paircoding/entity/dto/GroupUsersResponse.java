@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GroupUsersResponse {
+
   private List<GroupUserResponse> users;
 
   public GroupUsersResponse(List<GroupUserResponse> users) {

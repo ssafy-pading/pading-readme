@@ -8,12 +8,13 @@ public class ConflictException extends CustomException {
 
   private final ErrorCode errorCode;
 
-  public ConflictException () {
+  public ConflictException() {
     super(ErrorCode.CONFLICT_EXCEPTION.getMessage());
     this.errorCode = ErrorCode.CONFLICT_EXCEPTION;
   }
-  public ConflictException (String message) {
-    super(ErrorCode.CONFLICT_EXCEPTION.getMessage()+" : "+message);
+
+  public ConflictException(String message) {
+    super(ErrorCode.CONFLICT_EXCEPTION.getMessage() + " : " + message);
     this.errorCode = ErrorCode.CONFLICT_EXCEPTION;
   }
 }

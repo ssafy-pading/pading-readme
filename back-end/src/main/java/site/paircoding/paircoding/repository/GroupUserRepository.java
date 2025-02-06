@@ -2,8 +2,6 @@ package site.paircoding.paircoding.repository;
 
 import java.util.List;
 import java.util.Optional;
-import javax.management.relation.Role;
-import javax.swing.text.html.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +9,7 @@ import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.dto.GroupUserRoleDto;
 
 public interface GroupUserRepository extends JpaRepository<GroupUser, Integer> {
+
   @Query("SELECT gu.id.groupId FROM GroupUser gu WHERE gu.id.userId = :userId")
   List<Integer> findGroupIdByUserId(@Param("userId") Integer userId);
 
