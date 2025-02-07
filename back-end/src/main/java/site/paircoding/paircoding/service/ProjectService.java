@@ -13,6 +13,9 @@ import site.paircoding.paircoding.entity.ProjectUser;
 import site.paircoding.paircoding.entity.ProjectUserId;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
+import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
+import site.paircoding.paircoding.entity.dto.ProjectOSDto;
+import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.repository.GroupRepository;
@@ -38,16 +41,16 @@ public class ProjectService {
   private final GroupUserRepository groupUserRepository;
   private final ProjectUserRepository projectUserRepository;
 
-  public List<String> getLanguage() {
+  public List<ProjectLanguageDto> getLanguage() {
     return projectImageRepository.findDistinctLanguage();
   }
 
-  public List<String> getOS(String language) {
+  public List<ProjectOSDto> getOS(String language) {
     return projectImageRepository.findOsByLanguage(language);
   }
 
-  public List<Performance> getPerformance() {
-    return performanceRepository.findAll();
+  public List<ProjectPerformanceDto> getPerformance() {
+    return performanceRepository.findAllPerformance();
   }
 
   @Transactional

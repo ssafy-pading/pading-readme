@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.paircoding.paircoding.config.oauth.CustomUserDetails;
-import site.paircoding.paircoding.entity.Performance;
 import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
+import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
+import site.paircoding.paircoding.entity.dto.ProjectOSDto;
+import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.service.GroupService;
 import site.paircoding.paircoding.service.ProjectService;
@@ -42,14 +44,15 @@ public class ProjectController {
 
   // 프로젝트 생성
   @PostMapping()
-  public Project createProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+  public ApiResponse<Project> createProject(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @PathVariable Integer groupId,
       @RequestBody ProjectCreateRequest request) {
 
     // 유저 오너/매니저 권한 확인
     User user = customUserDetails.getUser();
 
-    return projectService.createProject(groupId, request);
+    return ApiResponse.success(projectService.createProject(groupId, request));
   }
 
   // 그룹 내 참여중인 프로젝트 리스트 조회
@@ -62,19 +65,19 @@ public class ProjectController {
 
     // 사용 가능한 언어 리스트 조회
     @GetMapping("/language")
-    public ApiResponse<List<String>> getLanguage() {
+    public ApiResponse<List<ProjectLanguageDto>> getLanguage() {
       return ApiResponse.success(projectService.getLanguage());
     }
 
     // 사용 가능한 OS 리스트 조회
     @GetMapping("/os")
-    public ApiResponse<List<String>> getOS(@RequestParam String language) {
+    public ApiResponse<List<ProjectOSDto>> getOS(@RequestParam String language) {
       return ApiResponse.success(projectService.getOS(language));
     }
 
     // 사용 가능한 사양 리스트 조회
     @GetMapping("/performance")
-    public ApiResponse<List<Performance>> getPerformance() {
+    public ApiResponse<List<ProjectPerformanceDto>> getPerformance() {
       return ApiResponse.success(projectService.getPerformance());
     }
   }
