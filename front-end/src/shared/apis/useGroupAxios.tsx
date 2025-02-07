@@ -150,9 +150,9 @@ const useGroupAxios = () => {
   /**
    * 그룹 참가
    */
-  const joinGroup = async (groupId: string): Promise<JoinGroupResponse> => {
+   const joinGroup = async (groupId: string, code: string): Promise<JoinGroupResponse> => {
     try {
-      const response = await groupAxios.post(`/v1/groups/${groupId}/join`);
+      const response = await groupAxios.post(`/v1/groups/${groupId}/join`, {code: `${code}`,});
       return response.data.data;
     } catch (error) {
       console.error(`Error joining group ${groupId}:`, error);
