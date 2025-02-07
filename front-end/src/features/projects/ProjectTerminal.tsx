@@ -17,8 +17,14 @@ const WebTerminal: React.FC = () => {
   useEffect(() => {
     term.current = new Terminal({
       cursorBlink: true,
-      cols: 120,
-      rows: 30,
+      cols: 80,
+      rows: 24,
+      scrollback: 1000,
+      disableStdin: false,
+      // fontSize
+      theme: {
+        background: '#0F172A'
+      }
     });
 
     fitAddon.current = new FitAddon();
@@ -26,7 +32,7 @@ const WebTerminal: React.FC = () => {
 
     if (terminalRef.current) {
       term.current.open(terminalRef.current);
-      fitAddon.current.fit();
+      fitAddon.current.fit(); 
     }
 
     const socket: WebSocket = new SockJS('http://localhost:8080/ws') as WebSocket;
@@ -82,20 +88,16 @@ const WebTerminal: React.FC = () => {
     };
   }, []);
 
-  return (
-    <div
-      ref={terminalRef}
-      style={{
-        width: '100%',
-        height: '40vh',
-        border: '1px solid #ccc',
-        padding: '0 8px',
-        overflow: 'hidden',
-        scrollbarWidth: 'thin',
-        scrollbarColor: '#4a5568 #2d3748',
-      }}
-    />
-  );
+  return <div ref={terminalRef}
+  style={{
+    width: "100%",
+    height: "40vh",
+    border: "1px solid #ccc",
+    padding: "0 8px",
+    overflow: "hidden",
+    scrollbarWidth: "thin",
+    scrollbarColor: "#4a5568 #2d3748",
+  }} />;
 };
 
 export default WebTerminal;

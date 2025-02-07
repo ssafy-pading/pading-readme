@@ -8,7 +8,7 @@ function ProjectOutButton() {
     return (
         <div>
             <button
-                className="text-white bg-red-500 px-4 py-2 rounded-md"
+                className="flex items-center text-white bg-[#EF4444] h-[35px] px-4 rounded-md"
                 onClick={() => navigate(`/projectlist/`)}
                 // onClick={() => navigate(`/project/${groupId}`)}
             >

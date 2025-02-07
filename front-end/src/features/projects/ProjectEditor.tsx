@@ -23,24 +23,22 @@ function ProjectEditor() {
   };
 
   return (
-    <div>
-      <div>
-        <Editor
-          height="100vh"
-          width="100%"
-          theme={"vs-dark"}
-          language={language}
-          onMount={handleEditorDidMount} // Editor 초기화
-          value={value}
-          onChange={(value) => setValue(value || "")}
-          options={
-            {
-              mouseWheelZoom: true, // 마우스 휠로 줌
-              smoothScrolling: true, // 부드러운 스크롤
-            }
+    <div className="h-full w-full">
+      <Editor
+        height="100%"
+        width="100%"
+        theme={"vs-dark"}
+        language={language}
+        onMount={handleEditorDidMount} // Editor 초기화
+        value={value}
+        onChange={(value) => setValue(value || "")}
+        options={
+          {
+            mouseWheelZoom: true, // 마우스 휠로 줌
+            smoothScrolling: true, // 부드러운 스크롤
           }
-        />
-      </div>
+        }
+      />
     </div>
   )
 }

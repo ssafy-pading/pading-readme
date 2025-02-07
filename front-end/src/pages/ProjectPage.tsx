@@ -3,10 +3,13 @@ import { ProjectEditorProvider } from "../context/ProjectEditorContext";
 import ProjectEditor from "../features/projects/ProjectEditor";
 import TerminalComponent from "../features/projects/ProjectTerminal";
 import ProjectLeaveButton from "../features/projects/ProjectLeaveButton";
-import ProjectMemberListButton from "../features/projects/ProjectMemberListButton";
+// import ProjectMemberListButton from "../features/projects/ProjectMemberListButton";
 import FileExplorer from "../features/projects/FileExplorer";
-
+import { VscChromeClose, VscAdd } from "react-icons/vsc";
 import { ResizableBox } from 'react-resizable';
+import MuteButton from "../features/projects/ProjectMuteButton";
+import CamButton from "../features/projects/ProjectCameraButton";
+import ParticipantsButton from "../features/projects/ProjectParticipants";
 
 import 'react-resizable/css/styles.css';
 import '../assets/css/ProjectPage.css'
@@ -46,40 +49,47 @@ function ProjectPage() {
     <ProjectEditorProvider>
     <div className="flex flex-col h-screen">
       {/* 네비게이션 바 */}
-      <div className="flex flex-row items-center h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
-        <div className="absolute left-1">
-          <ProjectMemberListButton/>
+      <div className="flex flex-row items-center gap-10 justify-between h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
+        <div className="flex items-center h-[35px] box-border bg-[#059669] rounded-md text-white px-4">
+          {/* <ProjectMemberListButton/> */}
+          Project : 프로젝트 이름
         </div>
-        <div className="absolute right-1">
-          <ProjectLeaveButton />
+        <div className="flex items-center justify-center gap-10">
+          <div className="flex items-center justify-center text-[#d4d4d4]">
+            <ParticipantsButton />
+          </div>
+          <div className="flex items-center justify-center gap-4 mr-32">
+            <MuteButton />
+            <CamButton />
+          </div>
+          <div className="flex">
+            <ProjectLeaveButton />
+          </div>
         </div>
       </div>
 
       {/* 네비게이션을 제외한 컨텐츠 */}
-      <div className="flex-1 flex flex-row justify-between">
+      <div className="flex-1 flex flex-row">
         {/* 파일 탐색기 컨테이너너*/}
         <ResizableBox
-          width={250}
+          width={300}
+          minConstraints={[100, Infinity]}
+          maxConstraints={[1000, Infinity]}
           height={Infinity}
-          axis="x"
-          minConstraints={[200, Infinity]}
-          maxConstraints={[500, Infinity]}
-          onResizeStart={() => setIsVerticalDragging(true)} // 드래그 시작
-          onResizeStop={() => setIsVerticalDragging(false)} // 드래그 종료
+          axis="x"// 드래그 종료
+          onResizeStart={() => setIsHorizontalDragging(true)}
+          onResizeStop={() => setIsHorizontalDragging(false)}
           handle={
             <span
-              className={`absolute right-0 top-0 h-full ${isVerticalDragging ? 'w-[5px] bg-[#3B82F6]' : 'w-[2px] bg-[#273654]'}
-              cursor-ew-resize hover:w-[4px] hover:bg-[#3B82F6]`}
+              className={`absolute right-0 top-0 h-full ${isHorizontalDragging ? 'w-[5px] bg-[#3B82F6] cursor-col-resize' : 'w-[2px] bg-[#273654]'}
+              hover:w-[4px] hover:bg-[#3B82F6] cursor-col-resize`}
               style={{ zIndex: 10 }}
             />
           }
           handleSize={[5, 5]}
         >
           <div className="flex flex-col justify-start h-full bg-[#0F172A]">
-            <div className="w-full h-[30px] border-b-2 border-[#273654]">
-              <b className="ml-4 text-white">Explorer</b>
-            </div>
-            <div className="w-full overflow-x-auto scroll pr-[10px]">
+            <div className="w-full overflow-x-hidden">
               {/* 파일 탐색기 들어갈 자리 */}
               <FileExplorer />
             </div>
@@ -87,14 +97,17 @@ function ProjectPage() {
         </ResizableBox>
 
         {/* 중앙 컨텐츠 */}
-        <div className="flex-1 flex-col">
-          {/* 코드 에디터 */}
+        <div className="flex-1 flex-col flex min-w-[600px]">
+          <div className="h-full w-full top-0 left-0 right-0 bg-[#1E293B] flex flex-col justify-between text-[#0F172A]">
+            <div className="w-full h-[30px] bg-[#1E293B]"> 
+              {/* 파일 탭 자리 */}
+            </div>
+            {/* 코드 편집기 자리 */}
+            <div className="flex-1 w-full bg-[#0F172A]">
+              {/* <p className="text-3xl">Pading</p> */}
               {/* <ProjectEditor /> */}
-          <div className="relative h-full top-0 left-0 right-0 bg-[#1E293B] flex justify-center text-[#0F172A]">
-            {/* <div className="mt-80"> */}
-              <p>코드 에디터</p>
-            {/* </div> */}
-            <div className="absolute w-full bottom-0">
+            </div>
+            <div className="w-full">
               <ResizableBox
                 width={Infinity}
                 height={250}
@@ -104,39 +117,41 @@ function ProjectPage() {
                 resizeHandles={['n']}
                 handle={
                   <span
-                    className={`absolute top-0 left-0 w-full ${isHorizontalDragging ? 'h-[5px] bg-[#3B82F6]' : 'h-[2px] bg-[#273654]'}
-                  cursor-ns-resize hover:h-[4px] hover:bg-[#3B82F6]`}
+                    className={`absolute top-0 left-0 w-full ${isVerticalDragging ? 'h-[5px] bg-[#3B82F6] cursor-row-resize' : 'h-[2px] bg-[#273654]'}
+                    cursor-row-resize hover:h-[4px] hover:bg-[#3B82F6]`}
                     style={{ zIndex: 10 }}
                   />
                 }
-                onResizeStart={() => setIsHorizontalDragging(true)}
-                onResizeStop={() => setIsHorizontalDragging(false)}
+                onResizeStart={() => setIsVerticalDragging(true)}
+                onResizeStop={() => setIsVerticalDragging(false)}
               >
                 {/* 터미널 */}
-                <div className="absolute bottom-0 left-0 right-0 bg-[#0F172A] h-full">
+                <div className="bg-[#0F172A] h-full">
                   {/* 상단 탭과 + 버튼 */}
-                  <div className="flex bg-gray-800 px-4 py-2 items-center space-x-2">
+                  <div className="flex bg-[#0F172A] h-[30px] box-border pr-2 items-center space-x-2">
                     {/* 터미널 탭들 */}
-                    <div className="flex items-center space-x-2 overflow-x-auto flex-grow">
+                    <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow">
                       {terminals.map((_, index) => (
-                        <div
-                          key={index}
-                          className={`flex items-center px-4 py-2 rounded-lg whitespace-nowrap ${activeTerminal === index
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-700 text-gray-300"
-                            } cursor-pointer`}
-                          onClick={() => setActiveTerminal(index)}
-                        >
-                          Terminal
+                        <div className="flex flex-row items-center">
+                          <div
+                            key={index}
+                            className={`items-center inline-flex justify-center h-full whitespace-nowrap ${activeTerminal === index
+                              ? "border-b-2 border-b-[#3B82F6] text-white"
+                              : "bg-[#0F172A] text-[#858595] hover:text-white"
+                              }  cursor-pointer`}
+                            onClick={() => setActiveTerminal(index)}
+                          >
+                            Terminal
+                          </div>
                           {terminals.length > 1 &&
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 deleteTerminal(index);
                               }}
-                              className="ml-2 text-red-500 hover:text-red-400"
+                              className="text-[#858595] hover:text-white ml-[5px] mt-[2px]"
                             >
-                              ✖
+                              <VscChromeClose />
                             </button>
                           }
                         </div>
@@ -154,13 +169,13 @@ function ProjectPage() {
                         title="Add new terminal"
                         style={{ position: 'sticky', right: 0 }}
                       >
-                        +
+                        <VscAdd />
                       </button>
                     </div>
                   </div>
 
                   {/* 터미널 화면 */}
-                  <div className="flex flex-grow w-full bg-black p-4 overflow-auto">
+                  <div className="flex-1 h-full w-full bg-[#0F172A] relative">
                     {terminals[activeTerminal]}
                   </div>
                 </div>
@@ -174,15 +189,34 @@ function ProjectPage() {
         {/* 오른쪽 메인 콘텐츠 */}
         <div className="flex flex-col h-full aspect-[1/3] border-l-2 border-[#273654] overflow-hidden">
           {/* 캐러셀 */}
-          <div className="bg-slate-400 flex-1 w-full overflow-hidden flex flex-col">
+          
             {/* <VerticalCarousel items={carouselItems} isChatOpen={isChatOpen} /> */}
-            <div className="relative h-1/2 bg-stone-700">
-              <p>테스트1</p>
-            </div>
-            <div className="relative h-1/2 bg-stone-600">
-              <p>테스트2</p>
-            </div>
-          </div>
+            { isChatOpen ?
+              <div className="bg-slate-400 flex-1 w-full overflow-hidden flex flex-col">
+                <div className="relative h-1/2 bg-stone-700">
+                  <p>테스트1</p>
+                </div>
+                <div className="relative h-1/2 bg-stone-600">
+                  <p>테스트2</p>
+                </div>
+              </div>
+              :
+              <div className="bg-slate-400 flex-1 w-full overflow-hidden flex flex-col">
+                <div className="relative h-1/4 bg-stone-700">
+                  <p>테스트1</p>
+                </div>
+                <div className="relative h-1/4 bg-stone-600">
+                  <p>테스트2</p>
+                </div>
+                <div className="relative h-1/4 bg-stone-700">
+                  <p>테스트3</p>
+                </div>
+                <div className="relative h-1/4 bg-stone-600">
+                  <p>테스트4</p>
+                </div>
+              </div>
+            }
+            
 
           {/* 채팅 */}
           <div className={`flex flex-col bg-[#0F172A] w-full transition-all duration-300 ease-in-out ${isChatOpen ? 'flex-1' : 'h-0'}`}>
