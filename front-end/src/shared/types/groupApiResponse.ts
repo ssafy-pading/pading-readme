@@ -22,7 +22,7 @@ export type CheckGroupNameDuplicateResponse = {
 };
 // 그룹 멤버 목록 조회
 export type GetGroupMembersResponse = {
-  members: {
+  users: {
       id: number;
       name: string;    // 멤버 이름
       image: string;   // 멤버 프로필 이미지 URL

@@ -5,6 +5,8 @@ import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
 
 import { UserProvider } from "../../context/userContext"; // 경로에 맞게 수정
 
+import ProjectSpinner from "../../widgets/spinners/ProjectSpinner";
+
 const Loading = <div>로딩중입니다...</div>
 
 // 그룹 X 페이지
@@ -45,7 +47,7 @@ const AppLayout = () => (
           ),
         },
         {
-          path: "projectlist",
+          path: "projectlist/:groupId",
           element: (
             <Suspense fallback={Loading}>
               <ProjectListPage />
@@ -53,9 +55,9 @@ const AppLayout = () => (
           ),
         },
         {
-          path: "project",
+          path: "project:groupId/:projectId",
           element: (
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<ProjectSpinner />}>
               <ProjectPage />
             </Suspense>
           ),
