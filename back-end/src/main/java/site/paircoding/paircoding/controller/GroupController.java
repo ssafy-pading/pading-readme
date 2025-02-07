@@ -56,8 +56,7 @@ public class GroupController {
   @GetMapping("{groupId}")
   public ApiResponse<Group> getGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails,
       @PathVariable Integer groupId) {
-    User user = customUserDetails.getUser();
-    Group group = groupService.getGroup(user, groupId);
+    Group group = groupService.getGroup(groupId);
     return ApiResponse.success(group);
   }
 
