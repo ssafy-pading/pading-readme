@@ -96,33 +96,37 @@ const InvitePage = () => {
     return (
         <div className="flex min-h-screen h-full items-center justify-center bg-gray-900">
             <div id="particles-js" className="w-full h-full"></div>
-                {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
-                <div className="p-7 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-lg absolute">
-                    <div className="text-2xl font-bold">환영합니다!</div>
+            {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
+            <div className="px-7 pb-2 h-1/4 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-md absolute">
+                <div className="relative w-full h-full flex flex-col p-10 ">
+
+                    {/* <div className="text-2xl font-bold">Pading</div> */}
+                    <div className="text-xl font-bold ">환영합니다!</div>
                     {isAuthenticated === null ? (
-                    <p className="text-gray-400 mt-2">Checking authentication...</p>
+                        <p className="text-gray-400 mt-2">Checking authentication...</p>
                     ) : isAuthenticated ? (
-                    <>
-                        <p className="text-lg mt-2">"{groupName}"에 참여하시겠습니까?</p>
+                        <>
+                        <p className="text-lg break-all">"{groupName}"에 참여하시겠습니까?</p>
                         <button
                         onClick={handleJoinGroup}
-                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
+                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full absolute bottom-1 left-0"
                         >
                         그룹 참여
                         </button>
                     </>
                     ) : (
-                    <>
-                        <p className="text-lg mt-2">그룹에 참여하시려면  로그인이 필요합니다.</p>
+                        <>
+                        <div className="text-lg break-all">그룹에 참여하시려면 로그인이 필요합니다.</div>
                         <button
                         onClick={() => navigate("/")}
-                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
+                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full absolute bottom-1 left-0"
                         >
                         로그인 페이지로 이동
                         </button>
                     </>
-                    )}
-
+                    )}  
+                </div>
+                <p>{" "}</p>
             </div>
         </div>
     );
