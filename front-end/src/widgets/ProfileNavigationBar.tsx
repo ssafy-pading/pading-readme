@@ -19,6 +19,9 @@ import { GetGroupDetailsResponse, GetGroupMembersResponse } from "../shared/type
 
 // MyPageModal 임포트
 import MyPageModal from "../widgets/MypageModal";
+import useMypageAxios from "../shared/apis/useMypageAxios";
+import LeaveModal from "./UserLeaveModal";
+import PictureModal from "./PictureChangeModal";
 
 const ProfileNavigationBar: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +56,7 @@ const ProfileNavigationBar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // "마이페이지" 모달 열림 상태 관리
-  const [isMyPageModalOpen, setIsMyPageModalOpen] = useState(false);
+    const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
 
   // 드롭다운 외부 클릭 시 닫힘 처리
   useEffect(() => {
@@ -121,6 +124,7 @@ const ProfileNavigationBar: React.FC = () => {
   // 멤버 목록 관련
   const [members, setMembers] = useState<GetGroupMembersResponse["members"]>([]);
   const [isMemberOpen, setIsMemberOpen] = useState(true);
+  const { logout } = useMypageAxios();
   const toggleMemberList = () => {
     setIsMemberOpen(!isMemberOpen);
   };
@@ -198,17 +202,27 @@ const ProfileNavigationBar: React.FC = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
+  // 모달 열기/닫기 함수
+  const openMypageModal = () => setActiveModal('mypage');
+  const openDeleteModal = () => setActiveModal('delete');
+  const openPictureModal = () => setActiveModal('picture');
+  const closeModal = () => setActiveModal(null);
+
   // "마이페이지" 버튼 클릭 시: 모달 열기
   const handleNavigateToMypage = () => {
     setIsDropdownOpen(false);
-    setIsMyPageModalOpen(true);
+    setActiveModal('mypage')
   };
 
   // 로그아웃 버튼 (예시)
-  const handleLogout = () => {
-    alert("로그아웃");
+  const handleLogout = async() => {
+    try{
+      logout();
+    }catch(error){
+      console.log(error);
+      console.log("logout 실패")
+    }
   };
-
   return (
     <div className="relative">
       {/* 토글 버튼 (네비게이션 바가 닫힌 상태) */}
@@ -374,11 +388,27 @@ const ProfileNavigationBar: React.FC = () => {
       </div>
 
       {/* MyPageModal 렌더링 */}
-      {isMyPageModalOpen && (
+      {activeModal === 'mypage' && (
         <MyPageModal
-          isOpen={isMyPageModalOpen}
-          onClose={() => setIsMyPageModalOpen(false)}
-          // 필요한 경우 onSwitchToLeave, onSwitchToPictureChange 등의 prop 전달 가능
+          isOpen={true}
+          onClose={closeModal}
+          onSwitchToLeave={openDeleteModal}
+          onSwitchToPictureChange={openPictureModal}
+          // groupId={/* 현재 그룹 ID를 전달할 수 있다면 전달 */}
+        />
+      )}
+      {activeModal === 'delete' && (
+        <LeaveModal
+          isOpen={true}
+          onClose={closeModal}
+          onSwitchToMypage={openMypageModal}
+        />
+      )}
+      {activeModal === 'picture' && (
+        <PictureModal
+          isOpen={true}
+          onClose={closeModal}
+          onSwitchToMypage={openMypageModal}
         />
       )}
     </div>

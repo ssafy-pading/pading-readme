@@ -65,7 +65,7 @@ const useMypageAxios = () => {
     try {
       const response = await mypageAxios.delete('/v1/mypage/logout');
       sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("refresToken");
+      sessionStorage.removeItem("refreshToken");
       navigate('/');
       return response.data = true;
     } catch (error) {
@@ -81,6 +81,9 @@ const useMypageAxios = () => {
   const deleteAccount = async (): Promise<boolean> => {
     try {
       const response = await mypageAxios.delete('/v1/mypage');
+      // 세션 스토리지 비우기
+      sessionStorage.removeItem("accessToken");
+      sessionStorage.removeItem("refreshToken");
       return response.data = true;
     } catch (error) {
       console.error('Error deleting account:', error);
