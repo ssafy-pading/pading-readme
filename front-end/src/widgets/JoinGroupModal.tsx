@@ -26,16 +26,16 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
    * 예시: 'https://example.com/invite/group-123'에서 'group-123' 추출
    * 실제 초대 링크의 형식에 맞게 조정 필요
    */
-  const extractGroupId = (link: string): string | null => {
+  const extractGroupId = (link: string): { groupId:number, code:string } | null => {
     try {
       const url = new URL(link);
       const pathSegments = url.pathname.split("/");
       // 초대 링크 형식에 따라 groupId 추출 로직 수정
-      // 예: '/invite/group-123'에서 'group-123' 추출
-      const inviteSegment = pathSegments.find((segment) =>
-        segment.startsWith("group-")
-      );
-      return inviteSegment || null;
+      const groupId:number = Number(pathSegments[2]);
+      const code:string = pathSegments[3];
+      
+      return {groupId:groupId, code:code}
+
     } catch (error) {
       console.log("초대 링크 파싱 에러:", error);
       return null;
@@ -51,15 +51,17 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
       return;
     }
 
-    const groupId = extractGroupId(inviteLink.trim());
-    if (!groupId) {
+    const inviteInfo: { groupId:number, code:string } | null = extractGroupId(inviteLink.trim());
+    if (inviteInfo == null) return;
+    console.log(inviteInfo);
+    if (!inviteInfo.groupId || !inviteInfo.code) {
       alert("유효한 초대 링크를 입력해주세요.");
       return;
     }
 
     setIsLoading(true);
     try {
-      const response: JoinGroupResponse = await joinGroup(groupId);
+      const response: JoinGroupResponse = await joinGroup(String(inviteInfo.groupId), inviteInfo.code);
       if (response) {
         alert(
           `${response.name} 그룹에 성공적으로 참여하였습니다!`
