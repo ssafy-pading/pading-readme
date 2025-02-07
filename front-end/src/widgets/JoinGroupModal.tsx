@@ -86,12 +86,12 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
       onRequestClose={handleClose}
       contentLabel="그룹 참여하기"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-      className="bg-white rounded-xl py-5 px-4 shadow-lg relative w-[500px] h-[350px]"
+      className="bg-white rounded-xl pt-5 pb-4 px-4 shadow-lg relative"
       shouldCloseOnOverlayClick={true}
     >
       <div className="w-full h-full flex flex-col">
         {/* 헤더 */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center w-[500px]">
           <span className="text-xl font-bold">그룹 참여하기</span>
           <button
             className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-300"
@@ -103,31 +103,38 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
         </div>
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit} className="flex-1 mt-10 flex flex-col">
-          <label htmlFor="inviteLink" className="text-lg text-gray-700 mb-2">
-            그룹 링크
-          </label>
-          <input
-            id="inviteLink"
-            type="text"
-            value={inviteLink}
-            onChange={(e) => setInviteLink(e.target.value)}
-            placeholder="초대 링크를 입력하세요"
-            className="mt-2 w-full border border-gray-300 rounded-lg px-4 py-4 text-lg focus:outline-none focus:ring-2 focus:ring-[#5C8290]"
-          />
-          <p
-            className="mt-7 text-center text-blue-500 hover:underline hover:text-blue-700 cursor-pointer"
-            onClick={onSwitchToCreate}
-          >
-            그룹을 생성하고 싶으신가요?
+        <form onSubmit={handleSubmit} className="w-full mt-10 space-y-6">
+          <div>
+            <label htmlFor="inviteLink" className="block text-lg font-medium text-gray-700 mb-2">
+              그룹 링크
+            </label>
+            <input
+              id="inviteLink"
+              type="text"
+              value={inviteLink}
+              onChange={(e) => setInviteLink(e.target.value)}
+              placeholder="초대 링크를 입력하세요"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[#5C8290]"
+              />
+          </div>
+          <p className="text-center">
+            <span
+              className="text-black underline cursor-pointer hover:cursor-pointer"
+              onClick={onSwitchToCreate}
+            >
+              그룹을 생성하고 싶으신가요?
+            </span>
           </p>
+
+
+
           <button
             type="submit"
             disabled={isLoading}
-            className={`mt-7 bg-[#5C8290] text-white py-4 px-4 rounded-xl w-full text-xl ${
+            className={`py-4 px-4 w-full rounded-xl text-xl ${
               isLoading
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#4a6d77]"
+                : "bg-[#5C8290] hover:bg-[#4a6d77] text-white "
             }`}
           >
             {isLoading ? "참여 중..." : "참여하기"}
