@@ -6,12 +6,14 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.Group;
+import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.Performance;
 import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.ProjectImage;
 import site.paircoding.paircoding.entity.ProjectUser;
 import site.paircoding.paircoding.entity.ProjectUserId;
 import site.paircoding.paircoding.entity.User;
+import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
@@ -51,6 +53,20 @@ public class ProjectService {
 
   public List<ProjectPerformanceDto> getPerformance() {
     return performanceRepository.findAllPerformance();
+  }
+
+  public List<GroupUserResponse> getMemberUsers(Integer groupId) {
+    List<GroupUser> groupMemberUsers = groupUserRepository.findGroupUserByGroupIdAndRole(groupId,
+        Role.MEMBER);
+    return groupMemberUsers.stream().map(groupUser ->
+            GroupUserResponse.builder()
+                .id(groupUser.getUser().getId())
+                .name(groupUser.getUser().getName())
+                .image(groupUser.getUser().getImage())
+                .email(groupUser.getUser().getEmail())
+                .role(groupUser.getRole())
+                .build())
+        .toList();
   }
 
   @Transactional

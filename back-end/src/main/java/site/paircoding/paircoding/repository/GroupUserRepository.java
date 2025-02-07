@@ -24,6 +24,10 @@ public interface GroupUserRepository extends JpaRepository<GroupUser, Integer> {
 
   void deleteAllByGroupId(Integer groupId);
 
+  @Query("SELECT gu FROM GroupUser gu WHERE gu.id.groupId = :groupId and gu.role = :role")
+  List<GroupUser> findGroupUserByGroupIdAndRole(Integer groupId, Role role);
+
   @Query("SELECT gu.id.userId FROM GroupUser gu WHERE gu.id.groupId = :groupId and gu.role = :role")
   Set<Integer> findUserIdsByGroupIdAndRole(Integer groupId, Role role);
+
 }

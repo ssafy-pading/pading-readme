@@ -14,7 +14,6 @@ import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
-import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
@@ -33,13 +32,14 @@ public class ProjectController {
 
   // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버 권한 유저
   @GetMapping("/users")
-  public ApiResponse<GroupUsersResponse> getUsers(
+  public ApiResponse<List<GroupUserResponse>> getUsers(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
       @PathVariable Integer groupId) {
+
+    // 유저 오너/매니저 권한 확인
     User user = customUserDetails.getUser();
-    List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
-    GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
-    return ApiResponse.success(groupUsersResponse);
+
+    return ApiResponse.success(projectService.getMemberUsers(groupId));
   }
 
   // 프로젝트 생성
