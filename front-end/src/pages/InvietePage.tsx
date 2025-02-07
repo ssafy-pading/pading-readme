@@ -11,7 +11,46 @@ const InvitePage = () => {
 
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [groupName, setGroupName] = useState<string | null>(null);
+    useEffect(() => {
+        
+        // Particles.js 로드
+        const particle = ():void => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/particles.js';
+            script.onload = () => {
+              // Particles.js 설정
+              (window as any).particlesJS('particles-js', {
+                particles: {
+                  number: { value: 100 },
+                  color: { value: '#ffffff' },
+                  shape: { type: 'edge' },
+                  opacity: { value: 0.8, random: true },
+                  size: { value: 2 },
+                  move: { enable: true, speed: 1, direction: 'top', straight: true, random: true },
+                  line_linked: { enable: false },
+                },
+                interactivity: { 
+                  detect_on: 'canvas',
+                  events:{
+                    onhover: { enable: false }, 
+                    onclick: { enable: false }, 
+                  },
+                  resize:true 
+                },
+                modes: {
+                  grab: { "distance": 0 },
+                  bubble: { "distance": 0 },
+                  repulse: { "distance": 0 },
+                  push: { "particles_nb": 0 },
+                  remove: { "particles_nb": 0 }
+                }
+              });
+            };
+            document.body.appendChild(script);
+          }
 
+          particle();
+    },[])
 
     useEffect(() => {
         // 로그인 상태 확인 (사용자 인증 확인 함수)
@@ -55,33 +94,36 @@ const InvitePage = () => {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-blue-900">
-        <div className="bg-gray-800 p-6 rounded-2xl shadow-lg text-white text-center max-w-md w-full">
-            <div className="text-2xl font-bold">환영합니다!</div>
-            {isAuthenticated === null ? (
-            <p className="text-gray-400 mt-2">Checking authentication...</p>
-            ) : isAuthenticated ? (
-            <>
-                <p className="text-lg mt-2">"{groupName}"에 참여하시겠습니까?</p>
-                <button
-                onClick={handleJoinGroup}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
-                >
-                그룹 참여
-                </button>
-            </>
-            ) : (
-            <>
-                <p className="text-lg mt-2">그룹에 참여하시려면  로그인이 필요합니다.</p>
-                <button
-                onClick={() => navigate("/")}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
-                >
-                로그인 페이지로 이동
-                </button>
-            </>
-            )}
-        </div>
+        <div className="flex min-h-screen h-full items-center justify-center bg-gray-900">
+            <div id="particles-js" className="w-full h-full"></div>
+                {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
+                <div className="p-7 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-lg absolute">
+                    <div className="text-2xl font-bold">환영합니다!</div>
+                    {isAuthenticated === null ? (
+                    <p className="text-gray-400 mt-2">Checking authentication...</p>
+                    ) : isAuthenticated ? (
+                    <>
+                        <p className="text-lg mt-2">"{groupName}"에 참여하시겠습니까?</p>
+                        <button
+                        onClick={handleJoinGroup}
+                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
+                        >
+                        그룹 참여
+                        </button>
+                    </>
+                    ) : (
+                    <>
+                        <p className="text-lg mt-2">그룹에 참여하시려면  로그인이 필요합니다.</p>
+                        <button
+                        onClick={() => navigate("/")}
+                        className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full"
+                        >
+                        로그인 페이지로 이동
+                        </button>
+                    </>
+                    )}
+
+            </div>
         </div>
     );
 };
