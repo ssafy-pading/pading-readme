@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.security.Key;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.global.error.ErrorCode;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
@@ -73,13 +75,14 @@ public class JwtUtil {
    */
   private String createToken(Authentication authentication, TokenType tokenType, long expireTime) {
     User user = ((CustomUserDetails) authentication.getPrincipal()).getUser();
+
     return Jwts.builder()
         .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
         .setSubject(String.valueOf(user.getId()))
         .claim("name", user.getName())
         .claim("token_type", tokenType)
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + expireTime))
+        .setExpiration(new Date(System.currentTimeMillis() + (expireTime * 1000)))
         .signWith(getSigningKey())
         .compact();
   }
@@ -133,7 +136,7 @@ public class JwtUtil {
           ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
       response.getWriter().write(json);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("IOException occurred while writing the response", e);
     }
   }
 

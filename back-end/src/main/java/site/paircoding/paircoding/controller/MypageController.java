@@ -42,10 +42,10 @@ public class MypageController {
     return ApiResponse.success();
   }
 
-  @DeleteMapping
-  public ApiResponse<Object> deleteUser(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-    userService.deleteUser(customUserDetails.getUser().getId());
-    return ApiResponse.success();
-  }
+//  @DeleteMapping
+//  public ApiResponse<Object> deleteUser(
+//      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+//    userService.deleteUser(customUserDetails.getUser().getId());
+//    return ApiResponse.success();
+//  }
 }
