@@ -18,11 +18,12 @@ export type GetGroupDetailsResponse = {
 };
 // 그룹명 중복 확인
 export type CheckGroupNameDuplicateResponse = {
-  is_duplicate: boolean; // 그룹명이 중복인지 여부 (true: 중복, false: 중복 아님)
+  duplicated: boolean; // 그룹명이 중복인지 여부 (true: 중복, false: 중복 아님)
 };
 // 그룹 멤버 목록 조회
 export type GetGroupMembersResponse = {
   members: {
+      id: number;
       name: string;    // 멤버 이름
       image: string;   // 멤버 프로필 이미지 URL
       email: string;   // 멤버 이메일
@@ -36,7 +37,7 @@ export type GroupInviteLinkResponse = {
 };
 // 그룹 참가
 export type JoinGroupResponse = {
-  group_id: number; // 그룹 ID
+  id: number; // 그룹 ID
   name: string;     // 그룹 이름
   capacity: number; // 그룹 정원
 };
