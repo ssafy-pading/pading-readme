@@ -1,11 +1,12 @@
 package site.paircoding.paircoding.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import site.paircoding.paircoding.entity.GroupUser;
-import site.paircoding.paircoding.entity.dto.GroupUserRoleDto;
 import site.paircoding.paircoding.entity.enums.Role;
 
 public interface GroupUserRepository extends JpaRepository<GroupUser, Integer> {
