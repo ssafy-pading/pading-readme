@@ -13,7 +13,6 @@ import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupDto;
 import site.paircoding.paircoding.entity.dto.GroupInvitationDto;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
-import site.paircoding.paircoding.entity.dto.GroupUserRoleDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.global.exception.NotFoundException;
@@ -28,6 +27,7 @@ import site.paircoding.paircoding.util.RedisUtil;
 @Service
 @RequiredArgsConstructor
 public class GroupService {
+
   private final GroupRepository groupRepository;
   private final GroupUserRepository groupUserRepository;
   private final UserRepository userRepository;
@@ -37,11 +37,21 @@ public class GroupService {
   @Value("${link.expire-time}")
   private long LINK_EXPIRE_TIME;
 
+  //내가 속한 그룹 목록 불러오기
   public List<Group> getGroups(User user) {
-    List<Integer> groupIds = groupUserRepository.findGroupIdByUserId(user.getId());
-    return groupRepository.findByIdIn(groupIds);
+    //참여중인 그룹 목록 조회
+    List<GroupUser> groupUsers = groupUserRepository.findGroupUserByUserId(user.getId())
+        .orElseThrow(() -> new NotFoundException("Group not found."));
+
+    // 그룹 목록 반환
+    List<Group> groups = new ArrayList<>();
+    for (GroupUser groupUser : groupUsers) {
+      groups.add(groupUser.getGroup());
+    }
+    return groups;
   }
 
+  //그룹 생성
   @Transactional
   public GroupDto createGroup(User user, String name, int capacity) {
     if (capacity < 2) {
@@ -50,92 +60,209 @@ public class GroupService {
     if (checkDuplicate(name)) {
       throw new BadRequestException("중복된 그룹명입니다.");
     }
-    Group group = Group.builder().name(name).capacity(capacity).build();
-    Group savedGroup =  groupRepository.save(group);
-    GroupUser groupUser = GroupUser.builder().group(savedGroup).user(user).role(Role.OWNER).build();
+
+    //그룹 생성
+    Group group = Group.builder()
+        .name(name)
+        .capacity(capacity)
+        .build();
+    Group savedGroup = groupRepository.save(group);
+
+    //그룹 생성자를 그룹장으로 등록
+    GroupUser groupUser = GroupUser.builder()
+        .group(savedGroup)
+        .user(user)
+        .role(Role.OWNER)
+        .build();
     groupUserRepository.save(groupUser);
-    return GroupDto.builder().id(savedGroup.getId()).name(savedGroup.getName()).capacity(savedGroup.getCapacity()).build();
+
+    return GroupDto.builder()
+        .id(savedGroup.getId())
+        .name(savedGroup.getName())
+        .capacity(savedGroup.getCapacity())
+        .build();
   }
 
-  public Group getGroup(User user, Integer groupId) {
-    List<Integer> groupIds = groupUserRepository.findGroupIdByUserId(user.getId());
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-
-    if (!groupIds.contains(groupId)) {
-      throw new UnauthorizedException("Access denied. You do not have permission to view this group.");
-    }
-    return groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+  //그룹 상세 정보 조회
+  public Group getGroup(Integer groupId) {
+    //그룹 조회
+    return groupRepository.findById(groupId)
+        .orElseThrow(() -> new NotFoundException("Group not found."));
   }
 
+  //그룹명 중복 체크
   public boolean checkDuplicate(String name) {
     return groupRepository.findByName(name).isPresent();
   }
 
+  //그룹 정보 수정
   public Group updateGroup(User user, Integer groupId, String name) {
-    Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to update this group."));
+    //그룹 조회
+//    Group group = groupRepository.findById(groupId)
+//        .orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //그룹에 속해있는지 확인
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to update this group."));
+
+    //그룹장인지 확인
     if (!groupUser.getRole().equals(Role.OWNER)) {
-      throw new UnauthorizedException("Access denied. You do not have permission to update this group.");
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to update this group.");
     }
+
+    //그룹명 중복 체크
     if (checkDuplicate(name)) {
       throw new BadRequestException("중복된 그룹명입니다.");
     }
 
-    return groupRepository.save(Group.builder().id(groupId).name(name).capacity(group.getCapacity()).build());
+    //그룹 정보 수정
+    return groupRepository.save(
+        Group.builder()
+            .id(groupId)
+            .name(name)
+            .capacity(groupUser.getGroup().getCapacity())
+            .build());
   }
 
+  //그룹 삭제
   @Transactional
   public void deleteGroup(User user, Integer groupId) {
-    Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to delete this group."));
+    //그룹 조회
+//    Group group = groupRepository.findById(groupId)
+//        .orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //그룹에 속해있는지 확인
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to delete this group."));
+
+    //그룹장인지 확인
     if (!groupUser.getRole().equals(Role.OWNER)) {
-      throw new UnauthorizedException("Access denied. You do not have permission to delete this group.");
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to delete this group.");
     }
-    groupUserRepository.deleteAllByGroupId(groupId);
-    groupRepository.delete(group);
+
+    //그룹 삭제
+    groupRepository.delete(groupUser.getGroup());
   }
 
+  //그룹 멤버 목록 조회
   public List<GroupUserResponse> getGroupUsers(User user, Integer groupId) {
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() ->  new UnauthorizedException("Access denied. You do not have permission to view this group."));
-    List<GroupUserRoleDto> groupUserRoles = groupUserRepository.findUserIdAndRoleByGroupId(groupId);
+    //그룹 조회
+//    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //그룹에 속해있는지 확인
+    groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(
+        () -> new UnauthorizedException(
+            "Access denied. You do not have permission to view this group."));
+
+    //그룹 멤버 목록 Role 조회
+    List<GroupUser> groupUsers = groupUserRepository.findGroupUserByGroupId(groupId)
+        .orElseThrow(() -> new NotFoundException("Group not found."));
+
     List<GroupUserResponse> list = new ArrayList<>();
-    for(GroupUserRoleDto groupUserRole : groupUserRoles) {
-      User searchedUser = userRepository.findById(groupUserRole.getUserId()).orElseThrow(() -> new NotFoundException("User not found."));;
-      list.add(GroupUserResponse.builder().id(searchedUser.getId()).name(searchedUser.getName()).image(searchedUser.getImage()).email(searchedUser.getEmail()).role(groupUserRole.getRole()).build());
+
+    for (GroupUser groupUser : groupUsers) {
+      User searchedUser = groupUser.getUser();
+
+      list.add(GroupUserResponse.builder()
+          .id(searchedUser.getId())
+          .name(searchedUser.getName())
+          .image(searchedUser.getImage())
+          .email(searchedUser.getEmail())
+          .role(groupUser.getRole())
+          .build());
     }
     return list;
   }
 
+  //그룹 탈퇴
   public void quitGroup(User user, Integer groupId) {
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to quit this group."));
+    //그룹 조회
+//    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //그룹에 속해있는지 확인
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to quit this group."));
+
+    //그룹장인지 확인
     if (groupUser.getRole().equals(Role.OWNER)) {
       throw new BadRequestException("그룹장은 그룹을 탈퇴할 수 없습니다.");
     }
     groupUserRepository.delete(groupUser);
   }
 
-  public GroupInvitationDto generateInvitation(User user, Integer groupId) {
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to generate invitation code."));
+  //그룹 초대 코드 조회
+  public GroupInvitationDto getInvitation(User user, Integer groupId) {
+    //그룹 조회
+//    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //그룹에 속해있는지 확인
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to view invitation code."));
+
+    //그룹장 또는 매니저인지 확인
     if (groupUser.getRole().equals(Role.MEMBER)) {
-      throw new UnauthorizedException("Access denied. You do not have permission to generate invitation code.");
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to view invitation code.");
     }
+
+    //redis에 초대 코드가 있는지 확인
     String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
     if (link == null) {
-      String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
-      redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, LINK_EXPIRE_TIME);
-      return new GroupInvitationDto(randomCode);
+      throw new NotFoundException("Invitation code not found.");
     }
-    return new GroupInvitationDto(link);
+
+    //redis에 초대 코드의 만료 시간 조회
+    long expirationTime = redisUtil.getExpire(INVITATION_PREFIX.formatted(groupId));
+
+    return new GroupInvitationDto(link, expirationTime);
   }
 
-  public Group joinGroup(User user, Integer groupId, String code) {
-    Group group = groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+  //그룹 초대 코드 생성
+  public GroupInvitationDto generateInvitation(User user, Integer groupId) {
+    //그룹 조회
+//    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
 
+    //그룹에 속해있는지 확인
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to generate invitation code."));
+
+    //그룹장 또는 매니저인지 확인
+    if (groupUser.getRole().equals(Role.MEMBER)) {
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to generate invitation code.");
+    }
+
+    //redis에 이미 초대 코드가 있는지 확인
+    String link = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
+    if (link != null) {
+      throw new BadRequestException("이미 초대 코드가 생성되었습니다.");
+    }
+
+    //초대 코드 생성
+    String randomCode = RandomUtil.generateRandomCode('0', 'z', 10);
+
+    //redis에 초대코드를 만료시간과 함께 저장
+    redisUtil.setex(INVITATION_PREFIX.formatted(groupId), randomCode, LINK_EXPIRE_TIME);
+
+    return new GroupInvitationDto(randomCode, LINK_EXPIRE_TIME);
+  }
+
+  //그룹 가입
+  public Group joinGroup(User user, Integer groupId, String code) {
+    //그룹 조회
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //redis에 초대 코드 가져오기
     String redisCode = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
-    if(redisCode == null || !redisCode.equals(code)) {
+    if (redisCode == null || !redisCode.equals(code)) {
       throw new BadRequestException("유효하지 않은 초대 코드입니다.");
     }
     if (groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).isPresent()) {
@@ -144,54 +271,108 @@ public class GroupService {
     if (groupUserRepository.countByGroupId(groupId) >= group.getCapacity()) {
       throw new BadRequestException("정원이 초과되었습니다.");
     }
-    GroupUser groupUser = GroupUser.builder().group(group).user(user).role(Role.MEMBER).build();
+
+    //그룹 가입
+    GroupUser groupUser = GroupUser.builder()
+        .group(group)
+        .user(user)
+        .role(Role.MEMBER)
+        .build();
     groupUserRepository.save(groupUser);
     return group;
   }
 
-  public GroupUserResponse updateGroupUserRole(User user, Integer groupId, Integer userId, Role role) {
-    if(user.getId().equals(userId)) {
+  //그룹 멤버 Role 수정
+  public GroupUserResponse updateGroupUserRole(User user, Integer groupId, Integer userId,
+      Role role) {
+    if (user.getId().equals(userId)) {
       throw new BadRequestException("자신의 권한은 변경할 수 없습니다.");
     }
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to update this group."));
-    GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId).orElseThrow(() -> new NotFoundException("User not found."));
 
+    //그룹 조회
+//    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //로그인 유저의 권한 확인
+    GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to update this group."));
+
+    //대상 유저의 권한 확인
+    GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId)
+        .orElseThrow(() -> new NotFoundException("User not found."));
+
+    //그룹장인 경우
     if (currentUser.getRole().equals(Role.OWNER)) {
+      //그룹장을 양도 하는 경우
       if (role.equals(Role.OWNER)) {
+        //그룹장의 권한을 매니저로 변경
         currentUser.setRole(Role.MANAGER);
       }
+
+      //대상 유저의 권한 변경
       targetUser.setRole(role);
+
+      //매니저인 경우
     } else if (currentUser.getRole().equals(Role.MANAGER)) {
+      //매니저는 일반 멤버를 매니저로 승격할 수만 있음
       if (!targetUser.getRole().equals(Role.MEMBER) || !role.equals(Role.MANAGER)) {
-        throw new UnauthorizedException("Access denied. You do not have permission to update this role.");
+        throw new UnauthorizedException(
+            "Access denied. You do not have permission to update this role.");
       }
       targetUser.setRole(Role.MANAGER);
     } else {
-      throw new UnauthorizedException("Access denied. You do not have permission to update this role.");
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to update this role.");
     }
 
+    //권한 변경 저장
     groupUserRepository.save(currentUser);
     groupUserRepository.save(targetUser);
-    User searchedUser = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found."));
-    return GroupUserResponse.builder().name(searchedUser.getName()).image(searchedUser.getImage()).email(searchedUser.getEmail()).role(targetUser.getRole()).build();
+
+    User searchedUser = targetUser.getUser();
+
+    return GroupUserResponse.builder()
+        .id(searchedUser.getId())
+        .name(searchedUser.getName())
+        .image(searchedUser.getImage())
+        .email(searchedUser.getEmail())
+        .role(targetUser.getRole())
+        .build();
   }
 
+  //그룹 멤버 추방
   public void deleteGroupUser(User user, Integer groupId, Integer userId) {
-    if(user.getId().equals(userId)) {
+    if (user.getId().equals(userId)) {
       throw new BadRequestException("자신을 추방할 수 없습니다.");
     }
-    groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
-    GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).orElseThrow(() -> new UnauthorizedException("Access denied. You do not have permission to delete this user."));
-    GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId).orElseThrow(() -> new NotFoundException("User not found."));
 
+    //그룹 조회
+    //groupRepository.findById(groupId).orElseThrow(() -> new NotFoundException("Group not found."));
+
+    //로그인 유저의 권한 확인
+    GroupUser currentUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new UnauthorizedException(
+            "Access denied. You do not have permission to delete this user."));
+
+    //대상 유저의 권한 확인
+    GroupUser targetUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId)
+        .orElseThrow(() -> new NotFoundException("User not found."));
+
+    //로그인 유저가 MEMBER인 경우 추방 불가
     if (currentUser.getRole().equals(Role.MEMBER)) {
-      throw new UnauthorizedException("Access denied. You do not have permission to delete this user.");
+      throw new UnauthorizedException(
+          "Access denied. You do not have permission to delete this user.");
+
+      //로그인 유저가 MANAGER인 경우
     } else if (currentUser.getRole().equals(Role.MANAGER)) {
+      //대상 유저가 OWNER, MANAGER인 경우 추방 불가
       if (targetUser.getRole().equals(Role.OWNER) || targetUser.getRole().equals(Role.MANAGER)) {
-        throw new UnauthorizedException("Access denied. You do not have permission to delete this user.");
+        throw new UnauthorizedException(
+            "Access denied. You do not have permission to delete this user.");
       }
     }
+
+    //그룹 멤버 추방
     groupUserRepository.delete(targetUser);
   }
 

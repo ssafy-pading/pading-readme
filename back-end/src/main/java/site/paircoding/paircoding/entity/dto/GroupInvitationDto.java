@@ -6,9 +6,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GroupInvitationDto {
+
   String code;
 
-  public GroupInvitationDto(String code) {
+  private long expirationTime;
+
+  public GroupInvitationDto(String code, long expirationTime) {
     this.code = code;
+    this.expirationTime = expirationTime;
   }
 }

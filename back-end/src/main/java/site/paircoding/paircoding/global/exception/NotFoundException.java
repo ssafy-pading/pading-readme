@@ -5,13 +5,15 @@ import site.paircoding.paircoding.global.error.ErrorCode;
 
 @Getter
 public class NotFoundException extends CustomException {
+
   private final ErrorCode errorCode;
 
-  public NotFoundException () {
+  public NotFoundException() {
     super(ErrorCode.NOT_FOUND_EXCEPTION.getMessage());
     this.errorCode = ErrorCode.NOT_FOUND_EXCEPTION;
   }
-  public NotFoundException (String message) {
+
+  public NotFoundException(String message) {
     super(ErrorCode.NOT_FOUND_EXCEPTION.getMessage() + " : " + message);
     this.errorCode = ErrorCode.NOT_FOUND_EXCEPTION;
   }

@@ -1,18 +1,11 @@
 package site.paircoding.paircoding.global.error;
 
-import java.util.Arrays;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import site.paircoding.paircoding.global.ApiResponse;
-import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.global.exception.CustomException;
-import site.paircoding.paircoding.global.exception.ForbiddenException;
-import site.paircoding.paircoding.global.exception.NotFoundException;
-import site.paircoding.paircoding.global.exception.UnauthorizedException;
 
 @Slf4j
 @RestControllerAdvice
@@ -21,7 +14,8 @@ public class ControllerExceptionHandler {
 
   // 오류 코드, 메시지, HTTP 상태를 받아 새로운 ResponseEntity를 생성하는 메서드
   private ResponseEntity<ApiResponse<?>> newResponseEntity(CustomException ex) {
-    return ResponseEntity.status(ex.getErrorCode().getStatus()).body(ApiResponse.error(ex.getErrorCode().getCode(), ex.getMessage()));
+    return ResponseEntity.status(ex.getErrorCode().getStatus())
+        .body(ApiResponse.error(ex.getErrorCode().getCode(), ex.getMessage()));
   }
 
   //CustomException을 처리하는 메서드
@@ -35,7 +29,8 @@ public class ControllerExceptionHandler {
   @ExceptionHandler({Exception.class})
   public ResponseEntity<ApiResponse<?>> serverErrorHandler(Exception ex) {
     log.error("Unexpected exception occurred: {}", ex.getStackTrace(), ex);
-    CustomException customException = new CustomException(ErrorCode.UNEXPECTED, ex.getMessage());
+    CustomException customException = new CustomException(ErrorCode.UNEXPECTED,
+        "Internal Server Error");
     return newResponseEntity(customException);
   }
 }

@@ -1,29 +1,25 @@
 package site.paircoding.paircoding.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 import site.paircoding.paircoding.entity.enums.Role;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Table(name = "`group_user`")
-public class GroupUser extends BaseEntity{
+public class GroupUser extends BaseEntity {
+
   @EmbeddedId
   private GroupUserId id;
 

@@ -18,19 +18,23 @@ import site.paircoding.paircoding.util.JwtUtil;
 @RequiredArgsConstructor
 @RequestMapping("/v1/mypage")
 public class MypageController {
+
   private final UserService userService;
   private final JwtUtil jwtUtil;
 
   @GetMapping
-  public ApiResponse<Object> getUserById(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+  public ApiResponse<Object> getUserById(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
     User user = customUserDetails.getUser();
-    UserDto mypageDto = UserDto.builder()
+    UserDto userDto = UserDto.builder()
+        .id(user.getId())
         .name(user.getName())
         .image(user.getImage())
         .email(user.getEmail())
         .build();
-    return ApiResponse.success(mypageDto);
+    return ApiResponse.success(userDto);
   }
+
   @DeleteMapping("/logout")
   public ApiResponse<Object> logout() {
     //리프레시 토큰 삭제
@@ -38,9 +42,10 @@ public class MypageController {
     return ApiResponse.success();
   }
 
-  @DeleteMapping
-  public ApiResponse<Object> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-    userService.deleteUser(customUserDetails.getUser().getId());
-    return ApiResponse.success();
-  }
+//  @DeleteMapping
+//  public ApiResponse<Object> deleteUser(
+//      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+//    userService.deleteUser(customUserDetails.getUser().getId());
+//    return ApiResponse.success();
+//  }
 }

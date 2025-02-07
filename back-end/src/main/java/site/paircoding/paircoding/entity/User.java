@@ -7,11 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @NoArgsConstructor
@@ -22,6 +20,7 @@ import org.hibernate.annotations.CreationTimestamp;
     }
 )
 public class User extends BaseEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
@@ -40,7 +39,8 @@ public class User extends BaseEntity {
   private String email;
 
   @Builder
-  public User(Integer id, String provider, String providerId, String name, String image, String email) {
+  public User(Integer id, String provider, String providerId, String name, String image,
+      String email) {
     this.id = id;
     this.provider = provider;
     this.providerId = providerId;

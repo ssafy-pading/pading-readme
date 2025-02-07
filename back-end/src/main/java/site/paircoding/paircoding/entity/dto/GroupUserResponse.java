@@ -7,6 +7,7 @@ import site.paircoding.paircoding.entity.enums.Role;
 @Data
 @Builder
 public class GroupUserResponse {
+
   private Integer id;
   private String name;
   private String image;

@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class GroupDto {
+
   private int id;
   private String name;
   private int capacity;

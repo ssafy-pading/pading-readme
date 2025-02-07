@@ -2,6 +2,8 @@ package site.paircoding.paircoding.config.oauth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -9,9 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.io.IOException;
-import java.net.URI;
 import site.paircoding.paircoding.util.JwtUtil;
 
 @Component
@@ -23,12 +22,13 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
   /**
    * 인증 성공 시 호출되는 메서드입니다.
    *
-   * @param request  HttpServletRequest 객체
-   * @param response HttpServletResponse 객체
+   * @param request        HttpServletRequest 객체
+   * @param response       HttpServletResponse 객체
    * @param authentication 인증 정보
    * @throws IOException 입출력 예외
    */
-  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException {
     MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
 
     // 액세스 토큰과 리프레시 토큰을 생성합니다.
