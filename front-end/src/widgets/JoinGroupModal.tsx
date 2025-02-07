@@ -98,12 +98,12 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
             onClick={handleClose}
             aria-label="Close modal"
           >
-            <img src={cross} alt="close" className="w-5 h-5" />
+            <img src={cross} alt="close" className="w-4 h-4" />
           </button>
         </div>
 
         {/* 폼 */}
-        <form onSubmit={handleSubmit} className="w-full mt-10 space-y-6">
+        <form onSubmit={handleSubmit} className="w-full mt-8 space-y-6">
           <div>
             <label htmlFor="inviteLink" className="block text-lg font-medium text-gray-700 mb-2">
               그룹 링크

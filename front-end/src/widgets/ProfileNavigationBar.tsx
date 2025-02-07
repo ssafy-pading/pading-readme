@@ -11,41 +11,70 @@ import {
   ChevronDoubleRightIcon,
   UserIcon,
   ArrowLeftOnRectangleIcon,
+  Cog6ToothIcon, // 추가: 환경설정 아이콘 (톱니바퀴)
 } from "@heroicons/react/24/outline";
+import profileImage from "../assets/profile_image.png";
 
 // --- 커스텀 훅 임포트 ---
 import useGroupAxios from "../shared/apis/useGroupAxios"; 
-import { GetGroupDetailsResponse, GetGroupMembersResponse } from "../shared/types/groupApiResponse";
+import useProjectAxios from "../shared/apis/useProjectAxios";
+import { GetMyPageResponse } from "../shared/types/mypageApiResponse";
 
 // MyPageModal 임포트
 import MyPageModal from "../widgets/MypageModal";
 import useMypageAxios from "../shared/apis/useMypageAxios";
 import LeaveModal from "./UserLeaveModal";
 import PictureModal from "./PictureChangeModal";
+import { useUser } from "../context/userContext";
+import { GetProjectListResponse } from "../shared/types/projectApiResponse";
+import GroupUpdateNameModal from "./GroupUpdateNameModal";
+
+interface GroupUser {
+  id: number;
+  name: string;
+  image: string;
+  status: boolean;
+}
 
 const ProfileNavigationBar: React.FC = () => {
-  const navigate = useNavigate();
+  const { userProfile } = useUser();
   const { getGroupDetails, getGroupMembers } = useGroupAxios();
-  const groupId = "1";
-  const [groupName, setGroupName] = useState("");
+  const { getProjects } = useProjectAxios();
+  const { logout } = useMypageAxios();
+  
+  const groupId = useParams<({ groupId })>().groupId;
 
-  // 그룹 상세 정보 조회 (예시)
+  const [groupName, setGroupName] = useState("");
+  const [groupCapacity, setGroupCapacity] = useState(0);
+
+  // 그룹 이름 수정 모달 오픈 여부를 관리하는 상태
+  const [isGroupUpdateModalOpen, setIsGroupUpdateModalOpen] = useState(false);
+
+  // 그룹 이름이 수정되면 갱신
+  const handleGroupNameUpdate = (newName: string) => {
+    setGroupName(newName)
+  };
+
+  // 그룹 상세 정보 조회
   useEffect(() => {
     const fetchGroupDetails = async () => {
       try {
-        // 실제 API 호출 예시:
-        // const data = await getGroupDetails(groupId);
-        // setGroupName(data.groupName);
-        setGroupName("C202"); // 임시 데이터
+        console.log("Fetching group details for groupId:", groupId);
+        const data = await getGroupDetails(groupId);
+        setGroupName(data.name);
+        setGroupCapacity(data.capacity);
       } catch (error) {
         console.error("그룹 상세 정보 조회 중 오류:", error);
       }
     };
     fetchGroupDetails();
-  }, [groupId]);
+  }, [groupId, getGroupDetails]);
 
   // 큰 네비게이션 바의 열림/닫힘 상태 (Context에서 관리)
   const { isProfileNavOpen, toggleProfileNav } = useNavigation();
+
+  // useNavigate 훅 사용
+  const navigate = useNavigate();
 
   // 작은 네비게이션 바 상태 (로컬 상태)
   const [isSmallNavOpen, setIsSmallNavOpen] = useState(false);
@@ -56,15 +85,12 @@ const ProfileNavigationBar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // "마이페이지" 모달 열림 상태 관리
-    const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
+  const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
 
   // 드롭다운 외부 클릭 시 닫힘 처리
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
@@ -117,87 +143,74 @@ const ProfileNavigationBar: React.FC = () => {
     setIsSmallNavOpen(false);
   };
 
-  // 컨테이너 높이와 상단 위치 (기존 위치 그대로)
+  // 컨테이너 높이와 상단 위치
   const containerHeight = isProfileNavOpen ? "h-full" : "h-auto";
   const navTopClass = isProfileNavOpen ? "top-0" : "top-[80px] bottom-[80px]";
 
   // 멤버 목록 관련
-  const [members, setMembers] = useState<GetGroupMembersResponse["members"]>([]);
-  const [isMemberOpen, setIsMemberOpen] = useState(true);
-  const { logout } = useMypageAxios();
-  const toggleMemberList = () => {
-    setIsMemberOpen(!isMemberOpen);
+  const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
+  const activeMemberCount = groupUsers.filter(user => user.status).length;
+
+  // 토글 관련
+  const [toggleStates, setToggleStates] = useState({
+    isGroupInfoOpen: true,
+    isMemberOpen: true,
+  });
+  
+  const toggle = (key: "isGroupInfoOpen" | "isMemberOpen") => {
+    setToggleStates((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
-
-  // 임시 멤버 데이터
-  const tempMembers: GetGroupMembersResponse["members"] = [
-    {
-      name: "이싸피",
-      image: "https://picsum.photos/30/30?random=1",
-      email: "alice@example.com",
-      role: "MANAGER",
-    },
-    {
-      name: "박싸피",
-      image: "https://picsum.photos/30/30?random=2",
-      email: "bob@example.com",
-      role: "Member",
-    },
-    {
-      name: "최싸피",
-      image: "https://picsum.photos/30/30?random=3",
-      email: "charlie@example.com",
-      role: "Member",
-    },
-    // 추가 테스트 데이터
-    {
-      name: "홍길동",
-      image: "https://picsum.photos/30/30?random=4",
-      email: "hong@example.com",
-      role: "Member",
-    },
-    {
-      name: "이몽룡",
-      image: "https://picsum.photos/30/30?random=5",
-      email: "lee@example.com",
-      role: "Member",
-    },
-    // 여러 번 추가해서 목록이 길어짐
-    {
-      name: "이싸피",
-      image: "https://picsum.photos/30/30?random=1",
-      email: "alice@example.com",
-      role: "MANAGER",
-    },
-    {
-      name: "박싸피",
-      image: "https://picsum.photos/30/30?random=2",
-      email: "bob@example.com",
-      role: "Member",
-    },
-    {
-      name: "최싸피",
-      image: "https://picsum.photos/30/30?random=3",
-      email: "charlie@example.com",
-      role: "Member",
-    },
-  ];
-
+  
+  // 그룹 멤버 조회 및 접속상태 불러오기 (프로젝트 목록 API 미구현시 빈 배열 사용)
   useEffect(() => {
     const fetchMembers = async () => {
+      if (!groupId) return;
       try {
-        // 실제 API 호출 예시:
-        // const data = await getGroupMembers(groupId);
-        // setMembers(data.members);
-        setMembers(tempMembers);
+        // 1️⃣ 그룹 멤버 정보 가져오기
+        const groupData = await getGroupMembers(groupId);
+        let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
+          id: user.id,
+          name: user.name,
+          image: user.image || profileImage,
+          status: false,
+          role: user.role
+        }));
+
+        // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
+        let projectData;
+        try {
+          projectData = await getProjects(groupId);
+        } catch (error) {
+          console.warn("프로젝트 목록 조회 API가 구현되지 않았습니다. 기본값을 사용합니다.");
+          projectData = { projects: [] };
+        }
+
+        // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
+        updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
+          const projectUser = projectData.projects
+            .flatMap((project) => project.users)
+            .find((user) => user.user_id === groupUser.id);
+          return projectUser
+            ? { ...groupUser, status: projectUser.status }
+            : groupUser;
+        });
+
+        setGroupUsers(updatedGroupUsers);
       } catch (error) {
         console.error("그룹 멤버 조회 중 오류:", error);
       }
     };
-    fetchMembers();
-  }, [groupId]);
 
-  // 드롭다운 토글 함수 (이름 및 아이콘 버튼 둘 다 클릭 시 실행)
+    fetchMembers();
+  }, [groupId, ]);
+  
+  // 로그인한 유저 role 확인
+  const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
+  
+  // 드롭다운 토글 함수
   const handleDropdownToggle = () => {
     setIsDropdownOpen((prev) => !prev);
   };
@@ -211,18 +224,19 @@ const ProfileNavigationBar: React.FC = () => {
   // "마이페이지" 버튼 클릭 시: 모달 열기
   const handleNavigateToMypage = () => {
     setIsDropdownOpen(false);
-    setActiveModal('mypage')
+    setActiveModal('mypage');
   };
 
   // 로그아웃 버튼 (예시)
-  const handleLogout = async() => {
-    try{
+  const handleLogout = async () => {
+    try {
       logout();
-    }catch(error){
+    } catch (error) {
       console.log(error);
-      console.log("logout 실패")
+      console.log("logout 실패");
     }
   };
+
   return (
     <div className="relative">
       {/* 토글 버튼 (네비게이션 바가 닫힌 상태) */}
@@ -274,39 +288,33 @@ const ProfileNavigationBar: React.FC = () => {
 
         {/* 프로필 영역 */}
         <div className="p-4">
-          <div className="grid grid-cols-3 gap-4 items-center">
+          <div className="grid grid-cols-4 gap-1 items-center">
             {/* 프로필 사진 */}
-            <div className="relative w-[70px] h-[70px] rounded-full bg-white flex items-center justify-center">
+            <div className="relative w-[50px] h-[50px] rounded-full bg-white flex items-center justify-center">
               <img
-                src="https://picsum.photos/70/70"
-                alt="프로필"
+                src={userProfile?.image || profileImage}
+                alt="ProfileImage"
                 className="w-full h-full rounded-full"
               />
             </div>
-            {/* 이름, 이메일, 드롭다운 버튼 (이름과 버튼 모두 클릭 시 드롭다운 열림) */}
-            <div className="col-span-2 relative" ref={dropdownRef}>
+            {/* 마이페이지, 로그아웃 드롭다운 버튼 */}
+            <div className="col-span-3 relative" ref={dropdownRef}>
               <div className="flex items-center">
                 <span
                   onClick={handleDropdownToggle}
-                  className="text-xl font-bold text-gray-800 cursor-pointer"
+                  className="font-bold text-[#4D4650] cursor-pointer"
                 >
-                  김싸피
+                  {userProfile?.name}
                 </span>
                 <button onClick={handleDropdownToggle} className="ml-2">
                   {isDropdownOpen ? (
-                    <ChevronUpIcon
-                      className="w-5 h-5 text-[#4D4650]"
-                      strokeWidth={2}
-                    />
+                    <ChevronUpIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
                   ) : (
-                    <ChevronDownIcon
-                      className="w-5 h-5 text-[#4D4650]"
-                      strokeWidth={2}
-                    />
+                    <ChevronDownIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
                   )}
                 </button>
               </div>
-              <p className="text-sm text-gray-600">example@email.com</p>
+              <p className="text-sm text-gray-600">{userProfile?.email}</p>
               {/* 드롭다운 메뉴 */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md overflow-hidden z-10">
@@ -334,51 +342,92 @@ const ProfileNavigationBar: React.FC = () => {
 
         {/* 그룹 이름 영역 */}
         <div className="flex items-center mx-5 mt-5 mb-2">
-          <UserGroupIcon className="w-6 h-6 text-gray-[#4D4650] mr-2" />
-          <span className="text-xl font-semibold text-[#4D4650]">{groupName}</span>
+          <span
+            className="text-xl cursor-pointer font-semibold text-[#4D4650] inline-flex items-center"
+            onClick={() => toggle("isGroupInfoOpen")}
+          >
+            {groupName}
+            {toggleStates.isGroupInfoOpen ? (
+              <ChevronUpIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+            )}
+          </span>
         </div>
+        {toggleStates.isGroupInfoOpen && (
+          <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
+            {userRole === "OWNER" && (
+              <div
+                className="p-2 cursor-pointer"
+                onClick={() => setIsGroupUpdateModalOpen(true)}
+                >
+                그룹 설정
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 멤버 목록 영역 */}
         <div>
-          <p
-            className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
-            onClick={toggleMemberList}
-          >
-            {isMemberOpen ? (
-              <ChevronUpIcon
-                className="w-5 h-5 text-[#4D4650] mr-2"
+        <p
+          className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
+          onClick={() => toggle("isMemberOpen")}
+        >
+          {toggleStates.isMemberOpen ? (
+            <ChevronUpIcon
+              className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
+              strokeWidth={2}
+            />
+          ) : (
+            <ChevronDownIcon
+              className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
+              strokeWidth={2}
+            />
+          )}
+          {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
+          <div className="flex items-center justify-between flex-1 text-[#4D4650]">
+            <span>
+              Members{" "}
+              <span className="text-base">
+                ({activeMemberCount}/{groupCapacity})
+              </span>
+            </span>
+            {(userRole === "OWNER" || userRole === "MANAGER") && (
+              <Cog6ToothIcon
+                className="w-4 h-4 text-[#4D4650] cursor-pointer"
                 strokeWidth={2}
-              />
-            ) : (
-              <ChevronDownIcon
-                className="w-5 h-5 text-[#4D4650] mr-2"
-                strokeWidth={2}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/userrole");
+                }}
               />
             )}
-            <span className="text-[#4D4650]">Members</span>
-          </p>
-          {isMemberOpen && (
-            // 멤버 목록 스크롤 기능 구현
+          </div>
+        </p>
+
+          {toggleStates.isMemberOpen && (
             <div
               className="ml-10 mb-2 overflow-y-auto"
               style={{
-                height: isProfileNavOpen
-                  ? "calc(100vh - 250px)" // 완전히 열린 상태
-                  : "calc(100vh - 380px)" // 호버 상태
+                height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 380px)",
               }}
             >
               <ul>
-                {members.map((member, idx) => (
-                  <li key={idx} className="flex items-center my-2">
+                {groupUsers.map((groupUser) => (
+                  <li key={groupUser.id} className="flex items-center my-2">
                     <div className="relative w-[30px] h-[30px]">
                       <img
-                        src={member.image}
-                        alt={member.name}
+                        src={groupUser.image}
+                        alt={groupUser.name}
                         className="w-full h-full rounded-full border-2 border-gray-300"
                       />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
+                      <span
+                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                          groupUser.status ? "bg-green-500" : "bg-gray-400"
+                        }`}
+                      />
                     </div>
-                    <span className="ml-4 text-[#4D4650]">{member.name}</span>
+                    <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
                   </li>
                 ))}
               </ul>
@@ -387,6 +436,15 @@ const ProfileNavigationBar: React.FC = () => {
         </div>
       </div>
 
+      {/* 그룹 이름 수정 모달 렌더링 */}
+      <GroupUpdateNameModal
+        isOpen={isGroupUpdateModalOpen}
+        onClose={() => setIsGroupUpdateModalOpen(false)}
+        groupId={groupId}
+        currentName={groupName}
+        onUpdate={handleGroupNameUpdate}
+      />
+
       {/* MyPageModal 렌더링 */}
       {activeModal === 'mypage' && (
         <MyPageModal
@@ -394,7 +452,6 @@ const ProfileNavigationBar: React.FC = () => {
           onClose={closeModal}
           onSwitchToLeave={openDeleteModal}
           onSwitchToPictureChange={openPictureModal}
-          // groupId={/* 현재 그룹 ID를 전달할 수 있다면 전달 */}
         />
       )}
       {activeModal === 'delete' && (

@@ -47,7 +47,7 @@ const AppLayout = () => (
           ),
         },
         {
-          path: "projectlist:groupId",
+          path: "projectlist/:groupId",
           element: (
             <Suspense fallback={Loading}>
               <ProjectListPage />
