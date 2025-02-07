@@ -8,11 +8,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
+@ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Project extends BaseEntity {
 
   @Id
@@ -44,6 +50,31 @@ public class Project extends BaseEntity {
   private Boolean autoStop;
 
   @Column(nullable = false)
-  @ColumnDefault(value = "false")
   private Boolean isDeleted;
+
+  @PrePersist
+  public void prePersist() {
+    if (status == null) {
+      status = true;
+    }
+    if (autoStop == null) {
+      autoStop = false;
+    }
+    if (isDeleted == null) {
+      isDeleted = false;
+    }
+  }
+
+  @Builder
+  public Project(Group group, ProjectImage projectImage, Performance performance, String name,
+      String containerId, Boolean status, Boolean autoStop, Boolean isDeleted) {
+    this.group = group;
+    this.projectImage = projectImage;
+    this.performance = performance;
+    this.name = name;
+    this.containerId = containerId;
+    this.status = (status != null) ? status : true;
+    this.autoStop = (autoStop != null) ? autoStop : false;
+    this.isDeleted = (isDeleted != null) ? isDeleted : false;
+  }
 }

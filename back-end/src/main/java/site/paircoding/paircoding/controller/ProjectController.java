@@ -5,14 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.Performance;
+import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
+import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.service.GroupService;
 import site.paircoding.paircoding.service.ProjectService;
@@ -21,6 +25,36 @@ import site.paircoding.paircoding.service.ProjectService;
 @RequiredArgsConstructor
 @RequestMapping("/v1/groups/{groupId}/projects")
 public class ProjectController {
+
+  private final ProjectService projectService;
+  private final GroupService groupService;
+
+  // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버 권한 유저
+  @GetMapping("/users")
+  public ApiResponse<GroupUsersResponse> getUsers(
+      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @PathVariable Integer groupId) {
+    User user = customUserDetails.getUser();
+    List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
+    GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
+    return ApiResponse.success(groupUsersResponse);
+  }
+
+  // 프로젝트 생성
+  @PostMapping()
+  public Project createProject(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @PathVariable Integer groupId,
+      @RequestBody ProjectCreateRequest request) {
+
+    // 유저 오너/매니저 권한 확인
+    User user = customUserDetails.getUser();
+
+    return projectService.createProject(groupId, request);
+  }
+
+  // 그룹 내 참여중인 프로젝트 리스트 조회
+
+  // 프로젝트 상세 조회
 
   @RestController
   @RequestMapping("/v1/projects")
@@ -44,26 +78,4 @@ public class ProjectController {
       return ApiResponse.success(projectService.getPerformance());
     }
   }
-
-  private final ProjectService projectService;
-  private final GroupService groupService;
-
-  // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버
-  @GetMapping("/users")
-  public ApiResponse<GroupUsersResponse> getUsers(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId) {
-    User user = customUserDetails.getUser();
-    List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
-    GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
-    return ApiResponse.success(groupUsersResponse);
-  }
-
-  // 프로젝트 생성
-
-  // 그룹 내 참여중인 프로젝트 리스트 조회
-
-  // 프로젝트 상세 조회
-
-
 }

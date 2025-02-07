@@ -16,12 +16,21 @@ public class Performance {
   private Integer id;
 
   @Column(nullable = false)
-  private Float cpu;
+  private String cpu;
 
   @Column(nullable = false)
-  private Integer ram;
+  private String cpuDescription;
 
   @Column(nullable = false)
-  private Integer disk;
+  private String memory;
+
+  @Column(nullable = false)
+  private String memoryDescription;
+
+  @Column(nullable = false)
+  private String storage;
+
+  @Column(nullable = false)
+  private String storageDescription;
 
 }
