@@ -29,7 +29,8 @@ public class ControllerExceptionHandler {
   @ExceptionHandler({Exception.class})
   public ResponseEntity<ApiResponse<?>> serverErrorHandler(Exception ex) {
     log.error("Unexpected exception occurred: {}", ex.getStackTrace(), ex);
-    CustomException customException = new CustomException(ErrorCode.UNEXPECTED, ex.getMessage());
+    CustomException customException = new CustomException(ErrorCode.UNEXPECTED,
+        "Internal Server Error");
     return newResponseEntity(customException);
   }
 }
