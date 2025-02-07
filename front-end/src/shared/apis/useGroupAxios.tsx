@@ -122,6 +122,19 @@ const useGroupAxios = () => {
   };
 
   /**
+   * 그룹 초대 링크 조회
+   */
+  const getInvitationLink = async (groupId: string): Promise<GroupInviteLinkResponse> => {
+    try {
+      const response = await groupAxios.get(`/v1/groups/${groupId}/invitation`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error creating invitation link for group ${groupId}:`, error);
+      throw error;
+    }
+  };
+
+  /**
    * 그룹 초대 링크 생성
    */
   const createInvitationLink = async (groupId: string): Promise<GroupInviteLinkResponse> => {
@@ -137,9 +150,9 @@ const useGroupAxios = () => {
   /**
    * 그룹 참가
    */
-  const joinGroup = async (groupId: string): Promise<JoinGroupResponse> => {
+   const joinGroup = async (groupId: string, code: string): Promise<JoinGroupResponse> => {
     try {
-      const response = await groupAxios.post(`/v1/groups/${groupId}/join`);
+      const response = await groupAxios.post(`/v1/groups/${groupId}/join`, {code: `${code}`,});
       return response.data.data;
     } catch (error) {
       console.error(`Error joining group ${groupId}:`, error);
@@ -256,6 +269,7 @@ const useGroupAxios = () => {
     updateGroupName,
     deleteGroup,
     getGroupMembers,
+    getInvitationLink,
     createInvitationLink,
     joinGroup,
     leaveGroup,

@@ -88,7 +88,8 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
         }
         // 리소스 없음
         if (error.response?.status === 404) {
-          alert('요청한 페이지를 찾을 수 없습니다.');
+          // alert('요청한 페이지를 찾을 수 없습니다.');
+          console.log("404 error")
         }
         // 충돌(Conflict)
         if (error.response?.status === 409) {

@@ -6,6 +6,7 @@ import {
   ClipboardDocumentIcon
 } from '@heroicons/react/24/solid';
 import { GroupInviteLinkResponse } from '../shared/types/groupApiResponse';
+import useGroupAxios from '../shared/apis/useGroupAxios';
 
 Modal.setAppElement('#root');
 
@@ -22,102 +23,93 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // --- 초대 링크 상태 ---
+  // ✅ API 훅에서 함수 가져오기
+  const { getInvitationLink, createInvitationLink } = useGroupAxios();
+
+  // 초대 링크 관련 상태
   const [inviteLink, setInviteLink] = useState('');
-  const [timeLeftSec, setTimeLeftSec] = useState(0); // 남은 초
+  const [timeLeftSec, setTimeLeftSec] = useState(0);
+  const [expirationDate, setExpirationDate] = useState<Date | null>(null);
   const [isExpired, setIsExpired] = useState(false);
 
-  // --- 로딩/에러 상태 ---
+  // 로딩/에러 상태
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 모달 열릴 때 / 닫힐 때 처리
+  // 모달이 열릴 때, 기존 초대 링크 확인
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
+    if (!isOpen || !groupId) return;
+
+    const fetchExistingLink = async () => {
+      try {
+        const data: GroupInviteLinkResponse = await getInvitationLink(groupId);
+        console.log(data);
+        const { code, expirationTime } = data;
+
+        setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
+        setTimeLeftSec(expirationTime);
+        setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
+        console.log(expirationDate);
+      } catch (err: any) {
+        if (err.status === 404) {
+          console.log('초대 링크가 존재하지 않습니다.');
+        } else {
+          console.error('초대 링크 확인 에러:', err);
+          setError('초대 링크를 불러올 수 없습니다.');
+        }
       }
     };
 
-    if (isOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      if (modalRef.current) {
-        modalRef.current.focus();
-      }
-    } else {
-      document.removeEventListener('keydown', handleKeyDown);
-    }
+    fetchExistingLink();
+  }, [isOpen, groupId]);
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  // 모달 닫힘 시 상태 초기화
-  const handleClose = () => {
-    setInviteLink('');
-    setTimeLeftSec(0);
-    setIsExpired(false);
-    setError('');
-    onClose();
-  };
-
-  // ★임시(목업) 초대 링크 생성★ (15분 만료: 900초)
-  const createInvitationLinkMock = async (): Promise<GroupInviteLinkResponse> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          invite_link: `https://example.com/invite/mock-123`,
-          expires_at: '', // 목업이므로 사용 안 함
-        });
-      }, 500);
-    });
-  };
-
-  // 초대 링크 생성 핸들러
+  // 초대 링크 생성
   const handleCreateInvitationLink = async () => {
+    if (!groupId) return;
+
     setIsLoading(true);
     setError('');
     setIsExpired(false);
 
     try {
-      // 실제 API 호출 시:
-      // const data = await realCreateInvitationLink(groupId);
+      const data: GroupInviteLinkResponse = await createInvitationLink(groupId);
+      const { code, expirationTime } = data;
 
-      // 목업
-      const data = await createInvitationLinkMock();
-      setInviteLink(data.invite_link);
-      setTimeLeftSec(900); // 15분
+      setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
+      setTimeLeftSec(expirationTime);
+      setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
     } catch (err) {
       console.error('초대 링크 생성 에러:', err);
-      setError('초대 링크를 생성할 수 없습니다. (목업)');
+      setError('초대 링크를 생성할 수 없습니다.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 카운트다운 (매 초마다 timeLeftSec 감소)
-  useEffect(() => {
-    if (!inviteLink) return; // 링크가 없으면 카운트다운 X
-    if (isExpired) return;   // 이미 만료되었으면 X
+  // 남은 시간 카운트다운
+useEffect(() => {
+  // 초대 링크가 없으면 카운트다운을 시작하지 않음.
+  if (!inviteLink) return;
+  
+  // 남은 시간이 0 이하이면 만료 처리
+  if (timeLeftSec <= 0) {
+    setIsExpired(true);
+    return;
+  }
 
-    if (timeLeftSec <= 0) {
-      setIsExpired(true);
-      return;
-    }
+  const timerId = setInterval(() => {
+    setTimeLeftSec((prev) => {
+      if (prev <= 1) {
+        clearInterval(timerId);
+        setIsExpired(true);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
 
-    const timerId = setInterval(() => {
-      setTimeLeftSec((prev) => {
-        if (prev <= 1) {
-          setIsExpired(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timerId);
-  }, [inviteLink, timeLeftSec, isExpired]);
+  return () => clearInterval(timerId);
+}, [inviteLink, timeLeftSec]);
 
   // 남은 시간 포맷 (분:초)
   const formatTime = (sec: number) => {
@@ -135,6 +127,16 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
     } catch (err) {
       alert('복사 실패: ' + err);
     }
+  };
+
+  // 모달 닫기 핸들러
+  const handleClose = () => {
+    setInviteLink('');
+    setTimeLeftSec(0);
+    setExpirationDate(null);
+    setIsExpired(false);
+    setError('');
+    onClose();
   };
 
   return (
@@ -167,29 +169,15 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
         {/* 중앙 아이콘 */}
         <LinkIcon className="w-12 h-12 text-blue-500 mb-4" />
 
-        <h2 className="text-2xl font-semibold text-gray-800 mb-2">초대 링크 생성</h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-2">초대 링크</h2>
 
-        {/* 링크가 없으면 => 생성 버튼 */}
-        {!inviteLink ? (
-          <div className="text-center text-gray-700">
-            <p className="mb-4">
-              아직 초대 링크가 없습니다. <br /> 아래 버튼을 클릭하여 초대 링크를 생성하세요.
-            </p>
-            <button
-              onClick={handleCreateInvitationLink}
-              disabled={isLoading}
-              className="px-4 py-2 bg-[#5C8290] text-white rounded-md hover:bg-[#4a6d77] disabled:opacity-50 transition-colors"
-            >
-              {isLoading ? '생성 중...' : '초대 링크 생성'}
-            </button>
-          </div>
-        ) : (
-          // 링크가 있는 경우
+        {/* 초대 링크 존재 시 */}
+        {inviteLink ? (
           <div className="text-center w-full">
             <div className="text-gray-800 mb-2 flex items-center justify-center gap-2">
-              <span className="text-blue-600 font-semibold break-all">{inviteLink}</span>
-
-              {/* Heroicons 아이콘으로 링크 복사 */}
+              <span className="text-blue-600 font-semibold break-all">
+                {inviteLink}
+              </span>
               <button
                 onClick={handleCopyToClipboard}
                 disabled={!inviteLink || isExpired}
@@ -198,7 +186,14 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
                 <ClipboardDocumentIcon className="w-6 h-6 text-gray-400 hover:text-gray-500" />
               </button>
             </div>
-
+            {expirationDate && (
+              <p className="text-gray-800 mb-2">
+                만료 시각:{' '}
+                <span className="text-green-600 font-medium">
+                  {expirationDate.toLocaleString()}
+                </span>
+              </p>
+            )}
             <p className="text-gray-800 mb-2">
               {isExpired ? (
                 <span className="text-red-500">만료되었습니다.</span>
@@ -212,12 +207,21 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
               )}
             </p>
           </div>
+        ) : (
+          <div className="text-center text-gray-700">
+            <p className="mb-4">아직 초대 링크가 없습니다. 생성하세요.</p>
+            <button
+              onClick={handleCreateInvitationLink}
+              disabled={isLoading}
+              className="px-4 py-2 bg-[#5C8290] text-white rounded-md hover:bg-[#4a6d77] disabled:opacity-50 transition-colors"
+            >
+              {isLoading ? '생성 중...' : '초대 링크 생성'}
+            </button>
+          </div>
         )}
 
-        {/* 에러 메시지 */}
         {error && <p className="text-red-500 mt-4">{error}</p>}
 
-        {/* 하단 닫기 버튼 */}
         <div className="mt-6 flex justify-end w-full">
           <button
             onClick={handleClose}
