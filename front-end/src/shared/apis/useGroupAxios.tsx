@@ -46,7 +46,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 상세 조회
    */
-  const getGroupDetails = async (groupId: string): Promise<GetGroupDetailsResponse> => {
+  const getGroupDetails = async (groupId: number): Promise<GetGroupDetailsResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/${groupId}`);
       return response.data.data;
@@ -85,7 +85,7 @@ const useGroupAxios = () => {
   /**
    * 그룹명 변경
    */
-  const updateGroupName = async (groupId: string, name: string): Promise<boolean> => {
+  const updateGroupName = async (groupId: number, name: string): Promise<boolean> => {
     try {
       await groupAxios.patch(`/v1/groups/${groupId}`, { name });
       return true;
@@ -98,7 +98,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 삭제
    */
-  const deleteGroup = async (groupId: string): Promise<boolean> => {
+  const deleteGroup = async (groupId: number): Promise<boolean> => {
     try {
       await groupAxios.delete(`/v1/groups/${groupId}`);
       return true;
@@ -111,7 +111,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 멤버 목록 조회
    */
-  const getGroupMembers = async (groupId: string): Promise<GetGroupMembersResponse> => {
+  const getGroupMembers = async (groupId: number): Promise<GetGroupMembersResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/${groupId}/users`);
       return response.data.data;
@@ -124,7 +124,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 초대 링크 조회
    */
-  const getInvitationLink = async (groupId: string): Promise<GroupInviteLinkResponse> => {
+  const getInvitationLink = async (groupId: number): Promise<GroupInviteLinkResponse> => {
     try {
       const response = await groupAxios.get(`/v1/groups/${groupId}/invitation`);
       return response.data.data;
@@ -137,7 +137,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 초대 링크 생성
    */
-  const createInvitationLink = async (groupId: string): Promise<GroupInviteLinkResponse> => {
+  const createInvitationLink = async (groupId: number): Promise<GroupInviteLinkResponse> => {
     try {
       const response = await groupAxios.post(`/v1/groups/${groupId}/invitation`);
       return response.data.data;
@@ -150,7 +150,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 참가
    */
-   const joinGroup = async (groupId: string, code: string): Promise<JoinGroupResponse> => {
+   const joinGroup = async (groupId: number, code: string): Promise<JoinGroupResponse> => {
     try {
       const response = await groupAxios.post(`/v1/groups/${groupId}/join`, {code: `${code}`,});
       return response.data.data;
@@ -163,7 +163,7 @@ const useGroupAxios = () => {
   /**
    * 그룹 나가기
    */
-  const leaveGroup = async (groupId: string): Promise<boolean> => {
+  const leaveGroup = async (groupId: number): Promise<boolean> => {
     try {
       await groupAxios.delete(`/v1/groups/${groupId}/quit`);
       return true;
@@ -177,8 +177,8 @@ const useGroupAxios = () => {
    * 멤버 권한 변경
    */
   const updateMemberRole = async (
-    groupId: string,
-    userId: string,
+    groupId: number,
+    userId: number,
     role: string
   ): Promise<UpdateMemberRoleResponse> => {
     try {
@@ -193,7 +193,7 @@ const useGroupAxios = () => {
   /**
    * 멤버 추방
    */
-  const expelMember = async (groupId: string, userId: string): Promise<boolean> => {
+  const expelMember = async (groupId: number, userId: number): Promise<boolean> => {
     try {
       await groupAxios.delete(`/v1/groups/${groupId}/users/${userId}`);
       return true;
@@ -206,7 +206,7 @@ const useGroupAxios = () => {
   /**
    * 오너 위임
    */
-  const delegateOwner = async (groupId: string, newOwnerId: string): Promise<boolean> => {
+  const delegateOwner = async (groupId: number, newOwnerId: number): Promise<boolean> => {
     try {
       await groupAxios.patch(`/v1/groups/${groupId}/users/delegation`, { newOwnerId });
       return true;
@@ -219,7 +219,7 @@ const useGroupAxios = () => {
   /**
    * 명세서 추가
    */
-  const addSpec = async (groupId: string, specData: Record<string, unknown>): Promise<boolean> => {
+  const addSpec = async (groupId: number, specData: Record<string, unknown>): Promise<boolean> => {
     try {
       await groupAxios.post(`/v1/groups/${groupId}/spec`, specData);
       return true;
@@ -233,8 +233,8 @@ const useGroupAxios = () => {
    * 명세서 수정
    */
   const updateSpec = async (
-    groupId: string,
-    specId: string,
+    groupId: number,
+    specId: number,
     specData: Record<string, unknown>
   ): Promise<boolean> => {
     try {
@@ -249,7 +249,7 @@ const useGroupAxios = () => {
   /**
    * 명세서 삭제
    */
-  const deleteSpec = async (groupId: string, specId: string): Promise<boolean> => {
+  const deleteSpec = async (groupId: number, specId: number): Promise<boolean> => {
     try {
       await groupAxios.delete(`/v1/groups/${groupId}/spec/${specId}`);
       return true;
