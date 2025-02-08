@@ -32,9 +32,10 @@ public class ProjectController {
 
   // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버 권한 유저
   @GetMapping("/users")
+  @GroupRoleCheck(Role.MANAGER)
   public ApiResponse<List<GroupUserResponse>> getUsers(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId) {
+      @PathVariable("groupId") Integer groupId) {
 
     // 유저 오너/매니저 권한 확인
     User user = customUserDetails.getUser();
@@ -44,9 +45,10 @@ public class ProjectController {
 
   // 프로젝트 생성
   @PostMapping()
+  @GroupRoleCheck(Role.MANAGER)
   public ApiResponse<Project> createProject(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId,
+      @PathVariable("groupId") Integer groupId,
       @RequestBody ProjectCreateRequest request) {
 
     // 유저 오너/매니저 권한 확인
