@@ -36,12 +36,13 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
-	
+
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'io.fabric8:kubernetes-client:7.0.1'
 
+    implementation 'com.google.protobuf:protobuf-java:3.21.12'
     implementation 'io.livekit:livekit-server:0.8.2'
-    
+
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
