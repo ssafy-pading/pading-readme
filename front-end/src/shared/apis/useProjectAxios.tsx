@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { AccessProjectResponse, CreateProjectResponse, GetLanguageListResponse, GetOSListResponse, GetProjectDetailsResponse, GetProjectListResponse, GetSpecificationListResponse } from '../types/projectApiResponse';
+import { AccessProjectResponse, CreateProjectResponse, GetLanguageListResponse, GetMemberListResponse, GetOSListResponse, GetPerformanceListResponse, GetProjectDetailsResponse, GetProjectListResponse } from '../types/projectApiResponse';
 
 /**
  * Custom hook for handling Project-related API requests.
@@ -45,9 +45,9 @@ const useProjectAxios = () => {
   /**
    * OS 목록 조회
    */
-  const getOSList = async (): Promise<GetOSListResponse> => {
+  const getOSList = async (language: string): Promise<GetOSListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/os');
+      const response = await projectAxios.get(`/v1/projects/os?language=${language}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching OS list:', error);
@@ -58,12 +58,25 @@ const useProjectAxios = () => {
   /**
    * 사양 목록 조회
    */
-  const getPerformanceList = async (): Promise<GetSpecificationListResponse> => {
+  const getPerformanceList = async (): Promise<GetPerformanceListResponse> => {
     try {
       const response = await projectAxios.get('/v1/projects/performance');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching performance list:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * 멤버 목록 조회
+   */
+  const getProjectsMemberList = async (groupId: number): Promise<GetMemberListResponse> => {
+    try {
+      const response = await projectAxios.get(`/v1/groups/${groupId}/projects/users`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching MemberList for group ${groupId}:`, error);
       throw error;
     }
   };
@@ -164,6 +177,7 @@ const useProjectAxios = () => {
     getLanguages,
     getOSList,
     getPerformanceList,
+    getProjectsMemberList,
     getProjects,
     createProject,
     getProjectDetails,
