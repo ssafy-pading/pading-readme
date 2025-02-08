@@ -47,11 +47,13 @@ public class OpenviduController {
   public ResponseEntity<String> receiveWebhook(@RequestHeader("Authorization") String authHeader,
       @RequestBody String body) {
     WebhookReceiver webhookReceiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
+    System.out.println("LiveKit Webhook: " + body + " " + authHeader);
+
     try {
       WebhookEvent event = webhookReceiver.receive(body, authHeader);
       System.out.println("LiveKit Webhook: " + event.toString());
     } catch (Exception e) {
-      System.err.println("Error validating webhook event: " + e.getMessage());
+      System.out.println("Error validating webhook event: " + e.getMessage());
     }
     return ResponseEntity.ok("ok");
   }
