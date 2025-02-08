@@ -33,20 +33,13 @@ public class OpenviduController {
   @PostMapping(value = "/token/{projectId}")
   public ResponseEntity<Map<String, String>> createToken(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer projectId) {
-    User user = customUserDetails.getUser();
-
-    /**
-     * projectId 검증 필요
-     *
-     *
-     */
-
+      @PathVariable String projectId) {
     AccessToken token = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
+    User user = customUserDetails.getUser();
     token.setName(user.getName());
-    token.setIdentity(user.getId().toString());
-    token.addGrants(new RoomJoin(true), new RoomName(projectId.toString()));
-
+    token.setIdentity(user.getId() + "");
+    token.addGrants(new RoomJoin(true), new RoomName(projectId));
+    System.out.println("token: " + token.toJwt());
     return ResponseEntity.ok(Map.of("token", token.toJwt()));
   }
 
@@ -62,4 +55,6 @@ public class OpenviduController {
     }
     return ResponseEntity.ok("ok");
   }
+
 }
+
