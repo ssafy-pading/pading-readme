@@ -27,6 +27,24 @@ public class ProjectController {
 
   private final ProjectService projectService;
 
+  // 사용 가능한 언어 리스트 조회
+  @GetMapping("/language")
+  public ApiResponse<List<ProjectLanguageDto>> getLanguage() {
+    return ApiResponse.success(projectService.getLanguage());
+  }
+
+  // 사용 가능한 OS 리스트 조회
+  @GetMapping("/os")
+  public ApiResponse<List<ProjectOSDto>> getOS(@RequestParam String language) {
+    return ApiResponse.success(projectService.getOS(language));
+  }
+
+  // 사용 가능한 사양 리스트 조회
+  @GetMapping("/performance")
+  public ApiResponse<List<ProjectPerformanceDto>> getPerformance() {
+    return ApiResponse.success(projectService.getPerformance());
+  }
+
   // 등록 가능한 멤버 리스트 조회 - 그룹 내 프로젝트에 없는 멤버 권한 유저
   @GetMapping("/users")
   @GroupRoleCheck(Role.MANAGER)
@@ -47,27 +65,5 @@ public class ProjectController {
   // 그룹 내 참여중인 프로젝트 리스트 조회
 
   // 프로젝트 상세 조회
-
-  @RestController
-  @RequestMapping("/v1/projects")
-  public class OptionController {
-
-    // 사용 가능한 언어 리스트 조회
-    @GetMapping("/language")
-    public ApiResponse<List<ProjectLanguageDto>> getLanguage() {
-      return ApiResponse.success(projectService.getLanguage());
-    }
-
-    // 사용 가능한 OS 리스트 조회
-    @GetMapping("/os")
-    public ApiResponse<List<ProjectOSDto>> getOS(@RequestParam String language) {
-      return ApiResponse.success(projectService.getOS(language));
-    }
-
-    // 사용 가능한 사양 리스트 조회
-    @GetMapping("/performance")
-    public ApiResponse<List<ProjectPerformanceDto>> getPerformance() {
-      return ApiResponse.success(projectService.getPerformance());
-    }
-  }
+  
 }
