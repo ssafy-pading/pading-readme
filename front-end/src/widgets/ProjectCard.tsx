@@ -12,9 +12,8 @@ import {
 interface ProjectCardProps {
   groupId: string;
   project: Project;
-  userRole: 'OWNER' | 'MANAGER' | 'MEMBER';
+  userRole: string
   onDelete: (project: Project) => void;     // Delete 로직 콜백
-  onExit?: (project: Project) => void;      // Exit 로직 콜백 (선택적)
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -22,7 +21,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   userRole,
   onDelete,
-  onExit,
 }) => {
   const { name, language_id, os_id, performance_id, users } = project;
   const navigate = useNavigate();
@@ -104,7 +102,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                     <button
                       className="w-full flex items-center text-left px-4 py-2 text-sm text-[#4B5563] hover:bg-gray-100"
                       onClick={() => {
-                        onExit?.(project);
                         setIsDropdownOpen(false);
                       }}
                       role="menuitem"

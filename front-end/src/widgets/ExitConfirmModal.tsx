@@ -42,12 +42,13 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
       contentLabel="Exit Confirmation"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-lg relative focus:outline-none"
+      shouldCloseOnOverlayClick={true}
     >
       <div
         className="w-full flex flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
         ref={modalRef}
         tabIndex={-1}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* 헤더 */}
         <div className="w-full flex justify-end">
@@ -70,7 +71,7 @@ const ExitConfirmModal: React.FC<ExitConfirmModalProps> = ({
           
         </p>
 
-        {/* 버튼들 */}
+        {/* 버튼 */}
         <div className="mt-6 flex justify-end space-x-4 w-full">
           <button
             onClick={onClose}

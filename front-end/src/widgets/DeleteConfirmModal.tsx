@@ -1,4 +1,3 @@
-// src/components/DeleteConfirmModal.tsx
 import React, { useEffect, useRef } from 'react';
 import Modal from 'react-modal';
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid';
@@ -13,7 +12,11 @@ interface DeleteConfirmModalProps {
 // Modal 접근성 설정
 Modal.setAppElement('#root');
 
-const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose, onConfirm, projectName }) => {
+const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  projectName }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,14 +28,10 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      // 포커스 이동
-      if (modalRef.current) {
-        modalRef.current.focus();
-      }
+      if (modalRef.current) modalRef.current.focus();
     } else {
       document.removeEventListener('keydown', handleKeyDown);
     }
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
@@ -46,13 +45,12 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" // 트랜지션 클래스 제거
       className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-lg relative focus:outline-none" // 트랜스폼 및 트랜지션 클래스 제거
       shouldCloseOnOverlayClick={true}
-      closeTimeoutMS={0} // 애니메이션 시간 제거
     >
       <div
         className="w-full flex flex-col items-center"
-        onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 이벤트 전파 방지
+        onClick={(e) => e.stopPropagation()}
         ref={modalRef}
-        tabIndex={-1} // 포커스를 받을 수 있도록 설정
+        tabIndex={-1}
       >
         {/* 헤더 */}
         <div className="w-full flex justify-end">
@@ -65,7 +63,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ isOpen, onClose
           </button>
         </div>
 
-        {/* 느낌표 아이콘 */}
+        {/* 아이콘 */}
         <ExclamationTriangleIcon className="w-12 h-12 text-yellow-500 mb-4" />
 
         {/* 본문 */}
