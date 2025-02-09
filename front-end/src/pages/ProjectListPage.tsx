@@ -19,6 +19,7 @@ import useProjectAxios from '../shared/apis/useProjectAxios';
 // 이미지 import
 import group_create_icon from '../assets/group_create_icon.svg';
 import { LinkIcon } from '@heroicons/react/24/outline';
+import InviteLink from '../widgets/CreateLinkComponents';
 
 // 타입 정의
 export type Project = GetProjectListResponse['projects'][number];
@@ -31,7 +32,7 @@ const ProjectListPage: React.FC = () => {
 
   // ───── 유저 역할 가져오기 ─────
   const userRole = 'OWNER'; // 추후에 실제 로그인 로직에 따라 가져와야 함
-  const groupId = '1'; // 추후에 URL 파라미터로 받아와야 함
+  const groupId = '3'; // 추후에 URL 파라미터로 받아와야 함
 
   // ───── API 훅 가져오기 ─────
   const { getGroupDetails } = useGroupAxios();
@@ -224,7 +225,7 @@ const ProjectListPage: React.FC = () => {
     <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
       {/* 프로젝트 목록 */}
       <div className="relative pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
-        <div className='flex justify-between items-center'>
+        <div className='flex justify-between items-center relative'>
           <p className="text-5xl text-[#4D4650] font-semibold mt-20 mb-8">
             {groupName}
           </p>
@@ -232,18 +233,22 @@ const ProjectListPage: React.FC = () => {
           {/* Heroicons를 사용한 초대 링크 만들기 버튼 */}
           {/* OWNER, MANAGER 만 초대 링크 생성 가능 */}
           {(userRole === 'OWNER' || userRole === 'MANAGER') && (
-            <button
-              className="inline-flex items-center px-4 py-2 bg-[#5C8290] text-white 
-              rounded border border-[#ccc] shadow-md 
-              hover: hover:shadow-lg 
-              transition-transform transform hover:scale-105
-              focus:outline-none focus:ring-2 focus:ring-blue-300
-              mt-20 mb-5"
-              onClick={() => openModal('link')}
-            >
-              <LinkIcon className="w-5 h-5 mr-2" />
-              <span>초대 링크 생성</span>
-            </button>
+            // <button
+            //   className="inline-flex items-center px-4 py-2 bg-[#5C8290] text-white 
+            //   rounded border border-[#ccc] shadow-md 
+            //   hover: hover:shadow-lg 
+            //   transition-transform transform hover:scale-105
+            //   focus:outline-none focus:ring-2 focus:ring-blue-300
+            //   mt-20 mb-5"
+            //   onClick={() => openModal('link')}
+            // >
+            //   <LinkIcon className="w-5 h-5 mr-2" />
+            //   <span>초대 링크 생성</span>
+            // </button>
+            // {/* CreateLinkComponents */}
+              <InviteLink
+              groupId={groupId}
+            />
           )}
         </div>
         <hr className="mb-10" />
@@ -299,12 +304,13 @@ const ProjectListPage: React.FC = () => {
       />
 
       {/* CreateLinkModal */}
-      <CreateLinkModal
+      {/* <CreateLinkModal
         isOpen={modalState.link}
         onClose={() => closeModal('link')}
         groupId={groupId}
-      />
+      /> */}
       
+
       {/* 네비게이션 바 */}
       <div className='relative z-50'>
       <ProfileNavigationBar />
