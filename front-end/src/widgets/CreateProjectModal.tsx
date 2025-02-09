@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
-import Select, { SingleValue, MultiValue, ActionMeta } from "react-select";
+import Select, { SingleValue, MultiValue } from "react-select";
 import cross from "../assets/cross.svg";
 import cpu from "/src/assets/cpu.svg";
 import memory from "/src/assets/memory.svg";
@@ -155,10 +155,10 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       try{
         // 그룹 아이디 야매로 넣기
         const memberList = await getProjectsMemberList(3);
-        const languages = await getLanguages();
-        const performanceList = await getPerformanceList();
         // // 아래는 원래 넣어야 하는 값
         // const memberList = await getProjectsMemberList(Number(groupId));
+        const languages = await getLanguages();
+        const performanceList = await getPerformanceList();
         // 언어, os, 사양, member 담아주기
         setLanguageOptions(
           languages.map((lang) => ({

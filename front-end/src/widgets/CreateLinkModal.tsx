@@ -44,11 +44,11 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
       try {
         const data: GroupInviteLinkResponse = await getInvitationLink(groupId);
         console.log(data);
-        const { code, expirationTime } = data;
+        const { invite_link, expires_at } = data;
 
-        setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
-        setTimeLeftSec(expirationTime);
-        setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
+        setInviteLink(`${window.location.origin}/invite/${groupId}/${invite_link}`);
+        setTimeLeftSec(expires_at);
+        setExpirationDate(new Date(Date.now() + (expires_at * 1000)));
         console.log(expirationDate);
       } catch (err: any) {
         if (err.status === 404) {
@@ -73,11 +73,11 @@ const CreateLinkModal: React.FC<CreateLinkModalProps> = ({
 
     try {
       const data: GroupInviteLinkResponse = await createInvitationLink(groupId);
-      const { code, expirationTime } = data;
+      const { invite_link, expires_at } = data;
 
-      setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
-      setTimeLeftSec(expirationTime);
-      setExpirationDate(new Date(Date.now() + (expirationTime * 1000)));
+      setInviteLink(`${window.location.origin}/invite/${groupId}/${invite_link}`);
+      setTimeLeftSec(expires_at);
+      setExpirationDate(new Date(Date.now() + (expires_at * 1000)));
     } catch (err) {
       console.error('초대 링크 생성 에러:', err);
       setError('초대 링크를 생성할 수 없습니다.');
