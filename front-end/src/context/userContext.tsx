@@ -17,7 +17,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const { getProfile } = useMypageAxios();
   useEffect(() => {
     // 1. 로그인 상태 체크 (예: JWT 토큰 확인)
-    const token = sessionStorage.getItem('accessToken'); // 혹은 sessionStorage 사용 가능
+    const token = localStorage.getItem('accessToken'); // 혹은 sessionStorage 사용 가능
     if (!token) {
       setIsAuthenticated(false);
       return; // 로그인되지 않았다면 fetchUserProfile 호출하지 않음

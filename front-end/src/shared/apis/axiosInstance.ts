@@ -17,11 +17,11 @@ export const createAxiosInstance = (): AxiosInstance => {
 
 const refreshJwt = async (): Promise<string | null> => {
   try {
-    const response = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/v1/auth/refresh`, {refreshToken: `Bearer ${sessionStorage.getItem('refreshToken')}`,});
+    const response = await axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}/v1/auth/refresh`, {refreshToken: `Bearer ${localStorage.getItem('refreshToken')}`,});
     const newToken = response.data?.data;
     if (newToken) {
-      sessionStorage.setItem('accessToken', newToken.accessToken); // 새로운 토큰 저장
-      sessionStorage.setItem('refreshToken', newToken.refreshToken); // 새로운 토큰 저장
+      localStorage.setItem('accessToken', newToken.accessToken); // 새로운 토큰 저장
+      localStorage.setItem('refreshToken', newToken.refreshToken); // 새로운 토큰 저장
     }
 
     return newToken;
@@ -39,7 +39,7 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
   // 요청 인터셉터
   const requestInterceptorId = axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig ) => {
-      const token = sessionStorage.getItem('accessToken');
+      const token = localStorage.getItem('accessToken');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -75,8 +75,8 @@ export const setupInterceptors = (axiosInstance: AxiosInstance, navigate: Naviga
               return axiosInstance(originalRequest);
             } else {
               // 리프레시 실패 시 로그아웃 처리
-              sessionStorage.removeItem('accessToken');
-              sessionStorage.removeItem('refreshToken');
+              localStorage.removeItem('accessToken');
+              localStorage.removeItem('refreshToken');
               // alert('다시 로그인 해 주세요.');
               navigate('/');
             }

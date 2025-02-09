@@ -2,9 +2,6 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { GoogleLoginResponse } from '../types/authApiResponse';
-import { GetMyPageResponse } from '../types/mypageApiResponse';
-import useMypageAxios from './useMypageAxios';
 
 /**
  * Custom hook for handling authentication-related API requests.
@@ -43,9 +40,6 @@ const useAuthAxios = () => {
   //     throw error;
   //   }
   // };
-
-  // 로그인 시 사용자 정보를 불러오는 데이터 
-  const {getProfile} = useMypageAxios();
   
   /**
    * 구글 로그인
