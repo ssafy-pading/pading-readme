@@ -127,5 +127,9 @@ public class ProjectService {
     return project;
   }
 
+  public Project getProject(Integer groupId, Integer projectId) {
+    return projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+  }
 
 }
