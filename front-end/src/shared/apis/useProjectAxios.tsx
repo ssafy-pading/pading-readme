@@ -34,7 +34,7 @@ const useProjectAxios = () => {
    */
   const getLanguages = async (): Promise<GetLanguageListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/language');
+      const response = await projectAxios.get('/v1/projects/option/language');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching language list:', error);
@@ -47,7 +47,7 @@ const useProjectAxios = () => {
    */
   const getOSList = async (language: string): Promise<GetOSListResponse> => {
     try {
-      const response = await projectAxios.get(`/v1/projects/os?language=${language}`);
+      const response = await projectAxios.get(`/v1/projects/option/os?language=${language}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching OS list:', error);
@@ -60,7 +60,7 @@ const useProjectAxios = () => {
    */
   const getPerformanceList = async (): Promise<GetPerformanceListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/performance');
+      const response = await projectAxios.get('/v1/projects/option/performance');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching performance list:', error);
