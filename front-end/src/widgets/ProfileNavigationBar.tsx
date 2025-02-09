@@ -354,7 +354,7 @@ const ProfileNavigationBar: React.FC = () => {
 
         {/* 멤버 목록 영역 */}
         <div>
-        <p
+        <div
           className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
           onClick={() => toggle("isMemberOpen")}
         >
@@ -388,7 +388,7 @@ const ProfileNavigationBar: React.FC = () => {
               />
             )} */}
           </div>
-        </p>
+        </div>
 
           {toggleStates.isMemberOpen && (
             <div
