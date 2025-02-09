@@ -84,7 +84,7 @@ const useProjectAxios = () => {
   /**
    * 프로젝트 목록 조회
    */
-  const getProjects = async (groupId: string): Promise<GetProjectListResponse> => {
+  const getProjects = async (groupId: number): Promise<GetProjectListResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects`);
       return response.data.data;
@@ -98,7 +98,7 @@ const useProjectAxios = () => {
    * 프로젝트 생성
    */
   const createProject = async (
-    groupId: string,
+    groupId: number,
     projectData: Record<string, unknown>
   ): Promise<CreateProjectResponse> => {
     try {
@@ -114,8 +114,8 @@ const useProjectAxios = () => {
    * 프로젝트 상세 조회
    */
   const getProjectDetails = async (
-    groupId: string,
-    projectId: string
+    groupId: number,
+    projectId: number
   ): Promise<GetProjectDetailsResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects/${projectId}`);
@@ -130,8 +130,8 @@ const useProjectAxios = () => {
    * 프로젝트 입장
    */
   const joinProject = async (
-    groupId: string,
-    projectId: string
+    groupId: number,
+    projectId: number
   ): Promise<AccessProjectResponse> => {
     try {
       const response = await projectAxios.post(`/v1/groups/${groupId}/projects/${projectId}/join`);
@@ -146,8 +146,8 @@ const useProjectAxios = () => {
    * 프로젝트 수정
    */
   const updateProject = async (
-    groupId: string,
-    projectId: string,
+    groupId: number,
+    projectId: number,
     projectData: Record<string, unknown>
   ): Promise<boolean> => {
     try {
@@ -162,7 +162,7 @@ const useProjectAxios = () => {
   /**
    * 프로젝트 삭제
    */
-  const deleteProject = async (groupId: string, projectId: string): Promise<boolean> => {
+  const deleteProject = async (groupId: number, projectId: number): Promise<boolean> => {
     try {
       await projectAxios.delete(`/v1/groups/${groupId}/projects/${projectId}`);
       return true;
