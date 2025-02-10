@@ -5,7 +5,7 @@ import { FaRegCopy } from "react-icons/fa6";
 import useGroupAxios from '../shared/apis/useGroupAxios';
 
 interface InviteLinkProps {
-  groupId: string;
+  groupId: number;
 }
 
 const InviteLink: React.FC<InviteLinkProps> = ({ groupId }) => {

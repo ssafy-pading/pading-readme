@@ -10,7 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface ProjectCardProps {
-  groupId: string;
+  groupId: number;
   project: Project;
   userRole: string
   onDelete: (project: Project) => void;     // Delete 로직 콜백

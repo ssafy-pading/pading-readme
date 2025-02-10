@@ -122,7 +122,8 @@ const ProfileNavigationBar: React.FC = () => {
 
   // url 파라미터에서 groupId 사용
   // nogroup 페이지에서는 undefined
-  const groupId = useParams<({ groupId: string | undefined })>().groupId;
+  const groupIdParams = useParams<({ groupId: string | undefined })>().groupId;
+  const groupId: number | undefined = groupIdParams !== undefined ? Number(groupIdParams) : undefined 
   
   /* ============================================
    그룹 이름, 그룹 정원
@@ -354,7 +355,7 @@ const ProfileNavigationBar: React.FC = () => {
 
         {/* 멤버 목록 영역 */}
         <div>
-        <p
+        <div
           className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
           onClick={() => toggle("isMemberOpen")}
         >
@@ -388,7 +389,7 @@ const ProfileNavigationBar: React.FC = () => {
               />
             )} */}
           </div>
-        </p>
+        </div>
 
           {toggleStates.isMemberOpen && (
             <div
