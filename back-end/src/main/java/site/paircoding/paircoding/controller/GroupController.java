@@ -64,7 +64,6 @@ public class GroupController {
     return ApiResponse.success(DuplicateResponse.builder().duplicated(isDuplicate).build());
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.OWNER)
   @PatchMapping("{groupId}")
   public ApiResponse<Group> updateGroup(@PathVariable("groupId") Integer groupId,
@@ -73,7 +72,6 @@ public class GroupController {
         groupService.updateGroup(groupId, updateGroupRequest.getName()));
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.OWNER)
   @DeleteMapping("{groupId}")
   public ApiResponse<Void> deleteGroup(@PathVariable("groupId") Integer groupId) {
@@ -89,7 +87,6 @@ public class GroupController {
     return ApiResponse.success();
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.MEMBER)
   @GetMapping("{groupId}/users")
   public ApiResponse<GroupUsersResponse> getGroupUsers(@PathVariable("groupId") Integer groupId) {
@@ -97,21 +94,18 @@ public class GroupController {
     return ApiResponse.success(new GroupUsersResponse(users));
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.MANAGER)
   @GetMapping("{groupId}/invitation")
   public ApiResponse<Object> gentInvitation(@PathVariable("groupId") Integer groupId) {
     return ApiResponse.success(groupService.getInvitation(groupId));
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.MANAGER)
   @PostMapping("{groupId}/invitation")
   public ApiResponse<Object> generateInvitation(@PathVariable("groupId") Integer groupId) {
     return ApiResponse.success(groupService.generateInvitation(groupId));
   }
 
-  @LoginCheck
   @PostMapping("{groupId}/join")
   public ApiResponse<Object> joinGroup(@LoginUser User user,
       @PathVariable("groupId") Integer groupId,
@@ -120,7 +114,6 @@ public class GroupController {
   }
 
 
-  @LoginCheck
   @GroupRoleCheck(Role.MANAGER)
   @PatchMapping("{groupId}/users/{userId}")
   public ApiResponse<GroupUserResponse> updateGroupUserRole(
@@ -131,7 +124,6 @@ public class GroupController {
         updateGroupRoleRequest.getRole()));
   }
 
-  @LoginCheck
   @GroupRoleCheck(Role.MANAGER)
   @DeleteMapping("{groupId}/users/{userId}")
   public ApiResponse<Void> deleteGroupUser(
