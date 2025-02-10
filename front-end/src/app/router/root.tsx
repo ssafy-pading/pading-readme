@@ -55,7 +55,7 @@ const AppLayout = () => (
           ),
         },
         {
-          path: "project:groupId/:projectId",
+          path: "project/:groupId/:projectId",
           element: (
             <Suspense fallback={<ProjectSpinner />}>
               <ProjectPage />

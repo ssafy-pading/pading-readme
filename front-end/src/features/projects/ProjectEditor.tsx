@@ -1,12 +1,18 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import Editor from "@monaco-editor/react";
 import * as Y from 'yjs';
 import { WebrtcProvider } from 'y-webrtc';
 import { MonacoBinding } from 'y-monaco';
 import { useProjectEditor } from '../../context/ProjectEditorContext';
 
+interface ProjectEditorProps {
+  groupId: string ;
+  projectId: string
 
-function ProjectEditor() {
+}
+
+
+const ProjectEditor: React.FC<ProjectEditorProps> = ({ groupId, projectId }) => {
   const editorRef = useRef<any>(null);
   const {value, setValue} = useProjectEditor();
   const [language, setlanguage] = useState("javascript")
@@ -16,7 +22,7 @@ function ProjectEditor() {
     editor.focus()
     // Yjs와 Monaco 연결
     const doc = new Y.Doc();
-    const provider = new WebrtcProvider("test-room", doc);
+    const provider = new WebrtcProvider(`${groupId}/${projectId}`, doc, {signaling: ['magenetrip.shop/4444']});
     const type = doc.getText("monaco");
     const binding = new MonacoBinding(type, editorRef.current.getModel(), new Set([editorRef.current]), provider.awareness);
 
