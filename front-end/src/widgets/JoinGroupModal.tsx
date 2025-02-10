@@ -61,7 +61,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
 
     setIsLoading(true);
     try {
-      const response: JoinGroupResponse = await joinGroup(String(inviteInfo.groupId), inviteInfo.code);
+      const response: JoinGroupResponse = await joinGroup(inviteInfo.groupId, inviteInfo.code);
       if (response) {
         alert(
           `${response.name} 그룹에 성공적으로 참여하였습니다!`

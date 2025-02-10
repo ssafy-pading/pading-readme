@@ -9,7 +9,7 @@ Modal.setAppElement("#root");
 interface GroupUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  groupId: string;
+  groupId: number;
   currentName: string;
   onUpdate: (newName: string) => void;
 }

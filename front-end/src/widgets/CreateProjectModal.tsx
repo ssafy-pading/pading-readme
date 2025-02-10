@@ -35,7 +35,7 @@ import useProjectAxios from "../shared/apis/useProjectAxios";
  * onClose: 모달 닫기 동작
  */
 interface ProjectCreateModalProps {
-  groupId: string;
+  groupId: number;
   isOpen: boolean;
   onClose: () => void;
 }

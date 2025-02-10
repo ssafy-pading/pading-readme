@@ -122,7 +122,8 @@ const ProfileNavigationBar: React.FC = () => {
 
   // url 파라미터에서 groupId 사용
   // nogroup 페이지에서는 undefined
-  const groupId = useParams<({ groupId: string | undefined })>().groupId;
+  const groupIdParams = useParams<({ groupId: string | undefined })>().groupId;
+  const groupId: number | undefined = groupIdParams !== undefined ? Number(groupIdParams) : undefined 
   
   /* ============================================
    그룹 이름, 그룹 정원

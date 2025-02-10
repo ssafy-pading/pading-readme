@@ -34,8 +34,9 @@ const ProjectListPage: React.FC = () => {
   const { isProfileNavOpen } = useNavigation();
 
   // url 파라미터에서 groupId 사용
-  const groupId = useParams<({ groupId: string })>().groupId;
-  
+  const groupIdParams = useParams<({ groupId: string | undefined })>().groupId;
+  const groupId: number | undefined = groupIdParams !== undefined ? Number(groupIdParams) : undefined 
+
   // ───── 유저 역할 가져오기 ─────
   const [ userRole, setUserRole ] = useState<string>("")
 
