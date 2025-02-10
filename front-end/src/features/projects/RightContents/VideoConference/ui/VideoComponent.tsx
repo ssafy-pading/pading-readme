@@ -1,14 +1,15 @@
 // VideoComponent.tsx
 import { useRef, useEffect } from 'react';
-import { LocalVideoTrack, RemoteTrack } from 'livekit-client';
+import { LocalVideoTrack, RemoteVideoTrack } from 'livekit-client';
 
 interface VideoComponentProps {
-  videoTrack: LocalVideoTrack | RemoteTrack;
+  videoTrack: LocalVideoTrack | RemoteVideoTrack;
   participantIdentity: string;
+  muted?: boolean;
 }
 
-const VideoComponent = ({ videoTrack, participantIdentity }: VideoComponentProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+const VideoComponent = ({ videoTrack, participantIdentity, muted=false }: VideoComponentProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -21,7 +22,7 @@ const VideoComponent = ({ videoTrack, participantIdentity }: VideoComponentProps
 
   return (
     <div id={"camera-" + participantIdentity} className="video-container rounded-md overflow-hidden">
-      <video ref={videoRef} id={videoTrack?.sid} style={{ transform: "scaleX(-1)" }} className="w-full h-full object-cover"></video>
+      <video ref={videoRef} autoPlay playsInline muted={muted}id={videoTrack?.sid} style={{ transform: "scaleX(-1)" }} className="w-full h-full object-cover"></video>
     </div>
   );
 };
