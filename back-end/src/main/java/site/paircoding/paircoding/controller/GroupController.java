@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import site.paircoding.paircoding.annotaion.GroupRoleCheck;
+import site.paircoding.paircoding.annotaion.LoginCheck;
 import site.paircoding.paircoding.annotaion.LoginUser;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.User;
@@ -23,6 +25,7 @@ import site.paircoding.paircoding.entity.dto.GroupUsersResponse;
 import site.paircoding.paircoding.entity.dto.GroupsResponse;
 import site.paircoding.paircoding.entity.dto.UpdateGroupRequest;
 import site.paircoding.paircoding.entity.dto.UpdateGroupRoleRequest;
+import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.ApiResponse;
 import site.paircoding.paircoding.service.GroupService;
 
@@ -33,6 +36,7 @@ public class GroupController {
 
   private final GroupService groupService;
 
+  @LoginCheck
   @GetMapping
   public ApiResponse<GroupsResponse> getGroups(
       @LoginUser User user) {
@@ -40,6 +44,7 @@ public class GroupController {
     return ApiResponse.success(new GroupsResponse(groups));
   }
 
+  @LoginCheck
   @PostMapping
   public ApiResponse<GroupDto> createGroup(
       @LoginUser User user,
@@ -59,52 +64,24 @@ public class GroupController {
     return ApiResponse.success(DuplicateResponse.builder().duplicated(isDuplicate).build());
   }
 
+  @LoginCheck
+  @GroupRoleCheck(Role.OWNER)
   @PatchMapping("{groupId}")
-  public ApiResponse<Group> updateGroup(
-      @LoginUser User user, @PathVariable("groupId") Integer groupId,
-      @RequestBody
-      UpdateGroupRequest updateGroupRequest) {
+  public ApiResponse<Group> updateGroup(@PathVariable("groupId") Integer groupId,
+      @RequestBody UpdateGroupRequest updateGroupRequest) {
     return ApiResponse.success(
-        groupService.updateGroup(user, groupId, updateGroupRequest.getName()));
+        groupService.updateGroup(groupId, updateGroupRequest.getName()));
   }
 
+  @LoginCheck
+  @GroupRoleCheck(Role.OWNER)
   @DeleteMapping("{groupId}")
-  public ApiResponse<Void> deleteGroup(@LoginUser User user,
-      @PathVariable("groupId") Integer groupId) {
-    groupService.deleteGroup(user, groupId);
+  public ApiResponse<Void> deleteGroup(@PathVariable("groupId") Integer groupId) {
+    groupService.deleteGroup(groupId);
     return ApiResponse.success();
   }
 
-  @GetMapping("{groupId}/users")
-  public ApiResponse<GroupUsersResponse> getGroupUsers(
-      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
-    List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
-    return ApiResponse.success(new GroupUsersResponse(users));
-  }
-
-  @GetMapping("{groupId}/invitation")
-  public ApiResponse<Object> gentInvitation(
-      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
-    return ApiResponse.success(groupService.getInvitation(user, groupId));
-  }
-
-  @PostMapping("{groupId}/invitation")
-  public ApiResponse<Object> generateInvitation(
-      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
-    return ApiResponse.success(groupService.generateInvitation(
-        user, groupId));
-  }
-
-  @PostMapping("{groupId}/join")
-  public ApiResponse<Object> joinGroup(@LoginUser User user,
-      @PathVariable("groupId") Integer groupId,
-      @RequestBody GroupInvitationDto groupInvitationDto) {
-    Group group = groupService.joinGroup(user, groupId, groupInvitationDto.getCode());
-    return ApiResponse.success(
-        GroupDto.builder().id(group.getId()).name(group.getName()).capacity(group.getCapacity())
-            .build());
-  }
-
+  @LoginCheck
   @DeleteMapping("{groupId}/quit")
   public ApiResponse<Void> quitGroup(@LoginUser User user,
       @PathVariable("groupId") Integer groupId) {
@@ -112,6 +89,39 @@ public class GroupController {
     return ApiResponse.success();
   }
 
+  @LoginCheck
+  @GroupRoleCheck(Role.MEMBER)
+  @GetMapping("{groupId}/users")
+  public ApiResponse<GroupUsersResponse> getGroupUsers(@PathVariable("groupId") Integer groupId) {
+    List<GroupUserResponse> users = groupService.getGroupUsers(groupId);
+    return ApiResponse.success(new GroupUsersResponse(users));
+  }
+
+  @LoginCheck
+  @GroupRoleCheck(Role.MANAGER)
+  @GetMapping("{groupId}/invitation")
+  public ApiResponse<Object> gentInvitation(@PathVariable("groupId") Integer groupId) {
+    return ApiResponse.success(groupService.getInvitation(groupId));
+  }
+
+  @LoginCheck
+  @GroupRoleCheck(Role.MANAGER)
+  @PostMapping("{groupId}/invitation")
+  public ApiResponse<Object> generateInvitation(@PathVariable("groupId") Integer groupId) {
+    return ApiResponse.success(groupService.generateInvitation(groupId));
+  }
+
+  @LoginCheck
+  @PostMapping("{groupId}/join")
+  public ApiResponse<Object> joinGroup(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId,
+      @RequestBody GroupInvitationDto groupInvitationDto) {
+    return ApiResponse.success(groupService.joinGroup(user, groupId, groupInvitationDto.getCode()));
+  }
+
+
+  @LoginCheck
+  @GroupRoleCheck(Role.MANAGER)
   @PatchMapping("{groupId}/users/{userId}")
   public ApiResponse<GroupUserResponse> updateGroupUserRole(
       @LoginUser User user, @PathVariable("groupId") Integer groupId,
@@ -121,6 +131,8 @@ public class GroupController {
         updateGroupRoleRequest.getRole()));
   }
 
+  @LoginCheck
+  @GroupRoleCheck(Role.MANAGER)
   @DeleteMapping("{groupId}/users/{userId}")
   public ApiResponse<Void> deleteGroupUser(
       @LoginUser User user, @PathVariable("groupId") Integer groupId,
