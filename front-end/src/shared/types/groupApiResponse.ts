@@ -32,8 +32,8 @@ export type GetGroupMembersResponse = {
 };
 // 그룹 초대 링크 생성
 export type GroupInviteLinkResponse = {
-  invite_link: string; // 초대 링크
-  expires_at: number;  // 초대 링크 만료 시간
+  code: string; // 초대 링크
+  expirationTime: number;  // 초대 링크 만료 시간
 };
 // 그룹 참가
 export type JoinGroupResponse = {
