@@ -19,7 +19,6 @@ import site.paircoding.paircoding.global.exception.NotFoundException;
 import site.paircoding.paircoding.global.exception.UnauthorizedException;
 import site.paircoding.paircoding.repository.GroupRepository;
 import site.paircoding.paircoding.repository.GroupUserRepository;
-import site.paircoding.paircoding.repository.UserRepository;
 import site.paircoding.paircoding.util.RandomUtil;
 import site.paircoding.paircoding.util.RedisUtil;
 
@@ -30,7 +29,7 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
   private final GroupUserRepository groupUserRepository;
-  private final UserRepository userRepository;
+  //private final UserRepository userRepository;
   private final RedisUtil redisUtil;
   private static final String INVITATION_PREFIX = "groupId=%d";
 

@@ -2,7 +2,6 @@ package site.paircoding.paircoding.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import site.paircoding.paircoding.config.oauth.CustomUserDetails;
+import site.paircoding.paircoding.annotaion.LoginUser;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.CreateGroupRequest;
@@ -36,28 +35,22 @@ public class GroupController {
 
   @GetMapping
   public ApiResponse<GroupsResponse> getGroups(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
-    User user = customUserDetails.getUser();
+      @LoginUser User user) {
     List<Group> groups = groupService.getGroups(user);
-    GroupsResponse groupsResponse = new GroupsResponse(groups);
-    return ApiResponse.success(groupsResponse);
+    return ApiResponse.success(new GroupsResponse(groups));
   }
 
   @PostMapping
   public ApiResponse<GroupDto> createGroup(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails,
+      @LoginUser User user,
       @RequestBody CreateGroupRequest createGroupRequest) {
-    User user = customUserDetails.getUser();
-    GroupDto GroupDto = groupService.createGroup(user, createGroupRequest.getName(),
-        createGroupRequest.getCapacity());
-    return ApiResponse.success(GroupDto);
+    return ApiResponse.success(groupService.createGroup(user, createGroupRequest.getName(),
+        createGroupRequest.getCapacity()));
   }
 
   @GetMapping("{groupId}")
-  public ApiResponse<Group> getGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId) {
-    Group group = groupService.getGroup(groupId);
-    return ApiResponse.success(group);
+  public ApiResponse<Group> getGroup(@PathVariable("groupId") Integer groupId) {
+    return ApiResponse.success(groupService.getGroup(groupId));
   }
 
   @GetMapping("check-duplicate")
@@ -68,51 +61,44 @@ public class GroupController {
 
   @PatchMapping("{groupId}")
   public ApiResponse<Group> updateGroup(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId,
+      @LoginUser User user, @PathVariable("groupId") Integer groupId,
       @RequestBody
       UpdateGroupRequest updateGroupRequest) {
-    User user = customUserDetails.getUser();
-    Group group = groupService.updateGroup(user, groupId, updateGroupRequest.getName());
-    return ApiResponse.success(group);
+    return ApiResponse.success(
+        groupService.updateGroup(user, groupId, updateGroupRequest.getName()));
   }
 
   @DeleteMapping("{groupId}")
-  public ApiResponse<Void> deleteGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId) {
-    User user = customUserDetails.getUser();
+  public ApiResponse<Void> deleteGroup(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId) {
     groupService.deleteGroup(user, groupId);
     return ApiResponse.success();
   }
 
   @GetMapping("{groupId}/users")
   public ApiResponse<GroupUsersResponse> getGroupUsers(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
-    User user = customUserDetails.getUser();
+      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
     List<GroupUserResponse> users = groupService.getGroupUsers(user, groupId);
-    GroupUsersResponse groupUsersResponse = new GroupUsersResponse(users);
-    return ApiResponse.success(groupUsersResponse);
+    return ApiResponse.success(new GroupUsersResponse(users));
   }
 
   @GetMapping("{groupId}/invitation")
   public ApiResponse<Object> gentInvitation(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
-    GroupInvitationDto groupInvitationDto = groupService.getInvitation(
-        customUserDetails.getUser(), groupId);
-    return ApiResponse.success(groupInvitationDto);
+      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
+    return ApiResponse.success(groupService.getInvitation(user, groupId));
   }
 
   @PostMapping("{groupId}/invitation")
   public ApiResponse<Object> generateInvitation(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId) {
-    GroupInvitationDto groupInvitationDto = groupService.generateInvitation(
-        customUserDetails.getUser(), groupId);
-    return ApiResponse.success(groupInvitationDto);
+      @LoginUser User user, @PathVariable("groupId") Integer groupId) {
+    return ApiResponse.success(groupService.generateInvitation(
+        user, groupId));
   }
 
   @PostMapping("{groupId}/join")
-  public ApiResponse<Object> joinGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId, @RequestBody GroupInvitationDto groupInvitationDto) {
-    User user = customUserDetails.getUser();
+  public ApiResponse<Object> joinGroup(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId,
+      @RequestBody GroupInvitationDto groupInvitationDto) {
     Group group = groupService.joinGroup(user, groupId, groupInvitationDto.getCode());
     return ApiResponse.success(
         GroupDto.builder().id(group.getId()).name(group.getName()).capacity(group.getCapacity())
@@ -120,28 +106,25 @@ public class GroupController {
   }
 
   @DeleteMapping("{groupId}/quit")
-  public ApiResponse<Void> quitGroup(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable Integer groupId) {
-    User user = customUserDetails.getUser();
+  public ApiResponse<Void> quitGroup(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId) {
     groupService.quitGroup(user, groupId);
     return ApiResponse.success();
   }
 
   @PatchMapping("{groupId}/users/{userId}")
   public ApiResponse<GroupUserResponse> updateGroupUserRole(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId,
-      @PathVariable Integer userId, @RequestBody UpdateGroupRoleRequest updateGroupRoleRequest) {
-    User user = customUserDetails.getUser();
-    GroupUserResponse groupUserResponse = groupService.updateGroupUserRole(user, groupId, userId,
-        updateGroupRoleRequest.getRole());
-    return ApiResponse.success(groupUserResponse);
+      @LoginUser User user, @PathVariable("groupId") Integer groupId,
+      @PathVariable("userId") Integer userId,
+      @RequestBody UpdateGroupRoleRequest updateGroupRoleRequest) {
+    return ApiResponse.success(groupService.updateGroupUserRole(user, groupId, userId,
+        updateGroupRoleRequest.getRole()));
   }
 
   @DeleteMapping("{groupId}/users/{userId}")
   public ApiResponse<Void> deleteGroupUser(
-      @AuthenticationPrincipal CustomUserDetails customUserDetails, @PathVariable Integer groupId,
-      @PathVariable Integer userId) {
-    User user = customUserDetails.getUser();
+      @LoginUser User user, @PathVariable("groupId") Integer groupId,
+      @PathVariable("userId") Integer userId) {
     groupService.deleteGroupUser(user, groupId, userId);
     return ApiResponse.success();
   }

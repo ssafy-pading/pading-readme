@@ -1,10 +1,12 @@
 package site.paircoding.paircoding.entity.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import site.paircoding.paircoding.entity.enums.Role;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class GroupUserResponse {
 

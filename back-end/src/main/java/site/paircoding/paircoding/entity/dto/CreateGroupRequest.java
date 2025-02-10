@@ -1,9 +1,11 @@
 // CreateGroupRequest.java
 package site.paircoding.paircoding.entity.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class CreateGroupRequest {
 
   private String name;
