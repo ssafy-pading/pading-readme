@@ -1,13 +1,7 @@
 package site.paircoding.paircoding.controller;
 
-import io.livekit.server.AccessToken;
-import io.livekit.server.RoomJoin;
-import io.livekit.server.RoomName;
-import io.livekit.server.WebhookReceiver;
 import java.util.Map;
-import livekit.LivekitWebhook.WebhookEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,47 +10,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.paircoding.paircoding.annotaion.GroupRoleCheck;
 import site.paircoding.paircoding.config.oauth.CustomUserDetails;
-import site.paircoding.paircoding.entity.User;
+import site.paircoding.paircoding.entity.enums.Role;
+import site.paircoding.paircoding.service.OpenviduService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/openvidu")
 public class OpenviduController {
 
-  @Value("${livekit.api.key}")
-  private String LIVEKIT_API_KEY;
+  private final OpenviduService openviduService;
 
-  @Value("${livekit.api.secret}")
-  private String LIVEKIT_API_SECRET;
-
-  @PostMapping(value = "/token/{projectId}")
+  @GroupRoleCheck(Role.MEMBER)
+  @PostMapping(value = "/token/groups/{groupId}/projects/{projectId}")
   public ResponseEntity<Map<String, String>> createToken(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable String projectId) {
-    AccessToken token = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
-    User user = customUserDetails.getUser();
-    token.setName(user.getName());
-    token.setIdentity(user.getId() + "");
-    token.addGrants(new RoomJoin(true), new RoomName(projectId));
-    System.out.println("token: " + token.toJwt());
-    return ResponseEntity.ok(Map.of("token", token.toJwt()));
+      @PathVariable String groupId, @PathVariable String projectId) {
+    return ResponseEntity.ok(openviduService.createToken(customUserDetails.getUser(), projectId));
   }
 
   @PostMapping(value = "/livekit/webhook", consumes = "application/webhook+json")
   public ResponseEntity<String> receiveWebhook(@RequestHeader("Authorization") String authHeader,
       @RequestBody String body) {
-    WebhookReceiver webhookReceiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
-    System.out.println("LiveKit Webhook: " + body + " " + authHeader);
-
-    try {
-      WebhookEvent event = webhookReceiver.receive(body, authHeader);
-      System.out.println("LiveKit Webhook: " + event.toString());
-    } catch (Exception e) {
-      System.out.println("Error validating webhook event: " + e.getMessage());
-    }
-    return ResponseEntity.ok("ok");
+    return ResponseEntity.ok(openviduService.handleWebhook(authHeader, body));
   }
-
 }
-
