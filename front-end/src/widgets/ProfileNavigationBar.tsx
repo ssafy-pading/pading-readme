@@ -11,6 +11,7 @@ import {
   ChevronDoubleRightIcon,
   UserIcon,
   ArrowLeftOnRectangleIcon,
+  Cog6ToothIcon,
   // Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import profileImage from "../assets/profile_image.png";
@@ -384,7 +385,7 @@ const ProfileNavigationBar: React.FC = () => {
                     strokeWidth={2}
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate("/userrole");
+                      navigate(`/rolechange/${groupId}`);
                     }}
                   />
                 )} */}
