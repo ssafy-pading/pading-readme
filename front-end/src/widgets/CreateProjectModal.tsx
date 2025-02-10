@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
-import Select, { SingleValue, MultiValue, ActionMeta } from "react-select";
+import Select, { SingleValue, MultiValue } from "react-select";
 import cross from "../assets/cross.svg";
 import cpu from "/src/assets/cpu.svg";
 import memory from "/src/assets/memory.svg";
@@ -40,62 +40,62 @@ interface ProjectCreateModalProps {
   onClose: () => void;
 }
 
-// 백엔드(혹은 외부)에서 가져올 데이터 예시 (실제 구현시 삭제바람)
-const languageOptions = [
-  { os_code: "java", os_name: "자바" },
-  { os_code: "python", os_name: "파이썬" },
-  { os_code: "javascript", os_name: "자바스크립트" },
-  { os_code: "csharp", os_name: "C#" },
-];
+// // 백엔드(혹은 외부)에서 가져올 데이터 예시 (실제 구현시 삭제바람)
+// const languageOptions = [
+//   { os_code: "java", os_name: "자바" },
+//   { os_code: "python", os_name: "파이썬" },
+//   { os_code: "javascript", os_name: "자바스크립트" },
+//   { os_code: "csharp", os_name: "C#" },
+// ];
 
-const osOptions = [
-  { os_code: "ubuntu_20_04_lts", os_name: "우분투 20.04 LTS" },
-  { os_code: "ubuntu_18_04_lts", os_name: "우분투 18.04 LTS" },
-  { os_code: "ubuntu_16_04_lts", os_name: "우분투 16.04 LTS" },
-];
+// const osOptions = [
+//   { os_code: "ubuntu_20_04_lts", os_name: "우분투 20.04 LTS" },
+//   { os_code: "ubuntu_18_04_lts", os_name: "우분투 18.04 LTS" },
+//   { os_code: "ubuntu_16_04_lts", os_name: "우분투 16.04 LTS" },
+// ];
 
-const specOptions = [
-  { code: "micro", cpu_core: 0.5, ram: "1GB", disk: "1GB" },
-  { code: "small", cpu_core: 2, ram: "2GB", disk: "2GB" },
-  { code: "medium", cpu_core: 4, ram: "4GB", disk: "4GB" },
-  { code: "large", cpu_core: 8, ram: "8GB", disk: "8GB" },
-];
+// const performanceOptions = [
+//   { code: "micro", cpu_core: 0.5, ram: "1GB", disk: "1GB" },
+//   { code: "small", cpu_core: 2, ram: "2GB", disk: "2GB" },
+//   { code: "medium", cpu_core: 4, ram: "4GB", disk: "4GB" },
+//   { code: "large", cpu_core: 8, ram: "8GB", disk: "8GB" },
+// ];
 
-// 구성원 검색/추가용 데이터
-// api에서는 4개의 정보만 보냄, ProjectListPage에서 멤버 정보와 속성명이나 개수가 차이가 있으니 체크 바람
-interface MemberData {
-  name: string;
-  image: string;
-  email: string;
-  role: string;
-}
+// // 구성원 검색/추가용 데이터
+// // api에서는 4개의 정보만 보냄, ProjectListPage에서 멤버 정보와 속성명이나 개수가 차이가 있으니 체크 바람
+// interface MemberData {
+//   name: string;
+//   image: string;
+//   email: string;
+//   role: string;
+// }
 
-const memberData: MemberData[] = [
-  {
-    name: "강싸피",
-    image: "https://lh3.googleusercontent.com/a/ACg8ocKyyZu4cMoD66g_cvM3uoxDqWQQunckuUMW1-x4zKbF=s96-c",
-    email: "kangssafy@example.com",
-    role: "Member",
-  },
-  {
-    name: "박싸피",
-    image: "https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg",
-    email: "ssafypark@example.com",
-    role: "Member",
-  },
-  {
-    name: "이싸피",
-    image: "https://secure.gravatar.com/avatar/adb423cb0bee73bb6033eabf7deb7b164b187a53f20a043768a5345de2eaa37a?s=80&d=identicon",
-    email: "leeeeeessafy@example.com",
-    role: "Member",
-  },
-  {
-    name: "신싸피",
-    image: "https://secure.gravatar.com/avatar/1a08e265bcf0ba7e141433e38be1aa16e7bcb4934a8273e49a9d65425332518d?s=80&d=identicon",
-    email: "godssafy@example.com",
-    role: "Member",
-  },
-];
+// const memberData: MemberData[] = [
+//   {
+//     name: "강싸피",
+//     image: "https://lh3.googleusercontent.com/a/ACg8ocKyyZu4cMoD66g_cvM3uoxDqWQQunckuUMW1-x4zKbF=s96-c",
+//     email: "kangssafy@example.com",
+//     role: "Member",
+//   },
+//   {
+//     name: "박싸피",
+//     image: "https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg",
+//     email: "ssafypark@example.com",
+//     role: "Member",
+//   },
+//   {
+//     name: "이싸피",
+//     image: "https://secure.gravatar.com/avatar/adb423cb0bee73bb6033eabf7deb7b164b187a53f20a043768a5345de2eaa37a?s=80&d=identicon",
+//     email: "leeeeeessafy@example.com",
+//     role: "Member",
+//   },
+//   {
+//     name: "신싸피",
+//     image: "https://secure.gravatar.com/avatar/1a08e265bcf0ba7e141433e38be1aa16e7bcb4934a8273e49a9d65425332518d?s=80&d=identicon",
+//     email: "godssafy@example.com",
+//     role: "Member",
+//   },
+// ];
 
 // react-select 에 사용할 Option 타입
 type LanguageOption = {
@@ -108,13 +108,13 @@ type OsOption = {
   label: string; // os_name
 };
 
-type SpecOption = {
-  value: string; // code
+type PerformanceOption = {
+  value: number; // code
   label: JSX.Element;
 };
 
 type MemberOption = {
-  value: string; // email
+  value: number; // id
   label: string; // 이름 + (email) 등의 표현
   image: string; // 프로필 사진
 };
@@ -127,75 +127,99 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const { getLanguages, getOSList, getPerformanceList, getProjectsMemberList, createProject } = useProjectAxios();
+
   // 폼 입력값 state
   const [projectName, setProjectName] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption | null>(
     null
   );
   const [selectedOs, setSelectedOs] = useState<OsOption | null>(null);
-  const [selectedSpec, setSelectedSpec] = useState<SpecOption | null>(null);
+  const [selectedPerformance, setSelectedPerformance] = useState<PerformanceOption | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<MemberOption[]>([]);
 
   // 모달 활성화 시, 필요
   const [languageSelectOptions, setLanguageOptions] = useState<LanguageOption[]>([]);
   const [osSelectOptions, setOsOptions] = useState<OsOption[]>([]);
-  const [specSelectOptions, setSpecOptions] = useState<SpecOption[]>([]);
+  const [performanceSelectOptions, setPerformanceOptions] = useState<PerformanceOption[]>([]);
   const [memberSelectOptions, setMemberOptions] = useState<MemberOption[]>([]);
 
   // 로딩상태
   // const [isLoading, setIsLoading] = useState(true);
 
-  // api호출기
-  const projectApi = useProjectAxios();
-
   // 1. api 호출하여 각 options에 담아주기
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       // setIsLoading(true);
       // 여기에 api로 데이터 불러오기를 합니다 
-
-
-      // 현재는 데이터가 없으므로 임시 데이터 사용
-      // 언어, os, 사양, member 담아주기
-      setLanguageOptions(
-        languageOptions.map((lang) => ({
-          value: lang.os_code,
-          label: lang.os_name,
-      })));
-
-      setOsOptions(
-        osOptions.map((os) => ({
-          value: os.os_code,
-          label: os.os_name,
-        }))
-      );
-      
-      // react-select에 이미지가 안들어가서 jsx element로 넣었습니다.... 
-      setSpecOptions(
-        specOptions.map((spec) => ({
-          value: spec.code,
-          label:(
+      try{
+        // 그룹 아이디 야매로 넣기
+        const memberList = await getProjectsMemberList(3);
+        // // 아래는 원래 넣어야 하는 값
+        // const memberList = await getProjectsMemberList(Number(groupId));
+        const languages = await getLanguages();
+        const performanceList = await getPerformanceList();
+        // 언어, os, 사양, member 담아주기
+        setLanguageOptions(
+          languages.map((lang) => ({
+            value: lang.language,
+            label: lang.language,
+        })));
+        // react-select에 이미지가 안들어가서 jsx element로 넣었습니다.... 
+        setPerformanceOptions(
+          performanceList.map((performance) => ({
+            value: performance.id,
+            label:(
               <>
-                  {spec.code} {" "}
-                  <img src={cpu} alt="CPU" className="inline-block"/> {spec.cpu_core} vCPU{" "}
-                  <img src={memory} alt="RAM" className="inline-block"/> {spec.ram}{" "}
-                  <img src={disk} alt="Disk" className="inline-block"/> {spec.disk}
+                  <img src={cpu} alt="CPU" className="inline-block"/> {performance.cpu}{" "}
+                  <img src={memory} alt="RAM" className="inline-block"/> {performance.memory}{" "}
+                  <img src={disk} alt="Disk" className="inline-block"/> {performance.storage}
               </>
-          )
-        }))
-      );
+            )
+          }))
+        );
+  
+        setMemberOptions(
+          memberList.map((member) => ({
+            value: member.id,
+            label: `${member.name} (${member.email})`,
+            image: member.image,
+          }))
+        );
+        console.log(memberList)
+      }catch(error){
+        console.log("프로젝트 생성 초기값 불러오기 에러");
+        console.log(error);
+      }
 
-      setMemberOptions(
-        memberData.map((member) => ({
-          value: member.email,
-          label: `${member.name} (${member.email})`,
-          image: member.image,
-        }))
-      );
     }
 
     loadData();
   }, [])
+
+
+  // 언어 변경 시 OS 목록을 새로 불러오는 함수
+  const handleLanguageChange = async (value: SingleValue<LanguageOption>) => {
+    setSelectedLanguage(value);
+
+    if (value) {
+      try {
+        // API 호출하여 해당 언어에 맞는 OS 목록 가져오기
+        const osList = await getOSList(value.value); // API 예시 호출
+        const newOsOptions = osList.map((os: { os:string }) => ({
+          value: os.os,
+          label: os.os,
+        }));
+
+        setOsOptions(newOsOptions);
+      } catch (error) {
+        console.error("OS 목록을 불러오는데 실패했습니다.", error);
+        alert("OS 목록을 가져오는데 실패했습니다.");
+      }
+    } else {
+      setOsOptions([]); // 언어 선택이 해제되면 OS 목록도 초기화
+    }
+  };
 
 
   // 구성원 옵션 변경 처리
@@ -208,8 +232,14 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
   // 폼 유효성 검사 (간단 예시)
   const validateForm = () => {
+    const projectNamePattern = /^[a-z0-9_-]+$/; // 소문자, 숫자, '_', '-'만 허용
+  
     if (!projectName.trim()) {
       alert("프로젝트 이름을 입력하세요.");
+      return false;
+    }
+    if (!projectNamePattern.test(projectName)) {
+      alert("프로젝트 이름은 영어 소문자, 숫자, '_', '-'만 사용할 수 있습니다.");
       return false;
     }
     if (!selectedLanguage) {
@@ -220,19 +250,11 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       alert("OS를 선택하세요.");
       return false;
     }
-    if (!selectedSpec) {
+    if (!selectedPerformance) {
       alert("성능(사양)을 선택하세요.");
       return false;
     }
-    // XSS, SQL injection 간단 체크 예시(더 강화해야 함)
-    const invalidPatterns = [/<\/?script>/i, /select\s+\*\s+from/i];
-    for (const pattern of invalidPatterns) {
-      if (pattern.test(projectName)) {
-        alert("입력값에 허용되지 않는 패턴이 포함되어 있습니다.");
-        return false;
-      }
-    }
-
+  
     return true;
   };
 
@@ -246,13 +268,11 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
     // 전송할 데이터(백엔드 API Body 예시)
     const formData = {
-      projectName,
+      name:projectName,
       language: selectedLanguage?.value,
       os: selectedOs?.value,
-      spec: selectedSpec?.value,
-      members: selectedMembers.map((member) => ({
-        email: member.value,
-      })),
+      performanceId: selectedPerformance?.value,
+      userIds: selectedMembers.map((member) => member.value),
     };
 
     console.log("보낼 폼 데이터:", formData);
@@ -260,8 +280,15 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
     // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
       try{
-        const newProject:CreateProjectResponse = await projectApi.createProject(groupId, formData);
+        const newProject:CreateProjectResponse = await createProject("3", formData);
         console.log(newProject);
+
+        // 기존 작성된 폼 초기화
+        setProjectName("");
+        setSelectedLanguage(null);
+        setSelectedOs(null);
+        setSelectedPerformance(null);
+        setSelectedMembers([]);
 
         // 완료 후 모달 닫기
         onClose();
@@ -305,20 +332,16 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           onChange={(e) => setProjectName(e.target.value)}
         />
 
-        {/* 언어 */}
-        <label className="block text-gray-700 mb-1">언어</label>
+        {/* 언어 선택 */}
         <Select
           options={languageSelectOptions}
           value={selectedLanguage}
-          onChange={(value: SingleValue<LanguageOption>) =>
-            setSelectedLanguage(value)
-          }
+          onChange={handleLanguageChange} // 변경된 함수로 연결
           placeholder="언어를 선택하세요"
           className="mb-4"
         />
 
-        {/* OS */}
-        <label className="block text-gray-700 mb-1">OS</label>
+        {/* OS 선택 */}
         <Select
           options={osSelectOptions}
           value={selectedOs}
@@ -327,12 +350,13 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           className="mb-4"
         />
 
+
         {/* 성능(사양) */}
         <label className="block text-gray-700 mb-1">성능</label>
         <Select
-          options={specSelectOptions}
-          value={selectedSpec}
-          onChange={(value: SingleValue<SpecOption>) => setSelectedSpec(value)}
+          options={performanceSelectOptions}
+          value={selectedPerformance}
+          onChange={(value: SingleValue<PerformanceOption>) => setSelectedPerformance(value)}
           placeholder="OS를 선택하세요"
           className="mb-4"
         />

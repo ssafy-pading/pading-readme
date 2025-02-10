@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { AccessProjectResponse, CreateProjectResponse, GetLanguageListResponse, GetOSListResponse, GetProjectDetailsResponse, GetProjectListResponse, GetSpecificationListResponse } from '../types/projectApiResponse';
+import { AccessProjectResponse, CreateProjectResponse, GetLanguageListResponse, GetMemberListResponse, GetOSListResponse, GetPerformanceListResponse, GetProjectDetailsResponse, GetProjectListResponse } from '../types/projectApiResponse';
 
 /**
  * Custom hook for handling Project-related API requests.
@@ -34,7 +34,7 @@ const useProjectAxios = () => {
    */
   const getLanguages = async (): Promise<GetLanguageListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/language');
+      const response = await projectAxios.get('/v1/projects/option/language');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching language list:', error);
@@ -45,9 +45,9 @@ const useProjectAxios = () => {
   /**
    * OS 목록 조회
    */
-  const getOSList = async (): Promise<GetOSListResponse> => {
+  const getOSList = async (language: string): Promise<GetOSListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/os');
+      const response = await projectAxios.get(`/v1/projects/option/os?language=${language}`);
       return response.data.data;
     } catch (error) {
       console.error('Error fetching OS list:', error);
@@ -58,9 +58,9 @@ const useProjectAxios = () => {
   /**
    * 사양 목록 조회
    */
-  const getPerformanceList = async (): Promise<GetSpecificationListResponse> => {
+  const getPerformanceList = async (): Promise<GetPerformanceListResponse> => {
     try {
-      const response = await projectAxios.get('/v1/projects/performance');
+      const response = await projectAxios.get('/v1/projects/option/performance');
       return response.data.data;
     } catch (error) {
       console.error('Error fetching performance list:', error);
@@ -69,9 +69,22 @@ const useProjectAxios = () => {
   };
 
   /**
+   * 멤버 목록 조회
+   */
+  const getProjectsMemberList = async (groupId: number): Promise<GetMemberListResponse> => {
+    try {
+      const response = await projectAxios.get(`/v1/groups/${groupId}/projects/users`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching MemberList for group ${groupId}:`, error);
+      throw error;
+    }
+  };
+
+  /**
    * 프로젝트 목록 조회
    */
-  const getProjects = async (groupId: string): Promise<GetProjectListResponse> => {
+  const getProjects = async (groupId: number): Promise<GetProjectListResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects`);
       return response.data.data;
@@ -85,7 +98,7 @@ const useProjectAxios = () => {
    * 프로젝트 생성
    */
   const createProject = async (
-    groupId: string,
+    groupId: number,
     projectData: Record<string, unknown>
   ): Promise<CreateProjectResponse> => {
     try {
@@ -101,8 +114,8 @@ const useProjectAxios = () => {
    * 프로젝트 상세 조회
    */
   const getProjectDetails = async (
-    groupId: string,
-    projectId: string
+    groupId: number,
+    projectId: number
   ): Promise<GetProjectDetailsResponse> => {
     try {
       const response = await projectAxios.get(`/v1/groups/${groupId}/projects/${projectId}`);
@@ -117,8 +130,8 @@ const useProjectAxios = () => {
    * 프로젝트 입장
    */
   const joinProject = async (
-    groupId: string,
-    projectId: string
+    groupId: number,
+    projectId: number
   ): Promise<AccessProjectResponse> => {
     try {
       const response = await projectAxios.post(`/v1/groups/${groupId}/projects/${projectId}/join`);
@@ -133,8 +146,8 @@ const useProjectAxios = () => {
    * 프로젝트 수정
    */
   const updateProject = async (
-    groupId: string,
-    projectId: string,
+    groupId: number,
+    projectId: number,
     projectData: Record<string, unknown>
   ): Promise<boolean> => {
     try {
@@ -149,7 +162,7 @@ const useProjectAxios = () => {
   /**
    * 프로젝트 삭제
    */
-  const deleteProject = async (groupId: string, projectId: string): Promise<boolean> => {
+  const deleteProject = async (groupId: number, projectId: number): Promise<boolean> => {
     try {
       await projectAxios.delete(`/v1/groups/${groupId}/projects/${projectId}`);
       return true;
@@ -164,6 +177,7 @@ const useProjectAxios = () => {
     getLanguages,
     getOSList,
     getPerformanceList,
+    getProjectsMemberList,
     getProjects,
     createProject,
     getProjectDetails,

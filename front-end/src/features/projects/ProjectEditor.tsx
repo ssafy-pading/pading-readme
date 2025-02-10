@@ -7,7 +7,7 @@ import { useProjectEditor } from '../../context/ProjectEditorContext';
 
 
 function ProjectEditor() {
-  const editorRef = useRef(null);
+  const editorRef = useRef<any>(null);
   const {value, setValue} = useProjectEditor();
   const [language, setlanguage] = useState("javascript")
 

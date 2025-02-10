@@ -3,6 +3,45 @@ import { useNavigate, useParams } from "react-router-dom";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupDetailsResponse, JoinGroupResponse } from "../shared/types/groupApiResponse";
 
+declare global {
+    interface Window {
+      particlesJS: (elementId: string, options: ParticlesOptions) => void;
+    }
+  }
+  
+interface ParticlesOptions {
+    particles: {
+      number: { value: number };
+      color: { value: string };
+      shape: { type: string };
+      opacity: { value: number; random: boolean };
+      size: { value: number };
+      move: {
+        enable: boolean;
+        speed: number;
+        direction: string;
+        straight: boolean;
+        random: boolean;
+      };
+      line_linked: { enable: boolean };
+    };
+    interactivity: {
+      detect_on: string;
+      events: {
+        onhover: { enable: boolean };
+        onclick: { enable: boolean };
+      };
+      resize: boolean;
+    };
+    modes: {
+      grab: { distance: number };
+      bubble: { distance: number };
+      repulse: { distance: number };
+      push: { particles_nb: number };
+      remove: { particles_nb: number };
+    };
+  }
+  
 const InvitePage = () => {
     const navigate = useNavigate();
     // const { inviteCode } = useParams<{ inviteCode: string }>();
@@ -19,7 +58,7 @@ const InvitePage = () => {
             script.src = 'https://cdn.jsdelivr.net/npm/particles.js';
             script.onload = () => {
               // Particles.js 설정
-              (window as any).particlesJS('particles-js', {
+              (window).particlesJS('particles-js', {
                 particles: {
                   number: { value: 100 },
                   color: { value: '#ffffff' },
