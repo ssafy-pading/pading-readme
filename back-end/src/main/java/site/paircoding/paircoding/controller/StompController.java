@@ -19,7 +19,7 @@ public class StompController {
   @MessageMapping("/chat/{projectId}")
   @SendTo("/sub/chat/{projectId}")
   public ChatDto sendMessage(ChatDto request,
-      @DestinationVariable Integer projectId) {
+      @DestinationVariable("projectId") Integer projectId) {
     // 메시지를 MongoDB에 저장
     ChatDocument chatDocument = chatService.saveMessage(projectId, request.getUsername(),
         request.getContent());
