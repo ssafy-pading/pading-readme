@@ -26,7 +26,7 @@ public class OpenviduController {
   @PostMapping(value = "/token/groups/{groupId}/projects/{projectId}")
   public ResponseEntity<Map<String, String>> createToken(
       @AuthenticationPrincipal CustomUserDetails customUserDetails,
-      @PathVariable String groupId, @PathVariable String projectId) {
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") String projectId) {
     return ResponseEntity.ok(openviduService.createToken(customUserDetails.getUser(), projectId));
   }
 
