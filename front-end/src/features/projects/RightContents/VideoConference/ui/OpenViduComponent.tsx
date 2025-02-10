@@ -30,8 +30,8 @@ interface OpenViduComponentProps {
     isChatOpen: boolean
 }
 
-const APPLICATION_SERVER_URL = "https://api-dev.pair-coding.site";
-const LIVEKIT_URL = "wss://magenetrip.shop";
+const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
 const OpenViduComponent: React.FC<OpenViduComponentProps> = ({
     isChatOpen
@@ -53,7 +53,8 @@ const OpenViduComponent: React.FC<OpenViduComponentProps> = ({
     // 참가자 상태 동기화
     useEffect(() => {
         const newParticipants: Participant[] = [];
-
+        console.log("APPLICATION_SERVER_URL", APPLICATION_SERVER_URL);
+        console.log("LIVEKIT_URL", LIVEKIT_URL);
         // 로컬 참가자 추가
         {
             (localVideoTrack || localAudioTrack) &&
