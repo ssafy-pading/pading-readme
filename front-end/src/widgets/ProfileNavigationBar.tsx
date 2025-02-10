@@ -144,7 +144,6 @@ const ProfileNavigationBar: React.FC = () => {
     const fetchGroupDetails = async () => {
       try {
         if (!groupId) {
-          console.log("groupId가 존재하지 않습니다")
           // navigate("/nogroup") // 그룹 id가 없으면 nogroup 페이지로 이동
           return
         }
@@ -288,7 +287,7 @@ const ProfileNavigationBar: React.FC = () => {
               <div className="flex items-center">
                 <span
                   onClick={handleDropdownToggle}
-                  className="font-bold text-[#4D4650] cursor-pointer"
+                  className="font-bold text-[#4D4650] cursor-pointer max-w-[120px] truncate overflow-hidden text-ellipsis"
                 >
                   {userProfile?.name}
                 </span>
@@ -300,7 +299,7 @@ const ProfileNavigationBar: React.FC = () => {
                   )}
                 </button>
               </div>
-              <p className="text-sm text-gray-600">{userProfile?.email}</p>
+              <p className="text-sm text-gray-600 max-w-[150px] truncate overflow-hidden text-ellipsis">{userProfile?.email}</p>
               {/* 드롭다운 메뉴 */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md overflow-hidden z-10">
@@ -325,101 +324,104 @@ const ProfileNavigationBar: React.FC = () => {
         </div>
 
         <hr className="border-1 mx-2" />
-
-        {/* 그룹 이름 영역 */}
-        <div className="flex items-center mx-5 mt-5 mb-2">
-          <span
-            className="text-xl cursor-pointer font-semibold text-[#4D4650] inline-flex items-center"
-            onClick={() => toggle("isGroupInfoOpen")}
-          >
-            {groupName}
-            {toggleStates.isGroupInfoOpen ? (
-              <ChevronUpIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
-            ) : (
-              <ChevronDownIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
-            )}
-          </span>
-        </div>
-        {toggleStates.isGroupInfoOpen && (
-          <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
-            {/* {userRole === "OWNER" && (
-              <div
-                className="p-2 cursor-pointer"
-                onClick={() => setIsGroupUpdateModalOpen(true)}
-                >
-                그룹 설정
+        {groupId && (
+          <div>
+            {/* 그룹 이름 영역 */}
+            <div className="flex items-center mx-5 mt-5 mb-2">
+              <span
+                className="text-xl cursor-pointer font-semibold text-[#4D4650] inline-flex items-center"
+                onClick={() => toggle("isGroupInfoOpen")}
+              >
+                {groupName}
+                {toggleStates.isGroupInfoOpen ? (
+                  <ChevronUpIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+                ) : (
+                  <ChevronDownIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+                )}
+              </span>
+            </div>
+            {toggleStates.isGroupInfoOpen && (
+              <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
+                {/* {userRole === "OWNER" && (
+                  <div
+                    className="p-2 cursor-pointer"
+                    onClick={() => setIsGroupUpdateModalOpen(true)}
+                    >
+                    그룹 설정
+                  </div>
+                )} */}
               </div>
-            )} */}
+            )}
+
+            {/* 멤버 목록 영역 */}
+            <div>
+            <div
+              className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
+              onClick={() => toggle("isMemberOpen")}
+            >
+              {toggleStates.isMemberOpen ? (
+                <ChevronUpIcon
+                  className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
+                  strokeWidth={2}
+                />
+              ) : (
+                <ChevronDownIcon
+                  className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
+                  strokeWidth={2}
+                />
+              )}
+              {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
+              <div className="flex items-center justify-between flex-1 text-[#4D4650]">
+                <span>
+                  Members{" "}
+                  <span className="text-base">
+                    {/* ({activeMemberCount}/{groupCapacity}) */}
+                  </span>
+                </span>
+                {/* {(userRole === "OWNER" || userRole === "MANAGER") && (
+                  <Cog6ToothIcon
+                    className="w-4 h-4 text-[#4D4650] cursor-pointer"
+                    strokeWidth={2}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/userrole");
+                    }}
+                  />
+                )} */}
+              </div>
+            </div>
+          </div>
+
+            {toggleStates.isMemberOpen && (
+              <div
+                className="ml-10 mb-2 overflow-y-auto"
+                style={{
+                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 380px)",
+                }}
+              >
+                <ul>
+                  {/* {groupUsers.map((groupUser) => (
+                    <li key={groupUser.id} className="flex items-center my-2">
+                      <div className="relative w-[30px] h-[30px]">
+                        <img
+                          src={groupUser.image}
+                          alt={groupUser.name}
+                          className="w-full h-full rounded-full border-2 border-gray-300"
+                        />
+                        <span
+                          className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                            groupUser.status ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                        />
+                      </div>
+                      <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
+                    </li>
+                  ))} */}
+                </ul>
+              </div>
+            )}
           </div>
         )}
-
-        {/* 멤버 목록 영역 */}
-        <div>
-        <div
-          className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
-          onClick={() => toggle("isMemberOpen")}
-        >
-          {toggleStates.isMemberOpen ? (
-            <ChevronUpIcon
-              className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
-              strokeWidth={2}
-            />
-          ) : (
-            <ChevronDownIcon
-              className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
-              strokeWidth={2}
-            />
-          )}
-          {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
-          <div className="flex items-center justify-between flex-1 text-[#4D4650]">
-            <span>
-              Members{" "}
-              <span className="text-base">
-                {/* ({activeMemberCount}/{groupCapacity}) */}
-              </span>
-            </span>
-            {/* {(userRole === "OWNER" || userRole === "MANAGER") && (
-              <Cog6ToothIcon
-                className="w-4 h-4 text-[#4D4650] cursor-pointer"
-                strokeWidth={2}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate("/userrole");
-                }}
-              />
-            )} */}
-          </div>
-        </div>
-
-          {toggleStates.isMemberOpen && (
-            <div
-              className="ml-10 mb-2 overflow-y-auto"
-              style={{
-                height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 380px)",
-              }}
-            >
-              <ul>
-                {/* {groupUsers.map((groupUser) => (
-                  <li key={groupUser.id} className="flex items-center my-2">
-                    <div className="relative w-[30px] h-[30px]">
-                      <img
-                        src={groupUser.image}
-                        alt={groupUser.name}
-                        className="w-full h-full rounded-full border-2 border-gray-300"
-                      />
-                      <span
-                        className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                          groupUser.status ? "bg-green-500" : "bg-gray-400"
-                        }`}
-                      />
-                    </div>
-                    <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
-                  </li>
-                ))} */}
-              </ul>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* 그룹 이름 수정 모달 렌더링 */}
