@@ -10,6 +10,7 @@ import { ResizableBox } from 'react-resizable';
 import MuteButton from "../features/projects/ProjectMuteButton";
 import CamButton from "../features/projects/ProjectCameraButton";
 import ParticipantsButton from "../features/projects/ProjectParticipants";
+import RightContentsContainer from "../features/projects/RightContents";
 
 import 'react-resizable/css/styles.css';
 import '../assets/css/ProjectPage.css'
@@ -54,7 +55,7 @@ function ProjectPage() {
       <div className="flex flex-col h-screen">
         {/* 네비게이션 바 */}
         <div className="flex flex-row items-center gap-10 justify-between h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
-          <div className="flex items-center h-[35px] box-border bg-[#059669] rounded-md text-white px-4">
+          <div className="flex items-center h-[35px] text-white px-4">
             {/* <ProjectMemberListButton/> */}
             Project : 프로젝트 이름
           </div>
@@ -62,7 +63,7 @@ function ProjectPage() {
             <div className="flex items-center justify-center text-[#d4d4d4]">
               <ParticipantsButton />
             </div>
-            <div className="flex items-center justify-center gap-4 mr-32">
+            <div className="flex items-center justify-center gap-4 mr-16">
               <MuteButton />
               <CamButton />
             </div>
@@ -76,9 +77,9 @@ function ProjectPage() {
         <div className="flex-1 flex flex-row">
           {/* 파일 탐색기 컨테이너너*/}
           <ResizableBox
-            width={300}
+            width={250}
             minConstraints={[100, Infinity]}
-            maxConstraints={[1000, Infinity]}
+            maxConstraints={[600, Infinity]}
             height={Infinity}
             axis="x"// 드래그 종료
             onResizeStart={() => setIsHorizontalDragging(true)}
@@ -203,57 +204,9 @@ function ProjectPage() {
 
           {/* 오른쪽 메인 콘텐츠 */}
           <div className="flex flex-col h-full aspect-[1/3] border-l-2 border-[#273654] overflow-hidden">
-            {/* 캐러셀 */}
-
-            {/* <VerticalCarousel items={carouselItems} isChatOpen={isChatOpen} /> */}
-            {isChatOpen ?
-              <div className="bg-slate-400 flex-1 w-full overflow-hidden flex flex-col">
-                <div className="relative h-1/2 bg-stone-700">
-                  <p>테스트1</p>
-                </div>
-                <div className="relative h-1/2 bg-stone-600">
-                  <p>테스트2</p>
-                </div>
-              </div>
-              :
-              <div className="bg-slate-400 flex-1 w-full overflow-hidden flex flex-col">
-                <div className="relative h-1/4 bg-stone-700">
-                  <p>테스트1</p>
-                </div>
-                <div className="relative h-1/4 bg-stone-600">
-                  <p>테스트2</p>
-                </div>
-                <div className="relative h-1/4 bg-stone-700">
-                  <p>테스트3</p>
-                </div>
-                <div className="relative h-1/4 bg-stone-600">
-                  <p>테스트4</p>
-                </div>
-              </div>
-            }
-
-
-            {/* 채팅 */}
-            <div className={`flex flex-col bg-[#0F172A] w-full transition-all duration-300 ease-in-out ${isChatOpen ? 'flex-1' : 'h-0'}`}>
-              <div className="flex w-full h-[30px] bg-[#273654] items-center">
-                <b className="ml-4 text-white">Chat</b>
-                {/* 채팅창 들어갈 자리리 */}
-              </div>
-            </div>
-            {/* 채팅창 푸터(채팅 입력칸/채팅 열고 닫는 버튼이 들어갈 컴포넌트트) */}
-            <div className="h-[50px] bg-[#0F172A] border-t-2 border-[#273654]">
-              <button
-                onClick={toggleChat}
-                className="w-full h-full text-white focus:outline-none"
-              >
-                {isChatOpen ? '채팅 닫기' : '채팅 열기'}
-              </button>
-            </div>
+            <RightContentsContainer />
           </div>
         </div>
-        {/*/////////////////////////////////////////////////////////////////////////*/}
-        {/*/////////////////////////////////////////////////////////////////////////*/}
-
       </div>
     </ProjectEditorProvider>
   );
