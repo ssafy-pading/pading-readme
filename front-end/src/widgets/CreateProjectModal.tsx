@@ -153,10 +153,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       // setIsLoading(true);
       // 여기에 api로 데이터 불러오기를 합니다 
       try{
-        // 그룹 아이디 야매로 넣기
-        const memberList = await getProjectsMemberList(3);
-        // // 아래는 원래 넣어야 하는 값
-        // const memberList = await getProjectsMemberList(Number(groupId));
+        const memberList = await getProjectsMemberList(groupId);
         const languages = await getLanguages();
         const performanceList = await getPerformanceList();
         // 언어, os, 사양, member 담아주기
@@ -280,7 +277,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
     // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
       try{
-        const newProject:CreateProjectResponse = await createProject("3", formData);
+        const newProject:CreateProjectResponse = await createProject(groupId, formData);
         console.log(newProject);
 
         // 기존 작성된 폼 초기화
