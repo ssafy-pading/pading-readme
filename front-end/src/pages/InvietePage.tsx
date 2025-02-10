@@ -102,7 +102,7 @@ const InvitePage = () => {
         const fetchGroupInfo = async () => {
         try {
             if(groupId != undefined){
-                const group:GetGroupDetailsResponse = await getGroupDetails(groupId); // 여기에 그룹 정보 가져오는 API 연결
+                const group:GetGroupDetailsResponse = await getGroupDetails(Number(groupId)); // 여기에 그룹 정보 가져오는 API 연결
                 setGroupName(group?.name || "Unknown Group");
             }else{
                 alert("잘못된 경로입니다.");
@@ -123,7 +123,7 @@ const InvitePage = () => {
         try {
             // 그룹 참여 API 호출
             if(groupId != undefined && inviteCode != undefined){
-                const groupDetails:JoinGroupResponse = await joinGroup(groupId, inviteCode);
+                const groupDetails:JoinGroupResponse = await joinGroup(Number(groupId), inviteCode);
 
                 navigate(`/proectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
             }
