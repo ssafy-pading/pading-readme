@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAxiosInstance, setupInterceptors } from './axiosInstance';
 import { AxiosInstance } from 'axios';
-import { CheckGroupNameDuplicateResponse, GetGroupDetailsResponse, GetGroupListResponse, GetGroupMembersResponse, GroupInviteLinkResponse, JoinGroupResponse, UpdateMemberRoleResponse } from '../types/groupApiResponse';
+import { CheckGroupNameDuplicateResponse, GetGroupDetailsResponse, GetGroupListResponse, GetGroupMembersResponse, GroupCreateResponse, GroupInviteLinkResponse, JoinGroupResponse, UpdateMemberRoleResponse } from '../types/groupApiResponse';
 
 /**
  * Custom hook for handling Group-related API requests.
@@ -72,10 +72,10 @@ const useGroupAxios = () => {
   /**
    * 그룹 생성
    */
-  const createGroup = async (data: Record<string, unknown>): Promise<boolean> => {
+  const createGroup = async (data: Record<string, unknown>): Promise<GroupCreateResponse> => {
     try {
-      await groupAxios.post('/v1/groups', data);
-      return true;
+      const response = await groupAxios.post('/v1/groups', data);
+      return response.data.data;
     } catch (error) {
       console.error('Error creating group:', error);
       throw error;

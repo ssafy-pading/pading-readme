@@ -3,6 +3,7 @@ import Modal from "react-modal";
 import cross from "../assets/cross.svg";
 import useGroupAxios from "../shared/apis/useGroupAxios"; // useGroupAxios 훅 가져오기
 import { JoinGroupResponse } from "../shared/types/groupApiResponse";
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -21,6 +22,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
   onClose,
   onSwitchToJoin,
 }) => {
+  const navigate = useNavigate()
   // 그룹 이름 상태 관리 (string)
   const [groupName, setGroupName] = useState<string>("");
   // 수용 인원 상태 관리 (문자열로 관리하여 input의 value와 일치)
@@ -89,19 +91,21 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
     setIsLoading(true);
     try {
       // 그룹 이름과 수용 인원(capacity)을 함께 전달
-      const success: boolean = await createGroup({ name: groupName, capacity: capNumber });
-      if (success) {
+      const { id: groupId } = await createGroup({ name: groupName, capacity: capNumber });
+
+      if (groupId) {
         alert("그룹이 성공적으로 생성되었습니다!");
         setGroupName(""); // 입력 필드 초기화
         setCapacity(""); // 입력 필드 초기화
         setDuplicateChecked(false);
         setIsNameAvailable(false);
         onClose(); // 모달 닫기
+        navigate(`/projectlist/${groupId}`); // 생성한 그룹으로 이동
       }
     } catch (error) {
       const errorMessage: string = "알 수 없는 오류가 발생했습니다.";
       alert(`그룹 생성 실패: ${errorMessage}`);
-      console.error("그룹 생성 에러:", error);
+      console.error("그룹 생성 실패:", error);
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +213,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
                 : "bg-[#5C8290] text-white hover:bg-[#4a6d77]"
             }`}
           >
-            {isLoading ? "생성 중..." : "생성하기"}
+            {isLoading ? "그룹 생성 중..." : "생성하기"}
           </button>
         </form>
       </div>

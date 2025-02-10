@@ -35,6 +35,12 @@ export type GroupInviteLinkResponse = {
   code: string; // 초대 링크
   expirationTime: number;  // 초대 링크 만료 시간
 };
+// 그룹 생성
+export type GroupCreateResponse = {
+    id: number;
+    name: string;
+    capacity: number;
+};
 // 그룹 참가
 export type JoinGroupResponse = {
   id: number; // 그룹 ID
