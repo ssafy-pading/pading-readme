@@ -10,10 +10,12 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @NoArgsConstructor
 @Getter
+@ToString
 @Table(
     uniqueConstraints = {
         @UniqueConstraint(columnNames = {"provider", "provider_id"})
