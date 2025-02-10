@@ -154,8 +154,8 @@ const ProjectListPage: React.FC = () => {
     <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
       {/* 프로젝트 목록 */}
       <div className="relative pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
-        <div className='flex justify-between items-center relative'>
-          <p className="text-5xl text-[#4D4650] font-semibold mt-20 mb-8">
+        <div className='flex justify-between items-center relative mt-20 mb-3'>
+          <p className="text-2xl text-[#4D4650] font-semibold mr-4">
             {groupName}
           </p>
 
@@ -182,7 +182,7 @@ const ProjectListPage: React.FC = () => {
         </div>
         <hr className="mb-10" />
 
-        <div className="grid gap-16 grid-cols-[repeat(auto-fill,_minmax(325px,_1fr))]">
+        <div className="grid gap-16 grid-cols-[repeat(auto-fill,_350px)]">
           {/* OWNER, MANAGER만 프로젝트 생성 버튼 표시 */}
           {(userRole === 'OWNER' || userRole === 'MANAGER') && (
             <button

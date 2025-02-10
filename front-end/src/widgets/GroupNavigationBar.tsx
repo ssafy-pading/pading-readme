@@ -35,6 +35,13 @@ const GroupNavigationBar: React.FC = () => {
   const location: Location = useLocation()
   const isNoGroupPage: boolean = location.pathname === "/nogroup";
 
+  // 현재 URL에서 nowGroupId 추출 (예: /projectlist/2)
+  let nowGroupId: number | null = null;
+  const pathParts = location.pathname.split('/');
+  if (pathParts[1] === 'projectlist' && pathParts[2]) {
+    nowGroupId = parseInt(pathParts[2], 10);
+  }
+
   // 그룹 목록 상태 관리
   const [groups, setGroups] = useState<Group[]>([]);
 
@@ -110,10 +117,14 @@ const GroupNavigationBar: React.FC = () => {
           {groups.map((group) => (
             <li key={group.id}>
               <button
-                className="w-12 h-12 bg-[#E4E9E9] hover:bg-[#7996A0] rounded flex items-center justify-center"
+                className={`w-12 h-12 rounded flex items-center justify-center transition-all duration-300 ${
+                  group.id === nowGroupId 
+                    ? 'bg-[#5C8290] text-white'
+                    : 'bg-[#E4E9E9] hover:bg-[#A0B4BA] active:bg-[#7996A0] text-[#4D4650] shadow-md'
+                }`}
                 onClick={() => handleGroupClick(group.id)}
               >
-                <span className="inline-block overflow-hidden whitespace-nowrap max-w-full text-sm text-black text-center font-bold">
+                <span className="inline-block overflow-hidden whitespace-nowrap max-w-full text-sm text-center font-bold">
                   {truncateName(group.name)}
                 </span>
               </button>

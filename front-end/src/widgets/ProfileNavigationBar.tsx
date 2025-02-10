@@ -335,9 +335,9 @@ const ProfileNavigationBar: React.FC = () => {
               >
                 {groupName}
                 {toggleStates.isGroupInfoOpen ? (
-                  <ChevronUpIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+                  <ChevronUpIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
                 ) : (
-                  <ChevronDownIcon className="w-5 h-5 text-[#4D4650] ml-2 pt-1" strokeWidth={2} />
+                  <ChevronDownIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
                 )}
               </span>
             </div>
@@ -362,19 +362,19 @@ const ProfileNavigationBar: React.FC = () => {
             >
               {toggleStates.isMemberOpen ? (
                 <ChevronUpIcon
-                  className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
-                  strokeWidth={2}
+                  className="w-3 h-3 text-[#4D4650] mr-1"
+                  strokeWidth={3}
                 />
               ) : (
                 <ChevronDownIcon
-                  className="w-5 h-5 text-[#4D4650] mr-2 pt-1"
-                  strokeWidth={2}
+                  className="w-3 h-3 text-[#4D4650] mr-1"
+                  strokeWidth={3}
                 />
               )}
               {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
               <div className="flex items-center justify-between flex-1 text-[#4D4650]">
-                <span>
-                  Members{" "}
+                <span className="text-base font-semibold">
+                  멤버{" "}
                   <span className="text-base">
                     {/* ({activeMemberCount}/{groupCapacity}) */}
                   </span>
