@@ -140,7 +140,7 @@ const ProjectListPage: React.FC = () => {
     if (!selectedDeleteProject || !groupId) return;
 
     try {
-      await deleteProject(groupId, selectedDeleteProject.id.toString());
+      await deleteProject(groupId, selectedDeleteProject.id);
       setProjectList((prev) => prev.filter((p) => p.id !== selectedDeleteProject.id));
       closeDeleteConfirmModal();
       alert('프로젝트가 성공적으로 삭제되었습니다.');
