@@ -44,14 +44,14 @@ const GroupNavigationBar: React.FC = () => {
       : name.length > 5 ? `${name.slice(0, 5)}···` : name;
   };
 
-  // 그룹 목록 불러오기 (마운트 시 실행)
+  // 그룹 목록
   useEffect(() => {
     const fetchGroups = async () => {
       try {
         const response = await getGroups();
         setGroups(response.groups);
 
-        // 그룹이 없을 경우 NoGroupPage로 리디렉션하는 코드 (no group 페이지가 없어서 주석 처리)
+        // no group 페이지가 없음
         // if (response.groups.length === 0) {
         //   navigate('/nogroup'); 
         // }
@@ -61,7 +61,7 @@ const GroupNavigationBar: React.FC = () => {
     };
 
     fetchGroups();
-  }, [navigate, getGroups]);
+  }, []);
 
   // 그룹 클릭 시 해당 그룹 상세 페이지로 이동
   const handleGroupClick = (groupId: number) => {

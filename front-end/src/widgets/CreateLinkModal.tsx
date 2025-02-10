@@ -13,7 +13,7 @@ Modal.setAppElement('#root');
 interface CreateLinkModalProps {
   isOpen: boolean;
   onClose: () => void;
-  groupId?: string;
+  groupId?: number;
 }
 
 const CreateLinkModal: React.FC<CreateLinkModalProps> = ({

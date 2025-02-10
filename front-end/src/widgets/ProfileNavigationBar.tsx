@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useNavigation } from "../context/navigationContext";
 // heroicons 아이콘 임포트
 import { 
-  UserGroupIcon, 
+  // UserGroupIcon, 
   ChevronUpIcon, 
   ChevronDownIcon, 
   Bars3Icon, 
@@ -11,7 +11,7 @@ import {
   ChevronDoubleRightIcon,
   UserIcon,
   ArrowLeftOnRectangleIcon,
-  Cog6ToothIcon, // 추가: 환경설정 아이콘 (톱니바퀴)
+  // Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import profileImage from "../assets/profile_image.png";
 
@@ -29,63 +29,82 @@ import { useUser } from "../context/userContext";
 import { GetProjectListResponse } from "../shared/types/projectApiResponse";
 import GroupUpdateNameModal from "./GroupUpdateNameModal";
 
+/* ============================================
+   INTERFACES & TYPES
+   ============================================ */
 interface GroupUser {
   id: number;
   name: string;
   image: string;
   status: boolean;
+  role: string;
 }
 
 const ProfileNavigationBar: React.FC = () => {
   const { userProfile } = useUser();
+  const navigate = useNavigate();
   const { getGroupDetails, getGroupMembers } = useGroupAxios();
   const { getProjects } = useProjectAxios();
   const { logout } = useMypageAxios();
+
+  /* --------------------------------------------
+     네비게이션 바 토글 및 호버 이벤트 (NavigationContext 사용)
+  -------------------------------------------- */
+  const { 
+    isProfileNavOpen, 
+    isSmallNavOpen,
+    handleButtonMouseEnter,
+    handleButtonMouseLeave,
+    handleNavMouseEnter,
+    handleNavMouseLeave,
+    handleToggleClick,
+    handleCloseClick,
+  } = useNavigation();
+
+  // 토글, 호버시 네비게이션 바 사이즈 설정 
+  const containerHeight: string = isProfileNavOpen ? "h-full" : "h-auto";
+  const navTopClass: string = isProfileNavOpen ? "top-0" : "top-[80px] bottom-[80px]";
+
+  /* --------------------------------------------
+     토글 및 드롭다운 관리
+  -------------------------------------------- */
+
+  // 그룹 설정, 멤버 목록 토글 관련
+  const [toggleStates, setToggleStates] = useState({
+    isGroupInfoOpen: true,
+    isMemberOpen: true,
+  });
   
-  const groupId = useParams<({ groupId })>().groupId;
-
-  const [groupName, setGroupName] = useState("");
-  const [groupCapacity, setGroupCapacity] = useState(0);
-
-  // 그룹 이름 수정 모달 오픈 여부를 관리하는 상태
-  const [isGroupUpdateModalOpen, setIsGroupUpdateModalOpen] = useState(false);
-
-  // 그룹 이름이 수정되면 갱신
-  const handleGroupNameUpdate = (newName: string) => {
-    setGroupName(newName)
+  const toggle = (key: "isGroupInfoOpen" | "isMemberOpen") => {
+    setToggleStates((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
-  // 그룹 상세 정보 조회
-  useEffect(() => {
-    const fetchGroupDetails = async () => {
-      try {
-        console.log("Fetching group details for groupId:", groupId);
-        const data = await getGroupDetails(groupId);
-        setGroupName(data.name);
-        setGroupCapacity(data.capacity);
-      } catch (error) {
-        console.error("그룹 상세 정보 조회 중 오류:", error);
-      }
-    };
-    fetchGroupDetails();
-  }, [groupId, getGroupDetails]);
-
-  // 큰 네비게이션 바의 열림/닫힘 상태 (Context에서 관리)
-  const { isProfileNavOpen, toggleProfileNav } = useNavigation();
-
-  // useNavigate 훅 사용
-  const navigate = useNavigate();
-
-  // 작은 네비게이션 바 상태 (로컬 상태)
-  const [isSmallNavOpen, setIsSmallNavOpen] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 드롭다운 메뉴 상태 및 드롭다운 영역 ref
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // 마이페이지 드롭다운
+  const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // "마이페이지" 모달 열림 상태 관리
   const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
+
+  // 드롭다운 토글 함수
+  const handleDropdownToggle = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
+    
+  // 모달 열기/닫기 함수
+  const openMypageModal = () => setActiveModal('mypage');
+  const openDeleteModal = () => setActiveModal('delete');
+  const openPictureModal = () => setActiveModal('picture');
+  const closeModal = () => setActiveModal(null);
+
+  // "마이페이지" 버튼 클릭 시: 모달 열기
+  const handleNavigateToMypage = () => {
+    setIsDropdownOpen(false);
+    setActiveModal('mypage');
+  };
 
   // 드롭다운 외부 클릭 시 닫힘 처리
   useEffect(() => {
@@ -100,134 +119,101 @@ const ProfileNavigationBar: React.FC = () => {
     };
   }, []);
 
-  // ── 토글 버튼 이벤트 ──
-  const handleButtonMouseEnter = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    setIsSmallNavOpen(true);
-  };
 
-  const handleButtonMouseLeave = () => {
-    timerRef.current = setTimeout(() => {
-      setIsSmallNavOpen(false);
-    }, 100);
-  };
-
-  // ── 네비게이션 바 컨테이너 이벤트 ──
-  const handleNavMouseEnter = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  const handleNavMouseLeave = () => {
-    timerRef.current = setTimeout(() => {
-      setIsSmallNavOpen(false);
-    }, 100);
-  };
-
-  // 토글 버튼 클릭 시: small nav 상태에서 큰 네비게이션 바로 확장
-  const handleToggleClick = () => {
-    if (isSmallNavOpen && !isProfileNavOpen) {
-      toggleProfileNav();
-      setIsSmallNavOpen(false);
-    }
-  };
-
-  // 큰 네비게이션 바 닫기 버튼
-  const handleCloseClick = () => {
-    toggleProfileNav();
-    setIsSmallNavOpen(false);
-  };
-
-  // 컨테이너 높이와 상단 위치
-  const containerHeight = isProfileNavOpen ? "h-full" : "h-auto";
-  const navTopClass = isProfileNavOpen ? "top-0" : "top-[80px] bottom-[80px]";
-
-  // 멤버 목록 관련
-  const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
-  const activeMemberCount = groupUsers.filter(user => user.status).length;
-
-  // 토글 관련
-  const [toggleStates, setToggleStates] = useState({
-    isGroupInfoOpen: true,
-    isMemberOpen: true,
-  });
+  // url 파라미터에서 groupId 사용
+  // nogroup 페이지에서는 undefined
+  const groupIdParams = useParams<({ groupId: string | undefined })>().groupId;
+  const groupId: number | undefined = groupIdParams !== undefined ? Number(groupIdParams) : undefined 
   
-  const toggle = (key: "isGroupInfoOpen" | "isMemberOpen") => {
-    setToggleStates((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  /* ============================================
+   그룹 이름, 그룹 정원
+   ============================================ */
+  const [groupName, setGroupName] = useState<string>("");
+  const [groupCapacity, setGroupCapacity] = useState<number>(0);
+
+  // 그룹 이름 수정 모달 오픈 여부를 관리하는 상태
+  const [isGroupUpdateModalOpen, setIsGroupUpdateModalOpen] = useState<boolean>(false);
+
+  // 그룹 이름이 수정되면 갱신
+  const handleGroupNameUpdate = (newName: string) => {
+    setGroupName(newName)
   };
-  
-  // 그룹 멤버 조회 및 접속상태 불러오기 (프로젝트 목록 API 미구현시 빈 배열 사용)
+
+  // 그룹 상세 정보 조회
   useEffect(() => {
-    const fetchMembers = async () => {
-      if (!groupId) return;
+    const fetchGroupDetails = async () => {
       try {
-        // 1️⃣ 그룹 멤버 정보 가져오기
-        const groupData = await getGroupMembers(groupId);
-        let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
-          id: user.id,
-          name: user.name,
-          image: user.image || profileImage,
-          status: false,
-          role: user.role
-        }));
-
-        // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
-        let projectData;
-        try {
-          projectData = await getProjects(groupId);
-        } catch (error) {
-          console.warn("프로젝트 목록 조회 API가 구현되지 않았습니다. 기본값을 사용합니다.");
-          projectData = { projects: [] };
+        if (!groupId) {
+          console.log("groupId가 존재하지 않습니다")
+          // navigate("/nogroup") // 그룹 id가 없으면 nogroup 페이지로 이동
+          return
         }
 
-        // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
-        updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
-          const projectUser = projectData.projects
-            .flatMap((project) => project.users)
-            .find((user) => user.user_id === groupUser.id);
-          return projectUser
-            ? { ...groupUser, status: projectUser.status }
-            : groupUser;
-        });
-
-        setGroupUsers(updatedGroupUsers);
+        const data = await getGroupDetails(groupId);
+        setGroupName(data.name);
+        setGroupCapacity(data.capacity);
       } catch (error) {
-        console.error("그룹 멤버 조회 중 오류:", error);
+        console.error("그룹 상세 정보 조회 중 오류:", error);
       }
     };
+    fetchGroupDetails();
+  }, [groupId, getGroupDetails]);
 
-    fetchMembers();
-  }, [groupId, ]);
+  /* --------------------------------------------
+    멤버 목록 관리 (프로젝트 목록 API 구현시까지 잠금금)
+  -------------------------------------------- */
+  // // 그룹 멤버 목록
+  // const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
+  // // 활동중인 멤버 수
+  // const activeMemberCount = groupUsers.filter(user => user.status).length;
+
+  // // 그룹 멤버 조회 및 접속상태 불러오기 (프로젝트 목록 API 미구현시 빈 배열 사용)
+  // useEffect(() => {
+  //   const fetchMembers = async () => {
+  //     if (!groupId) return;
+  //     try {
+  //       // 1️⃣ 그룹 멤버 정보 가져오기
+  //       const groupData = await getGroupMembers(groupId);
+  //       let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
+  //         id: user.id,
+  //         name: user.name,
+  //         image: user.image || profileImage,
+  //         status: false,
+  //         role: user.role
+  //       }));
+
+  //       // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
+  //       let projectData;
+  //       try {
+  //         projectData = await getProjects(groupId);
+  //       } catch (error) {
+  //         console.log(error);
+  //         projectData = { projects: [] };
+  //       }
+
+  //       // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
+  //       updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
+  //         const projectUser = projectData.projects
+  //           .flatMap((project) => project.users)
+  //           .find((user) => user.user_id === groupUser.id);
+  //         return projectUser
+  //           ? { ...groupUser, status: projectUser.status }
+  //           : groupUser;
+  //       });
+
+  //       setGroupUsers(updatedGroupUsers);
+  //     } catch (error) {
+  //       console.error("그룹 멤버 조회 중 오류:", error);
+  //     }
+  //   };
+
+  //   fetchMembers();
+  // }, [groupId, getGroupMembers, getProjects]);
   
-  // 로그인한 유저 role 확인
-  const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
+  // // 로그인한 유저 role 확인
+  // const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
   
-  // 드롭다운 토글 함수
-  const handleDropdownToggle = () => {
-    setIsDropdownOpen((prev) => !prev);
-  };
-
-  // 모달 열기/닫기 함수
-  const openMypageModal = () => setActiveModal('mypage');
-  const openDeleteModal = () => setActiveModal('delete');
-  const openPictureModal = () => setActiveModal('picture');
-  const closeModal = () => setActiveModal(null);
-
-  // "마이페이지" 버튼 클릭 시: 모달 열기
-  const handleNavigateToMypage = () => {
-    setIsDropdownOpen(false);
-    setActiveModal('mypage');
-  };
-
-  // 로그아웃 버튼 (예시)
+  // 로그아웃
   const handleLogout = async () => {
     try {
       logout();
@@ -356,20 +342,20 @@ const ProfileNavigationBar: React.FC = () => {
         </div>
         {toggleStates.isGroupInfoOpen && (
           <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
-            {userRole === "OWNER" && (
+            {/* {userRole === "OWNER" && (
               <div
                 className="p-2 cursor-pointer"
                 onClick={() => setIsGroupUpdateModalOpen(true)}
                 >
                 그룹 설정
               </div>
-            )}
+            )} */}
           </div>
         )}
 
         {/* 멤버 목록 영역 */}
         <div>
-        <p
+        <div
           className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
           onClick={() => toggle("isMemberOpen")}
         >
@@ -389,10 +375,10 @@ const ProfileNavigationBar: React.FC = () => {
             <span>
               Members{" "}
               <span className="text-base">
-                ({activeMemberCount}/{groupCapacity})
+                {/* ({activeMemberCount}/{groupCapacity}) */}
               </span>
             </span>
-            {(userRole === "OWNER" || userRole === "MANAGER") && (
+            {/* {(userRole === "OWNER" || userRole === "MANAGER") && (
               <Cog6ToothIcon
                 className="w-4 h-4 text-[#4D4650] cursor-pointer"
                 strokeWidth={2}
@@ -401,9 +387,9 @@ const ProfileNavigationBar: React.FC = () => {
                   navigate("/userrole");
                 }}
               />
-            )}
+            )} */}
           </div>
-        </p>
+        </div>
 
           {toggleStates.isMemberOpen && (
             <div
@@ -413,7 +399,7 @@ const ProfileNavigationBar: React.FC = () => {
               }}
             >
               <ul>
-                {groupUsers.map((groupUser) => (
+                {/* {groupUsers.map((groupUser) => (
                   <li key={groupUser.id} className="flex items-center my-2">
                     <div className="relative w-[30px] h-[30px]">
                       <img
@@ -429,7 +415,7 @@ const ProfileNavigationBar: React.FC = () => {
                     </div>
                     <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
                   </li>
-                ))}
+                ))} */}
               </ul>
             </div>
           )}
@@ -437,13 +423,15 @@ const ProfileNavigationBar: React.FC = () => {
       </div>
 
       {/* 그룹 이름 수정 모달 렌더링 */}
-      <GroupUpdateNameModal
-        isOpen={isGroupUpdateModalOpen}
-        onClose={() => setIsGroupUpdateModalOpen(false)}
-        groupId={groupId}
-        currentName={groupName}
-        onUpdate={handleGroupNameUpdate}
-      />
+      {groupId && (
+        <GroupUpdateNameModal
+          isOpen={isGroupUpdateModalOpen}
+          onClose={() => setIsGroupUpdateModalOpen(false)}
+          groupId={groupId}
+          currentName={groupName}
+          onUpdate={handleGroupNameUpdate}
+        />
+      )}
 
       {/* MyPageModal 렌더링 */}
       {activeModal === 'mypage' && (
