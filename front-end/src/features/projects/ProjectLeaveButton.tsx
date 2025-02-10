@@ -8,11 +8,11 @@ function ProjectOutButton() {
     return (
         <div>
             <button
-                className="flex items-center text-white bg-[#EF4444] h-[35px] px-4 rounded-md"
+                className="flex items-center justify-center text-white bg-[#EF4444] h-7 px-4 rounded-md"
                 onClick={() => navigate(`/projectlist/`)}
                 // onClick={() => navigate(`/project/${groupId}`)}
             >
-                Leave
+                <p className="text-sm">Leave</p>
             </button>
         </div>
     )

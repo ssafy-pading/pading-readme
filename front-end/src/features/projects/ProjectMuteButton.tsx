@@ -15,7 +15,7 @@ function MuteButton() {
                 onMouseUp={() => setIsClicked(false)} // 마우스 버튼 떼면 원래 크기
                 onMouseLeave={() => setIsClicked(false)} // 클릭 중 마우스 벗어나도 원래 크기
             >
-                {isMute ? <BsFillMicMuteFill className="text-3xl" /> : <BsFillMicFill className="text-3xl" />}
+                {isMute ? <BsFillMicMuteFill className="text-xl" /> : <BsFillMicFill className="text-xl" />}
             </div>
         </button>
     )

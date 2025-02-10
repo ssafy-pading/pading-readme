@@ -70,7 +70,7 @@ function FileExplorer() {
         >
             <div className="folder-container text-white w-full">
                 <div className="h-[30px] w-full border-b-2 border-[#273654] bg-[#0F172A] font-medium">
-                    Explorer
+                    <p className="ml-3 font-light">Explorer</p>
                 </div>
                 <Folder
                     handleInsertNode={handleInsertNode}
