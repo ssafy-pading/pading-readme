@@ -191,9 +191,6 @@ public class GroupService {
     //그룹 조회
     Group group = groupRepository.findById(groupId)
         .orElseThrow(() -> new NotFoundException("Group not found."));
-    if (code == null) {
-      throw new BadRequestException("초대 코드를 입력해주세요.");
-    }
     //redis에 초대 코드 가져오기
     String redisCode = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
     if (redisCode == null || !redisCode.equals(code)) {
