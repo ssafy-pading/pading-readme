@@ -30,21 +30,30 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket("ws://localhost:4444");
-      ws.current.onopen = () => console.log("✅ WebSocket Connected");
+      ws.current.onopen = () => {
+        console.log("✅ WebSocket Connected");
+        ws.current?.send(
+          JSON.stringify({
+            type: "subscribe",
+            topics: [`${groupId}-${projectId}`],
+          })
+        );
+      };
       ws.current.onclose = () => console.log("❌ WebSocket Disconnected");
-
-      // 웹소켓 서버의 바이너리 코드 받기기 
-      ws.current.onmessage = async (event) => {  
+      // 웹소켓 서버의 바이너리 코드 받기기
+      ws.current.onmessage = async (event) => {
         try {
+          let arrayBuffer;
           if (event.data instanceof Blob) {
-            // 🔹 Blob을 ArrayBuffer로 변환
-            const arrayBuffer = await event.data.arrayBuffer();
-            const update = new Uint8Array(arrayBuffer);
-            // yjs 문서에 동기화화
-            Y.applyUpdate(doc, update);
+            arrayBuffer = await event.data.arrayBuffer();
+          } else if (event.data instanceof ArrayBuffer) {
+            arrayBuffer = event.data;
           } else {
-            console.error("⚠️ Received unexpected data:", event.data);
+            console.error("⚠️ Received unexpected data type:", event.data);
+            return;
           }
+          const update = new Uint8Array(arrayBuffer);
+          Y.applyUpdate(doc, update);
         } catch (error) {
           console.error("⚠️ Error processing Yjs update:", error);
         }
