@@ -13,14 +13,14 @@ interface ProjectCardProps {
   groupId: number;
   project: ProjectListItem; // 전체 item: { project: {...}, users: [...] }
   userRole: string;
-  // onDelete: (project: ProjectListItem) => void; // Delete 로직 콜백
+  onDelete: (project: ProjectListItem) => void; // Delete 로직 콜백
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   groupId,
   project,
   userRole,
-  // onDelete,
+  onDelete,
 }) => {
   // project prop에서 실제 프로젝트 데이터와 사용자 목록(users)을 분해합니다.
   const { project: projectData, users } = project;

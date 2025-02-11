@@ -8,29 +8,37 @@ import ProjectCard from '../widgets/ProjectCard';
 import GroupNavigationBar from '../widgets/GroupNavigationBar';
 import ProfileNavigationBar from '../widgets/ProfileNavigationBar';
 import DeleteConfirmModal from '../widgets/DeleteConfirmModal';
-// import ExitConfirmModal from '../widgets/ExitConfirmModal';
 import ProjectCreateModal from '../widgets/CreateProjectModal';
 import { NavigationProvider, useNavigation } from '../context/navigationContext';
-
-// API 호출을 위한 커스텀 훅
 import useGroupAxios from '../shared/apis/useGroupAxios';
 import useProjectAxios from '../shared/apis/useProjectAxios';
-
-// 이미지 import
 import InviteLink from '../widgets/CreateLinkComponents';
-import { useUser } from '../context/userContext';
 import { FaPlus } from 'react-icons/fa';
+
+// Redux 관련 import
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState, AppDispatch } from '../app/redux/store';
+import { fetchUserInfo } from '../app/redux/user';
 
 // 타입 정의
 export type Project = ProjectListItem['project'];
 
 const ProjectListPage: React.FC = () => {
-  const { userProfile } = useUser();
+  // Redux를 통해 유저 정보 가져오기
+  const dispatch = useDispatch<AppDispatch>();
+  const userProfile = useSelector((state: RootState) => state.user.user);
+  const userStatus = useSelector((state: RootState) => state.user.status);
+
+  // 유저 정보가 없으면 컴포넌트 마운트 시 fetchUserInfo 디스패치
+  useEffect(() => {
+    if (!userProfile && userStatus === "idle") {
+      dispatch(fetchUserInfo());
+    }
+  }, [dispatch, userProfile, userStatus]);
+
   const navigate = useNavigate();
   const { getGroupMembers, getGroupDetails } = useGroupAxios();
   const { getProjects, deleteProject } = useProjectAxios();
-  
-  // ───── 네비게이션 액션을 위한 상태 ─────
   const { isProfileNavOpen } = useNavigation();
 
   // URL 파라미터에서 groupId 사용
@@ -113,23 +121,24 @@ const ProjectListPage: React.FC = () => {
   };
 
   // DELETE 관련 상태 및 함수
-  const [selectedDeleteProject, setSelectedDeleteProject] = useState<Project | null>(null);
-  const openDeleteConfirmModal = (project: Project) => {
+  // 타입 변경: ProjectListItem로 수정
+  const [selectedDeleteProject, setSelectedDeleteProject] = useState<ProjectListItem | null>(null);
+  const openDeleteConfirmModal = (project: ProjectListItem) => {
     setSelectedDeleteProject(project);
-    // 예: Delete 모달을 열려면 modalState.delete를 true로 설정
-    // setModalState(prev => ({ ...prev, delete: true }));
+    // Delete 모달을 열려면 modalState.delete를 true로 설정하면 됩니다.
+    setModalState((prev) => ({ ...prev, delete: true }));
   };
   const closeDeleteConfirmModal = () => {
     setSelectedDeleteProject(null);
-    // setModalState(prev => ({ ...prev, delete: false }));
+    setModalState((prev) => ({ ...prev, delete: false }));
   };
 
   const handleDelete = async () => {
     if (!selectedDeleteProject || !groupId) return;
     try {
-      await deleteProject(groupId, selectedDeleteProject.id);
+      await deleteProject(groupId, selectedDeleteProject.project.id);
       setProjectList((prev) =>
-        prev.filter((item) => item.project.id !== selectedDeleteProject.id)
+        prev.filter((item) => item.project.id !== selectedDeleteProject.project.id)
       );
       closeDeleteConfirmModal();
       alert('프로젝트가 성공적으로 삭제되었습니다.');
@@ -169,14 +178,14 @@ const ProjectListPage: React.FC = () => {
               groupId={groupId!}
               project={item} // 전체 item (project와 users 모두 포함)
               userRole={userRole}
-              // onDelete={openDeleteConfirmModal}
+              onDelete={openDeleteConfirmModal}
             />
           ))}
         </div>
       </div>
 
       {/* ProjectCreateModal */}
-      {(userRole === "OWENER" || userRole === "MANAGER") && (
+      {(userRole === "OWNER" || userRole === "MANAGER") && (
         <ProjectCreateModal
           groupId={groupId!}
           isOpen={modalState.create}
@@ -184,15 +193,13 @@ const ProjectListPage: React.FC = () => {
         />
       )}
 
-      {/* DeleteConfirmModal (필요 시 활성화) */}
-      {/*
+      {/* DeleteConfirmModal */}
       <DeleteConfirmModal
         isOpen={modalState.delete}
         onClose={closeDeleteConfirmModal}
         onConfirm={handleDelete}
-        projectName={selectedDeleteProject ? selectedDeleteProject.name : ''}
+        projectName={selectedDeleteProject ? selectedDeleteProject.project.name : ''}
       />
-      */}
 
       {/* 네비게이션 바 */}
       <div className="relative z-50">

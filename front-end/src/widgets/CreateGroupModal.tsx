@@ -1,8 +1,8 @@
+// GroupCreateModal.tsx
 import React, { useState } from "react";
 import Modal from "react-modal";
 import { RxCross2 } from "react-icons/rx";
-import useGroupAxios from "../shared/apis/useGroupAxios"; // useGroupAxios 훅 가져오기
-import { JoinGroupResponse } from "../shared/types/groupApiResponse";
+import useGroupAxios from "../shared/apis/useGroupAxios";
 import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
@@ -10,7 +10,8 @@ Modal.setAppElement("#root");
 interface GroupCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSwitchToJoin: () => void; // GroupJoinModal로 전환
+  onSwitchToJoin: () => void;
+  onGroupCreated: () => void;  // 그룹 생성 후 부모에 알리는 콜백
 }
 
 interface DuplicateCheckResponse {
@@ -21,23 +22,16 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
   isOpen,
   onClose,
   onSwitchToJoin,
+  onGroupCreated,
 }) => {
-  const navigate = useNavigate()
-  // 그룹 이름 상태 관리 (string)
+  const navigate = useNavigate();
   const [groupName, setGroupName] = useState<string>("");
-  // 수용 인원 상태 관리 (문자열로 관리하여 input의 value와 일치)
   const [capacity, setCapacity] = useState<string>("");
-  // 로딩 상태
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // 중복 확인 상태 및 결과 메시지 관리
   const [duplicateChecked, setDuplicateChecked] = useState<boolean>(false);
   const [isNameAvailable, setIsNameAvailable] = useState<boolean>(false);
-
-  // useGroupAxios 훅에서 제공하는 함수들
   const { createGroup, checkGroupNameDuplicate } = useGroupAxios();
 
-  // 그룹명 중복 확인 버튼 클릭 핸들러
   const handleCheckDuplicate = async (): Promise<void> => {
     if (groupName.trim() === "") {
       alert("먼저 그룹 이름을 입력해주세요.");
@@ -45,11 +39,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
     }
     try {
       const duplicateCheck: DuplicateCheckResponse = await checkGroupNameDuplicate(groupName);
-      if (duplicateCheck.duplicated) {
-        setIsNameAvailable(false);
-      } else {
-        setIsNameAvailable(true);
-      }
+      setIsNameAvailable(!duplicateCheck.duplicated);
       setDuplicateChecked(true);
     } catch (error) {
       alert("그룹명 중복 확인 중 오류가 발생했습니다.");
@@ -57,17 +47,13 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
     }
   };
 
-  // 그룹 생성 폼 제출 핸들러
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
-    // 그룹 이름 유효성 검사
     if (groupName.trim() === "") {
       alert("그룹 이름을 입력해주세요.");
       return;
     }
-
-    // 수용 인원 유효성 검사
     if (capacity.trim() === "") {
       alert("수용 인원을 입력해주세요.");
       return;
@@ -77,8 +63,6 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
       alert("유효한 수용 인원을 입력해주세요.");
       return;
     }
-
-    // 그룹 생성 전에 중복 확인 결과를 체크
     if (!duplicateChecked) {
       alert("먼저 그룹명 중복 확인을 해주세요.");
       return;
@@ -90,30 +74,28 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
 
     setIsLoading(true);
     try {
-      // 그룹 이름과 수용 인원(capacity)을 함께 전달
       const { id: groupId } = await createGroup({ name: groupName, capacity: capNumber });
-
       if (groupId) {
         alert("그룹이 성공적으로 생성되었습니다!");
-        setGroupName(""); // 입력 필드 초기화
-        setCapacity(""); // 입력 필드 초기화
+        // 그룹 생성 성공 시, 부모에게 그룹 목록 갱신 요청
+        onGroupCreated();
+        setGroupName("");
+        setCapacity("");
         setDuplicateChecked(false);
         setIsNameAvailable(false);
-        onClose(); // 모달 닫기
-        navigate(`/projectlist/${groupId}`); // 생성한 그룹으로 이동
+        onClose();
+        navigate(`/projectlist/${groupId}`);
       }
     } catch (error) {
-      const errorMessage: string = "알 수 없는 오류가 발생했습니다.";
-      alert(`그룹 생성 실패: ${errorMessage}`);
+      alert("그룹 생성 실패: 알 수 없는 오류가 발생했습니다.");
       console.error("그룹 생성 실패:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 모달 닫기 핸들러
   const handleClose = (): void => {
-    setGroupName(""); // 입력 필드 초기화
+    setGroupName("");
     setCapacity("");
     setDuplicateChecked(false);
     setIsNameAvailable(false);
@@ -144,18 +126,16 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
         </div>
         {/* 폼 */}
         <form onSubmit={handleSubmit} className="w-full mt-8 space-y-6">
-          {/* 그룹 이름 입력 */}
           <div>
             <label htmlFor="groupName" className="block text-sm font-semibold text-gray-700 mb-2">
               그룹 이름
             </label>
-            {/* 인풋 박스 및 중복 확인 버튼을 포함하는 컨테이너 */}
             <div className="relative">
               <input
                 id="groupName"
                 type="text"
                 value={groupName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(e) => {
                   setGroupName(e.target.value);
                   setDuplicateChecked(false);
                   setIsNameAvailable(false);
@@ -163,7 +143,6 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
                 placeholder="그룹 이름을 입력하세요"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C8290] pr-20"
               />
-              {/* 중복 확인 버튼 (입력 필드 내부, 오른쪽) */}
               <button
                 type="button"
                 onClick={handleCheckDuplicate}
@@ -172,14 +151,12 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
                 중복 확인
               </button>
             </div>
-            {/* 중복 확인 결과 메시지 */}
             {duplicateChecked && (
               <span className="mt-2 ml-2 block text-xs text-gray-700">
                 {isNameAvailable ? "사용 가능한 그룹명입니다." : "이미 사용중인 그룹명입니다."}
               </span>
             )}
           </div>
-          {/* 수용 인원 입력 */}
           <div>
             <label htmlFor="capacity" className="block text-sm font-semibold text-gray-700 mb-2">
               인원 제한
@@ -188,13 +165,12 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
               id="capacity"
               type="number"
               value={capacity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCapacity(e.target.value)}
+              onChange={(e) => setCapacity(e.target.value)}
               placeholder="예: 50"
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C8290]"
               min="1"
             />
           </div>
-          {/* 초대받은 경우 전환 링크 */}
           <p className="text-center">
             <span
               className="text-sm text-black underline cursor-pointer hover:cursor-pointer"
@@ -203,14 +179,11 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
               이미 초대를 받으셨나요?
             </span>
           </p>
-          {/* 제출 버튼 */}
           <button
             type="submit"
             disabled={isLoading}
             className={`py-3 w-full rounded-xl text-sm font-semibold ${
-              isLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-[#5C8290] hover:bg-[#4a6d77] text-white"
+              isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-[#5C8290] hover:bg-[#4a6d77] text-white"
             }`}
           >
             {isLoading ? "그룹 생성 중..." : "생성하기"}

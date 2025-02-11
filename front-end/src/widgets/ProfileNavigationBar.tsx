@@ -1,9 +1,9 @@
+// ProfileNavigationBar.tsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useNavigation } from "../context/navigationContext";
 // heroicons 아이콘 임포트
 import { 
-  // UserGroupIcon, 
   ChevronUpIcon, 
   ChevronDownIcon, 
   Bars3Icon, 
@@ -12,26 +12,24 @@ import {
   UserIcon,
   ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
-  // Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import profileImage from "../assets/profile_image.png";
+
+// --- Redux 관련 임포트 ---
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../app/redux/store";
+import { fetchUserInfo } from "../app/redux/user";
 
 // --- 커스텀 훅 임포트 ---
 import useGroupAxios from "../shared/apis/useGroupAxios"; 
 import useProjectAxios from "../shared/apis/useProjectAxios";
-
-// MyPageModal 임포트
 import MyPageModal from "../widgets/MypageModal";
 import useMypageAxios from "../shared/apis/useMypageAxios";
 import LeaveModal from "./UserLeaveModal";
 import PictureModal from "./PictureChangeModal";
-import { useUser } from "../context/userContext";
-import { GetProjectListResponse } from "../shared/types/projectApiResponse";
 import GroupUpdateNameModal from "./GroupUpdateNameModal";
+import { GetProjectListResponse } from "../shared/types/projectApiResponse";
 
-/* ============================================
-   INTERFACES & TYPES
-   ============================================ */
 interface GroupUser {
   id: number;
   name: string;
@@ -41,15 +39,25 @@ interface GroupUser {
 }
 
 const ProfileNavigationBar: React.FC = () => {
-  const { userProfile } = useUser();
+  // Redux를 통해 유저 정보 가져오기
+  const dispatch = useDispatch<AppDispatch>();
+  const userProfile = useSelector((state: RootState) => state.user.user);
+  const userStatus = useSelector((state: RootState) => state.user.status);
+
+  // 유저 정보가 없으면 컴포넌트 마운트 시 fetchUserInfo 디스패치
+  useEffect(() => {
+    if (!userProfile && userStatus === "idle") {
+      dispatch(fetchUserInfo());
+    }
+  }, [dispatch, userProfile, userStatus]);
+
   const navigate = useNavigate();
-  const { getGroupDetails, getGroupMembers } = useGroupAxios();
+  // useGroupAxios에서 그룹 상세, 멤버 조회, 그리고 그룹 삭제 함수 추출
+  const { getGroups, getGroupDetails, getGroupMembers, deleteGroup } = useGroupAxios();
   const { getProjects } = useProjectAxios();
   const { logout } = useMypageAxios();
 
-  /* --------------------------------------------
-     네비게이션 바 토글 및 호버 이벤트 (NavigationContext 사용)
-  -------------------------------------------- */
+  // 네비게이션 관련 커스텀 훅
   const { 
     isProfileNavOpen, 
     isSmallNavOpen,
@@ -61,20 +69,14 @@ const ProfileNavigationBar: React.FC = () => {
     handleCloseClick,
   } = useNavigation();
 
-  // 토글, 호버시 네비게이션 바 사이즈 설정 
   const containerHeight: string = isProfileNavOpen ? "h-full" : "h-auto";
   const navTopClass: string = isProfileNavOpen ? "top-0" : "top-[80px] bottom-[80px]";
 
-  /* --------------------------------------------
-     토글 및 드롭다운 관리
-  -------------------------------------------- */
-
-  // 그룹 설정, 멤버 목록 토글 관련
+  // 토글 상태 관리 (그룹 설정, 멤버 목록 토글)
   const [toggleStates, setToggleStates] = useState({
     isGroupInfoOpen: true,
     isMemberOpen: true,
   });
-  
   const toggle = (key: "isGroupInfoOpen" | "isMemberOpen") => {
     setToggleStates((prev) => ({
       ...prev,
@@ -82,31 +84,23 @@ const ProfileNavigationBar: React.FC = () => {
     }));
   };
 
-  // 마이페이지 드롭다운
+  // 마이페이지 드롭다운 관리
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // "마이페이지" 모달 열림 상태 관리
-  const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
-
-  // 드롭다운 토글 함수
   const handleDropdownToggle = () => {
     setIsDropdownOpen((prev) => !prev);
   };
     
-  // 모달 열기/닫기 함수
+  const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
   const openMypageModal = () => setActiveModal('mypage');
   const openDeleteModal = () => setActiveModal('delete');
   const openPictureModal = () => setActiveModal('picture');
   const closeModal = () => setActiveModal(null);
-
-  // "마이페이지" 버튼 클릭 시: 모달 열기
   const handleNavigateToMypage = () => {
     setIsDropdownOpen(false);
     setActiveModal('mypage');
   };
 
-  // 드롭다운 외부 클릭 시 닫힘 처리
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -119,26 +113,17 @@ const ProfileNavigationBar: React.FC = () => {
     };
   }, []);
 
-  //
-
-
-  // url 파라미터에서 groupId 사용
-  // nogroup 페이지에서는 undefined
-  const groupIdParams = useParams<({ groupId: string | undefined })>().groupId;
-  const groupId: number | undefined = groupIdParams !== undefined ? Number(groupIdParams) : undefined 
+  // URL 파라미터에서 groupId 추출 (nogroup 페이지에서는 undefined)
+  const groupIdParams = useParams<{ groupId?: string }>().groupId;
+  const groupId: number | undefined = groupIdParams ? Number(groupIdParams) : undefined;
   
-  /* ============================================
-   그룹 이름, 그룹 정원
-   ============================================ */
+  // 그룹 이름 및 정원 관리
   const [groupName, setGroupName] = useState<string>("");
   const [groupCapacity, setGroupCapacity] = useState<number>(0);
-
-  // 그룹 이름 수정 모달 오픈 여부를 관리하는 상태
+  // 그룹 이름 수정 모달 상태
   const [isGroupUpdateModalOpen, setIsGroupUpdateModalOpen] = useState<boolean>(false);
-
-  // 그룹 이름이 수정되면 갱신
   const handleGroupNameUpdate = (newName: string) => {
-    setGroupName(newName)
+    setGroupName(newName);
   };
 
   // 그룹 상세 정보 조회
@@ -146,10 +131,9 @@ const ProfileNavigationBar: React.FC = () => {
     const fetchGroupDetails = async () => {
       try {
         if (!groupId) {
-          navigate("/nogroup")
-          return
+          navigate("/nogroup");
+          return;
         }
-
         const data = await getGroupDetails(groupId);
         setGroupName(data.name);
         setGroupCapacity(data.capacity);
@@ -160,20 +144,14 @@ const ProfileNavigationBar: React.FC = () => {
     fetchGroupDetails();
   }, [groupId, navigate, getGroupDetails]);
 
-  /* --------------------------------------------
-    멤버 목록 관리 (프로젝트 목록 API 구현시까지 잠금)
-  -------------------------------------------- */
-  // 그룹 멤버 목록
+  // 그룹 멤버 관리
   const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
-  // 활동중인 멤버 수
   const activeMemberCount = groupUsers.filter(user => user.status).length;
 
-  // 그룹 멤버 조회 및 접속상태 불러오기
   useEffect(() => {
     const fetchMembers = async () => {
       if (!groupId) return;
       try {
-        // 1️⃣ 그룹 멤버 정보 가져오기
         const groupData = await getGroupMembers(groupId);
         let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
           id: user.id,
@@ -183,7 +161,6 @@ const ProfileNavigationBar: React.FC = () => {
           role: user.role
         }));
 
-        // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
         let projectData: GetProjectListResponse;
         try {
           projectData = await getProjects(groupId);
@@ -192,7 +169,6 @@ const ProfileNavigationBar: React.FC = () => {
           projectData = [];
         }
 
-        // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
         updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
           const projectUser = projectData
             .flatMap((projectItem) => projectItem.users)
@@ -207,21 +183,41 @@ const ProfileNavigationBar: React.FC = () => {
         console.error("그룹 멤버 조회 중 오류:", error);
       }
     };
-
     fetchMembers();
   }, [groupId, getGroupMembers, getProjects]);
 
-  
-  // 로그인한 유저 role 확인
+  // 로그인한 유저의 그룹 내 역할 확인
   const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
-  
-  // 로그아웃
+
+  // 로그아웃 처리
   const handleLogout = async () => {
     try {
       logout();
     } catch (error) {
-      console.log(error);
-      console.log("logout 실패");
+      console.error("로그아웃 실패:", error);
+    }
+  };
+
+  // ★ 그룹 삭제 로직
+  const handleDeleteGroup = async () => {
+    if (!groupId) return;
+    if (!window.confirm("정말 그룹을 삭제하시겠습니까? 이 작업은 복구할 수 없습니다.")) return;
+    try {
+      const success = await deleteGroup(groupId);
+      console.log("deleteGroup 결과:", success);
+      if (success) {
+        alert("그룹이 삭제되었습니다.");
+        // 삭제 후 최신 그룹 목록을 가져와 첫 번째 그룹으로 리다이렉트, 없으면 /nogroup
+        const groupsResponse = await getGroups();
+        if (groupsResponse.groups && groupsResponse.groups.length > 0) {
+          navigate(`/projectlist/${groupsResponse.groups[0].id}`);
+        } else {
+          navigate("/nogroup");
+        }
+      }
+    } catch (error) {
+      alert("그룹 삭제 중 오류가 발생했습니다.");
+      console.error("그룹 삭제 에러:", error);
     }
   };
 
@@ -236,10 +232,7 @@ const ProfileNavigationBar: React.FC = () => {
           className="p-2 fixed top-5 left-[150px]"
         >
           {isSmallNavOpen ? (
-            <ChevronDoubleRightIcon
-              className="text-[#4D4650] w-7 h-7"
-              strokeWidth={2}
-            />
+            <ChevronDoubleRightIcon className="text-[#4D4650] w-7 h-7" strokeWidth={2} />
           ) : (
             <Bars3Icon className="text-[#4D4650] w-7 h-7" strokeWidth={2} />
           )}
@@ -261,23 +254,19 @@ const ProfileNavigationBar: React.FC = () => {
           ${!isProfileNavOpen && isSmallNavOpen ? "rounded-r-xl border border-gray-300" : ""}
         `}
       >
-        {/* 닫기 버튼 (네비게이션 바 열림 상태) */}
+        {/* 닫기 버튼 */}
         {isProfileNavOpen && (
           <button
             onClick={handleCloseClick}
             className="p-2 absolute top-4 right-2 z-50"
           >
-            <ChevronDoubleLeftIcon
-              className="text-[#4D4650] w-6 h-6"
-              strokeWidth={2}
-            />
+            <ChevronDoubleLeftIcon className="text-[#4D4650] w-6 h-6" strokeWidth={2} />
           </button>
         )}
 
         {/* 프로필 영역 */}
         <div className="p-4">
           <div className="grid grid-cols-4 gap-1 items-center">
-            {/* 프로필 사진 */}
             <div className="relative w-[45px] h-[45px] rounded-full bg-white flex items-center justify-center">
               <img
                 src={userProfile?.image || profileImage}
@@ -285,7 +274,6 @@ const ProfileNavigationBar: React.FC = () => {
                 className="w-full h-full rounded-full"
               />
             </div>
-            {/* 마이페이지, 로그아웃 드롭다운 버튼 */}
             <div className="col-span-3 relative" ref={dropdownRef}>
               <div className="flex items-center">
                 <span
@@ -294,7 +282,6 @@ const ProfileNavigationBar: React.FC = () => {
                 >
                   {userProfile?.name}
                 </span>
-
                 <div className="relative">
                   <button onClick={handleDropdownToggle} className="ml-1">
                     {isDropdownOpen ? (
@@ -303,7 +290,6 @@ const ProfileNavigationBar: React.FC = () => {
                       <ChevronDownIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
                     )}
                   </button>
-                  {/* 드롭다운 메뉴 */}
                   {isDropdownOpen && (
                     <div className="absolute right-0 top-full mt-2 w-28 bg-white text-xs rounded-lg shadow-md overflow-hidden z-10">
                       <button
@@ -324,11 +310,12 @@ const ProfileNavigationBar: React.FC = () => {
                   )}
                 </div>
               </div>
-              <p className="text-xs text-gray-600 max-w-[150px] truncate overflow-hidden text-ellipsis">{userProfile?.email}</p>
+              <p className="text-xs text-gray-600 max-w-[150px] truncate overflow-hidden text-ellipsis">
+                {userProfile?.email}
+              </p>
             </div>
           </div>
         </div>
-
 
         <hr className="border-1 mx-2" />
         {groupId && (
@@ -337,64 +324,71 @@ const ProfileNavigationBar: React.FC = () => {
             <div className="flex items-center mx-5 mt-5 mb-2">
               <span
                 className="text-xl cursor-pointer font-semibold text-[#4D4650] inline-flex items-center"
-                onClick={() => toggle("isGroupInfoOpen")}
+                onClick={() => {
+                  if (userRole === "OWNER") {
+                    toggle("isGroupInfoOpen");
+                  }
+                }}
               >
                 {groupName}
-                {toggleStates.isGroupInfoOpen ? (
-                  <ChevronUpIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
-                ) : (
-                  <ChevronDownIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
+                {userRole === "OWNER" && (
+                  toggleStates.isGroupInfoOpen ? (
+                    <ChevronUpIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 text-[#4D4650] ml-1" strokeWidth={3} />
+                  )
                 )}
               </span>
             </div>
             {toggleStates.isGroupInfoOpen && (
-              <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
+              <div className="px-10 mb-2 text-[#4D4650]">
                 {userRole === "OWNER" && (
-                  <div
-                    className="p-2 cursor-pointer"
-                    onClick={() => setIsGroupUpdateModalOpen(true)}
+                  <>
+                    <div
+                      className="p-2 cursor-pointer hover:font-bold"
+                      onClick={() => setIsGroupUpdateModalOpen(true)}
                     >
-                    그룹 설정
-                  </div>
+                      이름 변경
+                    </div>
+                    <div
+                      className="p-2 cursor-pointer text-red-500 hover:font-bold"
+                      onClick={handleDeleteGroup}
+                    >
+                      그룹 삭제
+                    </div>
+                  </>
                 )}
               </div>
             )}
 
             {/* 멤버 목록 영역 */}
             <div>
-            <div
-              className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
-              onClick={() => toggle("isMemberOpen")}
-            >
-              {toggleStates.isMemberOpen ? (
-                <ChevronUpIcon
-                  className="w-3 h-3 text-[#4D4650] mr-1"
-                  strokeWidth={3}
-                />
-              ) : (
-                <ChevronDownIcon
-                  className="w-3 h-3 text-[#4D4650] mr-1"
-                  strokeWidth={3}
-                />
-              )}
-              {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
-              <div className="flex items-center justify-between flex-1 text-[#4D4650]">
-                <span className="text-base font-semibold">
-                  멤버 ({activeMemberCount}/{groupCapacity})
-                </span>
-                {(userRole === "OWNER" || userRole === "MANAGER") && (
-                  <Cog6ToothIcon
-                    className="w-4 h-4 text-[#4D4650] cursor-pointer"
-                    strokeWidth={2}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/rolechange/${groupId}`);
-                    }}
-                  />
+              <div
+                className="text-xl mx-5 mt-5 mb-2 cursor-pointer flex items-center"
+                onClick={() => toggle("isMemberOpen")}
+              >
+                {toggleStates.isMemberOpen ? (
+                  <ChevronUpIcon className="w-3 h-3 text-[#4D4650] mr-1" strokeWidth={3} />
+                ) : (
+                  <ChevronDownIcon className="w-3 h-3 text-[#4D4650] mr-1" strokeWidth={3} />
                 )}
+                <div className="flex items-center justify-between flex-1 text-[#4D4650]">
+                  <span className="text-base font-semibold">
+                    멤버 ({activeMemberCount}/{groupCapacity})
+                  </span>
+                  {(userRole === "OWNER" || userRole === "MANAGER") && (
+                    <Cog6ToothIcon
+                      className="w-4 h-4 text-[#4D4650] cursor-pointer"
+                      strokeWidth={2}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/rolechange/${groupId}`);
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
             {toggleStates.isMemberOpen && (
               <div
