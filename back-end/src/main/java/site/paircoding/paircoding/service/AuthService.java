@@ -22,7 +22,6 @@ public class AuthService {
   private final UserRepository userRepository;
 
   public AuthResponse refresh(String refreshToken) {
-    log.info("refreshToken: {}", refreshToken);
     if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {
       throw new UnauthorizedException("Invalid refresh token");
     }
