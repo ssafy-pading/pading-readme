@@ -1,7 +1,7 @@
 // src/widgets/ProjectCard.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Project } from '../pages/ProjectListPage';
+import { ProjectListItem } from '../shared/types/projectApiResponse';
 import { RxDotsHorizontal } from "react-icons/rx";
 import {
   PencilSquareIcon,
@@ -11,22 +11,23 @@ import {
 
 interface ProjectCardProps {
   groupId: number;
-  project: Project;
-  userRole: string
-  onDelete: (project: Project) => void;     // Delete 로직 콜백
+  project: ProjectListItem; // 전체 item: { project: {...}, users: [...] }
+  userRole: string;
+  // onDelete: (project: ProjectListItem) => void; // Delete 로직 콜백
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
   groupId,
   project,
   userRole,
-  onDelete,
+  // onDelete,
 }) => {
-  const { name, language_id, os_id, performance_id, users } = project;
+  // project prop에서 실제 프로젝트 데이터와 사용자 목록(users)을 분해합니다.
+  const { project: projectData, users } = project;
+  const { id, name, projectImage, performance } = projectData;
   const navigate = useNavigate();
 
-  // 드롭다운 관련 상태/로직은 간단히 생략 가능하지만,
-  // 필요하다면 useState로 관리하고, 아래와 같이 구현하세요.
+  // 드롭다운 관련 상태/로직
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
@@ -39,11 +40,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () =>
+      document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleEnterProject = () => {
-    navigate(`/project/${groupId}/${project.id}`);
+    navigate(`/project/${groupId}/${id}`);
   };
 
   return (
@@ -56,8 +58,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             onClick={toggleDropdown}
             className="hover:bg-gray-300 p-1 rounded-full focus:outline-none"
           >
-            <RxDotsHorizontal 
-            className="w-5 h-5 text-[#68687b]"/>
+            <RxDotsHorizontal className="w-5 h-5 text-[#68687b]" />
           </button>
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20 transition ease-out duration-100">
@@ -116,7 +117,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
       {/* 프로젝트 세부 정보 */}
       <p className="font-inter text-sm font-semibold text-[#858595] mt-5">
-        {language_id} | {performance_id} | {os_id}
+        {projectImage.language} | {performance.cpuDescription} | {performance.memory}
       </p>
 
       {/* 참여자 목록 */}

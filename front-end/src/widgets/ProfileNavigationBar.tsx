@@ -19,7 +19,6 @@ import profileImage from "../assets/profile_image.png";
 // --- 커스텀 훅 임포트 ---
 import useGroupAxios from "../shared/apis/useGroupAxios"; 
 import useProjectAxios from "../shared/apis/useProjectAxios";
-import { GetMyPageResponse } from "../shared/types/mypageApiResponse";
 
 // MyPageModal 임포트
 import MyPageModal from "../widgets/MypageModal";
@@ -164,56 +163,57 @@ const ProfileNavigationBar: React.FC = () => {
   /* --------------------------------------------
     멤버 목록 관리 (프로젝트 목록 API 구현시까지 잠금)
   -------------------------------------------- */
-  // // 그룹 멤버 목록
-  // const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
-  // // 활동중인 멤버 수
-  // const activeMemberCount = groupUsers.filter(user => user.status).length;
+  // 그룹 멤버 목록
+  const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
+  // 활동중인 멤버 수
+  const activeMemberCount = groupUsers.filter(user => user.status).length;
 
-  // // 그룹 멤버 조회 및 접속상태 불러오기 (프로젝트 목록 API 미구현시 빈 배열 사용)
-  // useEffect(() => {
-  //   const fetchMembers = async () => {
-  //     if (!groupId) return;
-  //     try {
-  //       // 1️⃣ 그룹 멤버 정보 가져오기
-  //       const groupData = await getGroupMembers(groupId);
-  //       let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
-  //         id: user.id,
-  //         name: user.name,
-  //         image: user.image || profileImage,
-  //         status: false,
-  //         role: user.role
-  //       }));
+  // 그룹 멤버 조회 및 접속상태 불러오기
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!groupId) return;
+      try {
+        // 1️⃣ 그룹 멤버 정보 가져오기
+        const groupData = await getGroupMembers(groupId);
+        let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
+          id: user.id,
+          name: user.name,
+          image: user.image || profileImage,
+          status: false,
+          role: user.role
+        }));
 
-  //       // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
-  //       let projectData;
-  //       try {
-  //         projectData = await getProjects(groupId);
-  //       } catch (error) {
-  //         console.log(error);
-  //         projectData = { projects: [] };
-  //       }
+        // 2️⃣ 프로젝트 정보 가져오기 (에러 발생 시 빈 배열 반환)
+        let projectData: GetProjectListResponse;
+        try {
+          projectData = await getProjects(groupId);
+        } catch (error) {
+          console.log(error);
+          projectData = [];
+        }
 
-  //       // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
-  //       updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
-  //         const projectUser = projectData.projects
-  //           .flatMap((project) => project.users)
-  //           .find((user) => user.user_id === groupUser.id);
-  //         return projectUser
-  //           ? { ...groupUser, status: projectUser.status }
-  //           : groupUser;
-  //       });
+        // 3️⃣ 프로젝트 정보와 그룹 멤버 정보를 비교하여 접속 상태 업데이트
+        updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
+          const projectUser = projectData
+            .flatMap((projectItem) => projectItem.users)
+            .find((user) => user.id === groupUser.id);
+          return projectUser
+            ? { ...groupUser, status: projectUser.status }
+            : groupUser;
+        });
 
-  //       setGroupUsers(updatedGroupUsers);
-  //     } catch (error) {
-  //       console.error("그룹 멤버 조회 중 오류:", error);
-  //     }
-  //   };
+        setGroupUsers(updatedGroupUsers);
+      } catch (error) {
+        console.error("그룹 멤버 조회 중 오류:", error);
+      }
+    };
 
-  //   fetchMembers();
-  // }, [groupId, getGroupMembers, getProjects]);
+    fetchMembers();
+  }, [groupId, getGroupMembers, getProjects]);
+
   
-  // // 로그인한 유저 role 확인
-  // const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
+  // 로그인한 유저 role 확인
+  const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
   
   // 로그아웃
   const handleLogout = async () => {
@@ -349,14 +349,14 @@ const ProfileNavigationBar: React.FC = () => {
             </div>
             {toggleStates.isGroupInfoOpen && (
               <div className="px-10 mb-2 text-[#4D4650] hover:font-bold">
-                {/* {userRole === "OWNER" && (
+                {userRole === "OWNER" && (
                   <div
                     className="p-2 cursor-pointer"
                     onClick={() => setIsGroupUpdateModalOpen(true)}
                     >
                     그룹 설정
                   </div>
-                )} */}
+                )}
               </div>
             )}
 
@@ -380,12 +380,9 @@ const ProfileNavigationBar: React.FC = () => {
               {/* 내부 컨테이너에 flex-1과 justify-between을 추가 */}
               <div className="flex items-center justify-between flex-1 text-[#4D4650]">
                 <span className="text-base font-semibold">
-                  멤버{" "}
-                  <span className="text-base">
-                    {/* ({activeMemberCount}/{groupCapacity}) */}
-                  </span>
+                  멤버 ({activeMemberCount}/{groupCapacity})
                 </span>
-                {/* {(userRole === "OWNER" || userRole === "MANAGER") && (
+                {(userRole === "OWNER" || userRole === "MANAGER") && (
                   <Cog6ToothIcon
                     className="w-4 h-4 text-[#4D4650] cursor-pointer"
                     strokeWidth={2}
@@ -394,7 +391,7 @@ const ProfileNavigationBar: React.FC = () => {
                       navigate(`/rolechange/${groupId}`);
                     }}
                   />
-                )} */}
+                )}
               </div>
             </div>
           </div>
@@ -407,7 +404,7 @@ const ProfileNavigationBar: React.FC = () => {
                 }}
               >
                 <ul>
-                  {/* {groupUsers.map((groupUser) => (
+                  {groupUsers.map((groupUser) => (
                     <li key={groupUser.id} className="flex items-center my-2">
                       <div className="relative w-[30px] h-[30px]">
                         <img
@@ -423,7 +420,7 @@ const ProfileNavigationBar: React.FC = () => {
                       </div>
                       <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
                     </li>
-                  ))} */}
+                  ))}
                 </ul>
               </div>
             )}

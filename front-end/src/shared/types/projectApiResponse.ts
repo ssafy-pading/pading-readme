@@ -33,25 +33,38 @@ export type GetMemberListResponse = {
 //   }[]; // 멤버 목록
 // };
 // 프로젝트 목록 조회
-export type GetProjectListResponse = {
-  projects: {
-    id: number;             // 프로젝트 ID
-    os_id: string;          // 운영 체제 ID (예: ubuntu_20_04_lts)
-    language_id: string;    // 언어 ID (예: java, python)
-    performance_id: string; // 성능 레벨 ID (예: medium, large)
-    name: string;           // 프로젝트 이름
-    container_id: string;   // 컨테이너 ID
-    status: string;         // 프로젝트 상태 (예: active, inactive)
-    users: {
-        user_id: number;          // 사용자 ID
-        name: string;             // 사용자 이름
-        email: string;            // 사용자 이메일
-        role: string;             // 사용자 역할 (예: OWNER, MANAGER, MEMBER)
-        profile_image: string;    // 사용자 프로필 이미지 URL
-        status: boolean;          // 사용자 상태 (true: 활성, false: 비활성)
-    }[]; // 프로젝트 사용자 목록
-  }[]; // 프로젝트 목록
+export type ProjectListItem = {
+  project: {
+    id: number;
+    group: { id: number; name: string; capacity: number };
+    projectImage: { tag: string; language: string; os: string };
+    performance: {
+      id: number;
+      cpu: string;
+      cpuDescription: string;
+      memory: string;
+      memoryDescription: string;
+      storage: string;
+      storageDescription: string;
+    };
+    name: string;
+    containerId: string;
+    status: boolean;
+    autoStop: boolean;
+    isDeleted: boolean;
+  };
+  users: {
+    id: number;
+    name: string;
+    image: string | null;
+    email: string;
+    status: boolean;
+  }[];
 };
+
+// 전체 응답은 ProjectListItem의 배열
+export type GetProjectListResponse = ProjectListItem[];
+
 // 프로젝트 생성
 export type CreateProjectResponse = {
   project_id: number;   // 프로젝트 ID
