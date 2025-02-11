@@ -7,6 +7,7 @@ import {
   GetGroupDetailsResponse,
   GetGroupListResponse,
   GetGroupMembersResponse,
+  GroupCreateResponse,
   GroupInviteLinkResponse,
   JoinGroupResponse,
   UpdateMemberRoleResponse,
@@ -120,10 +121,10 @@ const useGroupAxios = () => {
   /**
    * 그룹 생성
    */
-  const createGroup = useCallback(async (data: Record<string, unknown>): Promise<boolean> => {
+  const createGroup = useCallback(async (data: Record<string, unknown>): Promise<GroupCreateResponse> => {
     const request = async () => {
-      await axios.post(`${baseURL}/v1/groups`, data, withAuthHeader());
-      return true;
+      const response = await axios.post(`${baseURL}/v1/groups`, data, withAuthHeader());
+      return response.data.data;
     };
     try {
       return await request();
