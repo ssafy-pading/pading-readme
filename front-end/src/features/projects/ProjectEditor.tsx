@@ -6,8 +6,8 @@ import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../context/ProjectEditorContext";
 
 interface ProjectEditorProps {
-  groupId: string;
-  projectId: string;
+  groupId?: string;
+  projectId?: string;
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
