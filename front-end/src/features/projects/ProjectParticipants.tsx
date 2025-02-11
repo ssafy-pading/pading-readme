@@ -6,7 +6,7 @@ function ParticipantsButton() {
     return(
         <div className="flex flex-row items-center justify-center">
             <div>{/* 이미지 들어갈 자라 */}</div>
-            <div className="text-sm text-[#A1A1AF]">{participantsCnt}participants</div>
+            <div className="text-xs text-[#A1A1AF] font-bold">{participantsCnt} participants</div>
         </div>
     )
 }

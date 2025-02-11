@@ -14,6 +14,8 @@ import Modal from "react-modal";
 import VideoComponent from "./VideoComponent";
 import AudioComponent from "./AudioComponent";
 import { IoClose } from "react-icons/io5";
+import { FiInfo } from "react-icons/fi";
+import { PulseLoader } from "react-spinners";
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
@@ -30,14 +32,17 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     const [remoteTracks, setRemoteTracks] = useState<TrackInfo[]>([]);
     const [localParticipant, setLocalParticipant] = useState<Participant | null>(null);
     const [remoteParticipants, setRemoteParticipants] = useState<Participant[]>([]);
-    const [hasJoined, setHasJoined] = useState(false);
+    const [hasJoined, setHasJoined] = useState<boolean>(false);
 
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+    const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
     const [previewVideoTrack, setPreviewVideoTrack] = useState<LocalVideoTrack | undefined>(undefined);
     const [previewAudioTrack, setPreviewAudioTrack] = useState<LocalAudioTrack | undefined>(undefined);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [volume, setVolume] = useState<number>(0);
+    const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
+
+    const [joiningRoom, setJoiningRoom] = useState<boolean>(false);
 
     useEffect(() => {
         if (localVideoTrack || localAudioTrack) {
@@ -72,76 +77,26 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         setRemoteParticipants(Object.values(remoteMap));
     }, [localVideoTrack, localAudioTrack, remoteTracks]);
 
-    // const openPreview = async () => {
-    //     try {
-    //         const tracks = await createLocalTracks({ video: true, audio: true });
-    //         const videoTrack = tracks.find(track => track.kind === "video") as LocalVideoTrack;
-    //         const audioTrack = tracks.find(track => track.kind === "audio") as LocalAudioTrack;
-
-    //         if (videoTrack) setPreviewVideoTrack(videoTrack);
-    //         if (audioTrack) {
-    //             setPreviewAudioTrack(audioTrack);
-    //             playAudioTrack(audioTrack);
-    //             analyzeAudioTrack(audioTrack);
-    //         }
-    //         setIsPreviewOpen(true);
-    //     } catch (error) {
-    //         console.error("Preview error:", error);
-    //     }
-    // };
     const openPreview = async () => {
         try {
-          const tracks = await createLocalTracks({ video: true, audio: true });
-          const videoTrack = tracks.find((t) => t.kind === "video") as LocalVideoTrack;
-          const audioTrack = tracks.find((t) => t.kind === "audio") as LocalAudioTrack;
-          setPreviewVideoTrack(videoTrack);
-          setPreviewAudioTrack(audioTrack);
-    
-          if (!audioRef.current) {
-            audioRef.current = new Audio();
-          }
-          audioTrack.attach(audioRef.current);
-          await audioRef.current.play();
-    
-          setIsPreviewOpen(true);
+            const tracks = await createLocalTracks({ video: true, audio: true });
+            const videoTrack = tracks.find((t) => t.kind === "video") as LocalVideoTrack;
+            const audioTrack = tracks.find((t) => t.kind === "audio") as LocalAudioTrack;
+            setPreviewVideoTrack(videoTrack);
+            setPreviewAudioTrack(audioTrack);
+
+            if (!audioRef.current) {
+                audioRef.current = new Audio();
+            }
+            audioTrack.attach(audioRef.current);
+            await audioRef.current.play();
+
+            setIsPreviewOpen(true);
         } catch (error) {
-          console.error("Preview error:", error);
+            console.error("Preview error:", error);
+            setShowPermissionModal(true);
         }
-      };
-
-
-    // 오디오 트랙 재생
-    // const playAudioTrack = (audioTrack: LocalAudioTrack) => {
-    //     if (!audioRef.current) {
-    //         audioRef.current = new Audio();
-    //     }
-    //     audioTrack.attach(audioRef.current);
-    //     audioRef.current.play();
-    // };
-
-    // // 오디오 볼륨 감지
-    // const analyzeAudioTrack = (audioTrack: LocalAudioTrack) => {
-    //     if (!audioTrack.mediaStream) return; // 미디어 스트림 여부 확인. 없으면 source 선언에서 에러 발생
-
-    //     const audioContext = new AudioContext();
-    //     const source = audioContext.createMediaStreamSource(audioTrack.mediaStream);
-    //     const analyser = audioContext.createAnalyser();
-
-    //     analyser.fftSize = 256;
-    //     const bufferLength = analyser.frequencyBinCount;
-    //     const dataArray = new Uint8Array(bufferLength);
-
-    //     source.connect(analyser);
-
-    //     const updateVolume = () => {
-    //         analyser.getByteFrequencyData(dataArray);
-    //         const avgVolume = dataArray.reduce((sum, val) => sum + val, 0) / bufferLength;
-    //         setVolume(avgVolume);
-    //         requestAnimationFrame(updateVolume);
-    //     };
-
-    //     updateVolume();
-    // };
+    };
 
     const closePreview = () => {
         previewVideoTrack?.stop();
@@ -153,6 +108,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
 
     // 룸에 실제로 입장
     const joinRoom = async () => {
+        setJoiningRoom(true);
         const room = new Room();
         setRoom(room);
         console.log("room", room);
@@ -182,6 +138,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
             console.log("room.localParticipant", room.localParticipant)
 
             setHasJoined(true);
+            setJoiningRoom(!false);
             closePreview();
         } catch (error) {
             console.error("Connection error:", error);
@@ -204,7 +161,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         const response = await fetch(`${APPLICATION_SERVER_URL}/v1/openvidu/token/groups/8/projects/1`, {
             method: 'POST',
             headers: {
-                "Authorization": "Bearer "+localStorage.getItem("accessToken"),
+                "Authorization": "Bearer " + localStorage.getItem("accessToken"),
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
@@ -230,37 +187,84 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                 onJoin={openPreview}
             />
 
-            <Modal
-                isOpen={isPreviewOpen}
-                onRequestClose={closePreview}
-                className="flex items-center justify-center z-20"
-                overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
-                ariaHideApp={false}
-                shouldCloseOnOverlayClick={true}
-            >
-                <div className="bg-[#0F172A] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center border border-[#273654] relative">
-                    <button
-                        onClick={closePreview}
-                        className="absolute top-2 right-4 text-white text-xl flex items-center justify-center w-8 h-8 rounded-full hover:scale-110"
-                    >
-                        <IoClose className="text-2xl" />
-                    </button>
-                    <div className="mt-5">
-                        {previewVideoTrack && (
-                            <VideoComponent videoTrack={previewVideoTrack} participantIdentity="" />
-                        )}
-                    </div>
-                    <div className="mt-0 w-full">
-                        <progress value={volume} max="255" className="w-full h-2 bg-gray-200 rounded"></progress>
-                    </div>
-
-                    <div className="flex justify-center mt-4">
-                        <button onClick={joinRoom} className="w-1/4 bg-blue-500 text-white px-4 py-2 rounded-md font-bold">
-                            입장
+            {showPermissionModal && (
+                <Modal
+                    isOpen={showPermissionModal}
+                    onRequestClose={() => setShowPermissionModal(false)}
+                    className="flex items-center justify-center z-20"
+                    overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
+                    ariaHideApp={false}
+                >
+                    <div className="bg-[#212426] text-white p-6 rounded-lg shadow-lg text-center flex-col justify-center">
+                        <h2 className="text-xl font-bold mb-4">카메라 및 마이크 권한 필요</h2>
+                        <p className="text-gray-400 mb-4">
+                            회의에 참여하려면 브라우저에서 카메라와 마이크 권한을 허용해야 합니다.
+                        </p>
+                        <p className="text-gray-400 text-sm mb-4">
+                            권한이 차단된 경우, 아래 가이드를 참고하여 브라우저 설정에서 변경해주세요.
+                        </p>
+                        <div className="text-left text-sm text-gray-300 bg-[#212426] p-3 rounded">
+                            <p className="flex items-center gap-1">
+                                <strong>Chrome:</strong> 주소창 왼쪽 <FiInfo /> 아이콘 클릭 → '카메라'와 '마이크'를 '허용'으로 변경
+                            </p>
+                            <p className="flex items-center gap-1">
+                                <strong>Edge:</strong> 주소창 왼쪽 <FiInfo /> 아이콘 클릭 → '사이트 권한' → '카메라'와 '마이크' 허용
+                            </p>
+                            <p>
+                                <strong>Safari (iOS):</strong> 설정 → Safari → '카메라' 및 '마이크' 허용
+                            </p>
+                        </div>
+                        <button
+                            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+                            onClick={() => setShowPermissionModal(false)}
+                        >
+                            닫기
                         </button>
                     </div>
-                </div>
-            </Modal>
+                </Modal>
+            )}
+            {isPreviewOpen && (
+                <Modal
+                    isOpen={isPreviewOpen}
+                    onRequestClose={closePreview}
+                    className="flex items-center justify-center z-20"
+                    overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
+                    ariaHideApp={false}
+                >
+                    <div className="bg-[#212426] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center relative">
+                        <button
+                            onClick={closePreview}
+                            className="absolute top-2 right-4 text-white text-xl flex items-center justify-center w-8 h-8 rounded-full hover:scale-110"
+                        >
+                            <IoClose className="text-xl" />
+                        </button>
+                        <div className="mt-5">
+                            {previewVideoTrack && (
+                                <VideoComponent videoTrack={previewVideoTrack} participantIdentity="" />
+                            )}
+                        </div>
+                        <div className="mt-0 w-full">
+                            <progress value={volume} max="255" className="w-full h-2 bg-gray-200 rounded"></progress>
+                        </div>
+
+                        <div className="flex justify-center mt-4">
+                            {joiningRoom ? (
+                                <div className="flex text-sm w-1/4 h-8 bg-blue-500 rounded-md justify-center items-center">
+                                    <PulseLoader 
+                                        size={8}
+                                        margin={4}
+                                        color={"#ffffff"}
+                                    />
+                                </div>
+                            ):(
+                                <button onClick={joinRoom} className="text-sm w-1/4 h-8 bg-blue-500 text-white rounded-md">
+                                    참여하기
+                                </button>    
+                            )}
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }
