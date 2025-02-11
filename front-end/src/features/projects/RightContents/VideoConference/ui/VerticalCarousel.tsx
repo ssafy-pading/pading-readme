@@ -1,29 +1,31 @@
 import React, { useRef, useEffect } from "react";
 import Slider from "react-slick";
+import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 import "./VerticalCarousel.css";
-import { LocalVideoTrack, LocalAudioTrack, RemoteTrack } from "livekit-client";
-import AudioComponent from "./AudioComponent";
+import { LocalVideoTrack, LocalAudioTrack, RemoteVideoTrack, RemoteAudioTrack } from "livekit-client";
 
-interface Participant {
+export interface Participant {
   id: string;
   identity: string;
   isLocal: boolean;
-  videoTrack: LocalVideoTrack | RemoteTrack | undefined;
-  audioTrack: LocalAudioTrack | RemoteTrack | undefined;
+  videoTrack: LocalVideoTrack | RemoteVideoTrack | undefined;
+  audioTrack?: LocalAudioTrack | RemoteAudioTrack | undefined;
 }
 
 interface VerticalCarouselProps {
   isChatOpen: boolean;
-  participants: Participant[];
+  localParticipant?: Participant;
+  remoteParticipants: Participant[];
   hasJoined: boolean;
   onJoin: () => void;
 }
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
-  participants,
+  localParticipant,
+  remoteParticipants,
   hasJoined,
   onJoin,
 }) => {
@@ -35,7 +37,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   }, [isChatOpen]);
 
   const getSlideCount = () => {
-    const participantCount = participants.length;
+    const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
     const baseSlides = isChatOpen ? 2 : 4;
     return participantCount <= baseSlides ? participantCount : baseSlides;
   };
@@ -55,31 +57,45 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     },
   };
 
-  const videoParticipants = participants.filter(
-    p => p.videoTrack && p.videoTrack.kind === "video"
-  );
+  // const videoParticipants = participants.filter(
+  //   p => p.videoTrack && p.videoTrack.kind === "video"
+  // );
 
   return (
     <div className="relative w-full h-full flex flex-col bg-[#0F172A] overflow-hidden">
       {hasJoined ? (
         <>
           <Slider ref={sliderRef} {...settings}>
-            {videoParticipants.map((participant) => (
-              <div key={participant.id} className="relative p-2">
-                {participant.videoTrack && (
-                    <VideoComponent
-                      videoTrack={participant.videoTrack}
-                      participantIdentity={participant.identity}
-                    />
-                  )}
-                {participant.audioTrack && !participant.isLocal && (
-                    <AudioComponent audioTrack={participant.audioTrack} />
-                  )}
+            {localParticipant && localParticipant.videoTrack && (
+              <div key={localParticipant.id} className="relative p-2">
+                <VideoComponent
+                  videoTrack={localParticipant.videoTrack}
+                  participantIdentity={localParticipant.identity}
+                  muted={true}
+                />
                 <div className="absolute top-0 left-4 mt-2 text-sm text-white">
-                  {participant.identity} {participant.isLocal && '(You)'}
+                  {localParticipant.identity && "(You)"}
                 </div>
               </div>
-            ))}
+            )}
+
+            {remoteParticipants.map((participant) => 
+              participant.videoTrack ? (
+              <div key={participant.id} className="relative p-2">
+                {participant.videoTrack && (
+                  <VideoComponent
+                    videoTrack={participant.videoTrack}
+                    participantIdentity={participant.identity}
+                  />
+                )}
+                {participant.audioTrack && (
+                  <AudioComponent audioTrack={participant.audioTrack} />
+                )}
+                <div className="absolute top-0 left-4 mt-2 text-sm text-white">
+                  {participant.identity}
+                </div>
+              </div>
+            ):null)}
           </Slider>
 
           {getSlideCount() > 2 && (
@@ -105,8 +121,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
             <p className="text-sm">화상회의 참여하기</p>
           </button>
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
