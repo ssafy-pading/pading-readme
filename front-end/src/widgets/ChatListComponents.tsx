@@ -12,7 +12,12 @@ interface ChatMessage {
   createdAt: string;
 }
 
-const ChatRoom: React.FC = () => {
+interface ChatRoom {
+  isChatOpen: boolean;
+  onOpenStateChange: (state: boolean) => void;
+}
+
+const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
   const [chatList, setChatList] = useState<ChatMessage[]>([]);
   const [message, setMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -27,6 +32,10 @@ const ChatRoom: React.FC = () => {
     }
   };
 
+  // const [isOpen, setIsOpen] = useState<boolean>(true);
+  // useEffect(() => {
+  //   console.log(isChatOpen);
+  // }, [isChatOpen])
   // STOMP 클라이언트 연결 설정 (컴포넌트 마운트 시 실행)
   useEffect(() => {
     const socket = new SockJS(`${import.meta.env.VITE_APP_API_BASE_URL}/ws`);
@@ -138,11 +147,20 @@ const ChatRoom: React.FC = () => {
     setMessage(e.target.value);
   };
 
+  const toggleState = () => {
+    console.log("ss");
+    onOpenStateChange(!isChatOpen);
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-900 text-white">
+    <div className="flex flex-col h-full bg-[#212426] text-white">
+      <div className={`${isChatOpen ? '': 'hidden'} h-[30px] bg-[#2F3336] flex items-center justify-between font-bold text-white text-xs px-4`}>
+        Chat
+        {isChatOpen ? <button onClick={toggleState}>▼</button> : null}
+      </div>
       {/* 메시지 목록 영역 */}
       <div
-        className="flex-1 overflow-y-auto p-1 flex flex-col space-y-4"
+        className={`${isChatOpen ? '': 'hidden'} flex-1 overflow-y-auto p-1 flex flex-col space-y-4`}
         ref={chatContainerRef}
       >
         {chatList.map((chat) => {
@@ -174,7 +192,7 @@ const ChatRoom: React.FC = () => {
 
       {/* 채팅 입력창 + 전송 버튼 */}
       <div className="w-full">
-        <form onSubmit={handleSendChat} className="flex w-full justify-center pl-1 py-2">
+        <form onSubmit={isChatOpen ? handleSendChat : (e) => { e.preventDefault(); toggleState(); }} className="flex w-full justify-center pl-1 py-2">
           <div className="mx-1">
             <input
               type="text"
