@@ -6,16 +6,16 @@ function CamButton() {
     const [isClicked, setIsClicked] = useState<boolean>(false);
 
     return (
-        <button onClick={() => setIsMute(!isMute)} className='text-white'> {/* 버튼 클릭 시 상태 변경 */}
+        <button onClick={() => setIsMute(!isMute)} className='text-white'>
             <div
-                className={`cursor-pointer transition-transform duration-200 ease-in-out ${isClicked ? "scale-90" : "scale-100"
+                className={`cursor-pointer transition-transform duration-200 ease-in-out ${isClicked ? "scale-75" : "scale-100"
                     }`}
                 onClick={() => setIsMute(!isMute)}
-                onMouseDown={() => setIsClicked(true)} // 클릭 시 축소
-                onMouseUp={() => setIsClicked(false)} // 마우스 버튼 떼면 원래 크기
-                onMouseLeave={() => setIsClicked(false)} // 클릭 중 마우스 벗어나도 원래 크기
+                onMouseDown={() => setIsClicked(true)}
+                onMouseUp={() => setIsClicked(false)}
+                onMouseLeave={() => setIsClicked(false)}
             >
-                {isMute ? <BsFillCameraVideoFill className="text-3xl" /> : <BsCameraVideoOffFill className="text-3xl" />}
+                {isMute ? <BsFillCameraVideoFill className="text-md" /> : <BsCameraVideoOffFill className="text-md" />}
             </div>
         </button>
     )

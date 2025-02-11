@@ -11,6 +11,7 @@ import MuteButton from "../features/projects/ProjectMuteButton";
 import CamButton from "../features/projects/ProjectCameraButton";
 import ParticipantsButton from "../features/projects/ProjectParticipants";
 import { useParams } from "react-router-dom";
+import RightContentsContainer from "../features/projects/RightContents";
 
 import "react-resizable/css/styles.css";
 import "../assets/css/ProjectPage.css";
@@ -55,16 +56,16 @@ function ProjectPage() {
     <ProjectEditorProvider>
       <div className="flex flex-col h-screen">
         {/* 네비게이션 바 */}
-        <div className="flex flex-row items-center gap-10 justify-between h-[50px] bg-[#0F172A] border-b-2 border-[#273654] px-5 box-content">
-          <div className="flex items-center h-[35px] box-border bg-[#059669] rounded-md text-white px-4">
+        <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content">
+          <div className="flex items-center h-[25px] text-white text-sm">
             {/* <ProjectMemberListButton/> */}
-            Project : 프로젝트 이름
+            <p className="font-semibold text-center">프로젝트 이름</p>
           </div>
-          <div className="flex items-center justify-center gap-10">
+          <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
               <ParticipantsButton />
             </div>
-            <div className="flex items-center justify-center gap-4 mr-32">
+            <div className="flex items-center justify-center gap-4 mr-16">
               <MuteButton />
               <CamButton />
             </div>
@@ -75,12 +76,12 @@ function ProjectPage() {
         </div>
 
         {/* 네비게이션을 제외한 컨텐츠 */}
-        <div className="flex-1 flex flex-row">
+        <div className="flex flex-row h-[calc(100vh-30px)]">
           {/* 파일 탐색기 컨테이너너*/}
           <ResizableBox
-            width={300}
+            width={250}
             minConstraints={[100, Infinity]}
-            maxConstraints={[1000, Infinity]}
+            maxConstraints={[600, Infinity]}
             height={Infinity}
             axis="x" // 드래그 종료
             onResizeStart={() => setIsHorizontalDragging(true)}
@@ -101,7 +102,7 @@ function ProjectPage() {
             }
             handleSize={[5, 5]}
           >
-            <div className="flex flex-col justify-start h-full bg-[#0F172A]">
+            <div className="flex flex-col justify-start h-full bg-[#212426]">
               <div className="w-full overflow-x-hidden">
                 {/* 파일 탐색기 들어갈 자리 */}
                 <FileExplorer />
@@ -111,14 +112,17 @@ function ProjectPage() {
 
           {/* 중앙 컨텐츠 */}
           <div className="flex-1 flex-col flex min-w-[600px]">
-            <div className="h-full w-full top-0 left-0 right-0 bg-[#1E293B] flex flex-col justify-between text-[#0F172A]">
-              <div className="w-full h-[30px] bg-[#1E293B]">
+            <div className="h-full w-full top-0 left-0 right-0 bg-[#212426] flex flex-col justify-between text-[#141617]">
+              <div className="w-full h-[30px] bg-[#2F3336]">
                 {/* 파일 탭 자리 */}
               </div>
               {/* 코드 편집기 자리 */}
-              <div className="flex-1 w-full bg-[#0F172A]">
+              <div className="flex-1 w-full bg-[#141617]">
                 {/* <p className="text-3xl">Pading</p> */}
                 <ProjectEditor groupId={groupId} projectId={projectId} />
+                <div className="text-3xl font-bold text-center mt-40 text-[#2F3336]">
+                  <p>Pading IDE</p>
+                </div>
               </div>
               <div className="w-full">
                 <ResizableBox
@@ -146,9 +150,9 @@ function ProjectPage() {
                   }}
                 >
                   {/* 터미널 */}
-                  <div className="bg-[#0F172A] h-full">
+                  <div className="bg-[#212426] h-full">
                     {/* 상단 탭과 + 버튼 */}
-                    <div className="flex bg-[#0F172A] h-[30px] box-border pr-2 items-center space-x-2">
+                    <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
                       <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow">
                         {terminals.map((_, index) => (
@@ -196,7 +200,7 @@ function ProjectPage() {
                     </div>
 
                     {/* 터미널 화면 */}
-                    <div className="flex-1 w-full h-[calc(100%-30px)] bg-[#0F172A] relative">
+                    <div className="flex-1 w-full h-[calc(100%-30px)] bg-[#141617] relative">
                       {/* {terminals[activeTerminal]} */}
                       <TerminalComponent
                         height={terminalHeight - 30}

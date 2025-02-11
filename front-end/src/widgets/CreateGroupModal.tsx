@@ -124,6 +124,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
       className="bg-white rounded-xl pt-5 pb-4 px-4 shadow-lg relative"
       shouldCloseOnOverlayClick={true}
+      shouldReturnFocusAfterClose={false}
     >
       <div className="w-full h-full flex flex-col">
         {/* 헤더 */}
