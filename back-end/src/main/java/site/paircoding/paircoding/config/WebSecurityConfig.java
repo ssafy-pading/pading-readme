@@ -77,6 +77,7 @@ public class WebSecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.addAllowedOrigin("https://pading.site");
     configuration.addAllowedOrigin("https://pading-c8f33.firebaseapp.com");
+    configuration.addAllowedOrigin("http://localhost:5173");
     configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
     configuration.addAllowedHeader("*"); // 모든 헤더 허용
     configuration.setAllowCredentials(true); // 자격 증명 허용
