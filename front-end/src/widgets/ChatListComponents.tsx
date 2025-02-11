@@ -4,9 +4,11 @@ import SockJS from 'sockjs-client';
 import paperPlane from '/src/assets/paper-plane 1.svg';
 import profileImage from "../assets/profile_image.png";
 import { getChatMessages } from '../shared/apis/chatApi';
+import { useUser } from '../context/userContext';
 
 interface ChatMessage {
   id: string;
+  userId: number;
   username: string;
   content: string;
   createdAt: string;
@@ -22,8 +24,9 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
   const [message, setMessage] = useState<string>('');
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const stompClientRef = useRef<Client | null>(null);
-  const projectId = 123;
-  const groupId = 1;
+  const projectId = 19;
+  const groupId = 8;
+  const { userProfile } = useUser();
 
   // 스크롤을 맨 아래로 이동시키는 함수
   const scrollToBottom = () => {
@@ -91,47 +94,50 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
   }, [chatList]);
 
   // (선택 사항) 임시 더미 데이터 설정: 서버 데이터가 준비되면 이 부분은 생략하거나 조건부로 렌더링
-  useEffect(() => {
-    const initialChats: ChatMessage[] = [
-      {
-        id: "1",
-        username: 'Alice',
-        content: '안녕하세요!',
-        createdAt: '2025-01-26T12:00:00',
-      },
-      {
-        id: "2",
-        username: 'Me',
-        content: '안녕하세요, Alice님!',
-        createdAt: '2025-01-26T12:01:00',
-      },
-      {
-        id: "3",
-        username: 'Bob',
-        content: '코드 상태가 이상한가요?',
-        createdAt: '2025-01-26T12:02:00',
-      },
-      {
-        id: "4",
-        username: 'Me',
-        content: '님 코드가 더 이상한데요?',
-        createdAt: '2025-01-26T12:03:00',
-      },
-    ];
+  // useEffect(() => {
+  //   const initialChats: ChatMessage[] = [
+  //     {
+  //       id: "1",
+  //       username: 'Alice',
+  //       content: '안녕하세요!',
+  //       createdAt: '2025-01-26T12:00:00',
+  //     },
+  //     {
+  //       id: "2",
+  //       username: 'Me',
+  //       content: '안녕하세요, Alice님!',
+  //       createdAt: '2025-01-26T12:01:00',
+  //     },
+  //     {
+  //       id: "3",
+  //       username: 'Bob',
+  //       content: '코드 상태가 이상한가요?',
+  //       createdAt: '2025-01-26T12:02:00',
+  //     },
+  //     {
+  //       id: "4",
+  //       username: 'Me',
+  //       content: '님 코드가 더 이상한데요?',
+  //       createdAt: '2025-01-26T12:03:00',
+  //     },
+  //   ];
 
-    const sortedChats = initialChats.sort(
-      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    );
-    setChatList(sortedChats);
-    scrollToBottom();
-  }, []);
+  //   const sortedChats = initialChats.sort(
+  //     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  //   );
+  //   setChatList(sortedChats);
+  //   scrollToBottom();
+  // }, []);
 
   // 채팅 전송 함수
   const handleSendChat = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     if (!message.trim()) return;
 
+    console.log('userProfile', userProfile);
     const myNewChat = {
+      userId: userProfile?.id,
+      username: userProfile?.name,
       content: message,
     };
 
@@ -148,7 +154,6 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
   };
 
   const toggleState = () => {
-    console.log("ss");
     onOpenStateChange(!isChatOpen);
   };
 
@@ -164,7 +169,7 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
         ref={chatContainerRef}
       >
         {chatList.map((chat) => {
-          const isMe = chat.username === 'Me';
+          const isMe = chat.userId === userProfile?.id;
           return (
             <div
               key={chat.id}
