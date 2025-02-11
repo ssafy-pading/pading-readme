@@ -38,31 +38,28 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
 
   const getSlideCount = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
-    const baseSlides = isChatOpen ? 2 : 4;
-    return participantCount <= baseSlides ? participantCount : baseSlides;
+    return isChatOpen ? Math.min(participantCount, 2) : Math.min(participantCount, 4);
   };
-
+  
+  const shouldShowCarouselButtons = () => {
+    const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
+    return isChatOpen ? participantCount >= 3 : participantCount >= 5;
+  };
+  
   const settings = {
     dots: false,
     infinite: false,
     vertical: true,
     verticalSwiping: true,
     slidesToShow: getSlideCount(),
-    slidesToScroll: isChatOpen ? 2 : 4,
+    slidesToScroll: getSlideCount(),
     adaptiveHeight: false,
     draggable: false,
     arrows: false,
-    beforeChange: (current: number, next: number) => {
-      console.log(current, next);
-    },
   };
 
-  // const videoParticipants = participants.filter(
-  //   p => p.videoTrack && p.videoTrack.kind === "video"
-  // );
-
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0F172A] overflow-hidden">
+    <div className="relative w-full h-full flex flex-col bg-[#212426] overflow-hidden">
       {hasJoined ? (
         <>
           <Slider ref={sliderRef} {...settings}>
@@ -98,7 +95,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
             ):null)}
           </Slider>
 
-          {getSlideCount() > 2 && (
+          {shouldShowCarouselButtons() && (
             <>
               <button
                 onClick={() => sliderRef.current?.slickPrev()}
@@ -116,13 +113,17 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
           )}
         </>
       ) : (
-        <div className="flex justify-center mt-10">
-          <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">
-            <p className="text-sm">화상회의 참여하기</p>
-          </button>
+        <div className="flex flex-col justify-center h-full">
+          <div className="h-[30px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4">
+            Video
+          </div>
+          <div className="flex flex-1 justify-center items-center">
+            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">
+              <p className="text-sm">화상회의 참여하기</p>
+            </button>
+          </div>
         </div>
-      )
-      }
+      )}
     </div >
   );
 };
