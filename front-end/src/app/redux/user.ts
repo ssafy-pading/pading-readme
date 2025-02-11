@@ -3,7 +3,7 @@
 
 // // redux 초기 import 
 // import { useSelector, useDispatch } from 'react-redux';
-// import { fetchUserInfo } from '../app/redux/user';
+// import { fetchUserInfo, resetUserState } from '../app/redux/user';
 // import type { RootState, AppDispatch } from '../app/redux/store';
 
 // // redux dispatch, 유저 객체 사용
@@ -24,8 +24,6 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { GetMyPageResponse } from '../../shared/types/mypageApiResponse';
 import axios from 'axios';
 
-
-
 type RoleState = {
   roles: { [groupId: number]: string }; // 그룹 ID별 role 정보
   user: GetMyPageResponse | null;
@@ -44,12 +42,12 @@ const initialState: RoleState = {
 export const fetchUserInfo = createAsyncThunk('user/fetchUserInfo', async (_, { rejectWithValue }) => {
   try {
     const response = await axios(`${import.meta.env.VITE_APP_API_BASE_URL}/v1/mypage`, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            "Content-Type": "application/json",
-        }
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        "Content-Type": "application/json",
+      },
     });
-    console.log("response",response);
+    console.log("response", response);
     return response.data.data;
   } catch (error: any) {
     console.log(error);
@@ -65,6 +63,8 @@ const userSlice = createSlice({
       const { groupId, role } = action.payload;
       state.roles[groupId] = role;
     },
+    // resetUserState 리듀서 추가: 상태를 초기값으로 리셋
+    resetUserState: () => initialState,
   },
   extraReducers: (builder) => {
     builder
@@ -82,5 +82,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setRole } = userSlice.actions;
+export const { setRole, resetUserState } = userSlice.actions;
 export default userSlice.reducer;

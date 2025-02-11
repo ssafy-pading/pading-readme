@@ -13,6 +13,12 @@ import { useNavigate } from 'react-router-dom';
 // import { useUser } from '../context/userContext';
 import useGroupAxios from '../shared/apis/useGroupAxios';
 
+// redux 초기 import 
+import { useDispatch } from 'react-redux';
+import { resetUserState } from '../app/redux/user';
+import type { AppDispatch } from '../app/redux/store';
+
+
 declare global {
   interface Window {
     particlesJS: (elementId: string, options: ParticlesOptions) => void;
@@ -59,29 +65,45 @@ const LoginPage: React.FC = () => {
   // const { setUserProfile } = useUser();
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
+
+  // redux에서 사용하는 함수
+  // redux dispatch, 유저 객체 사용
+  const dispatch = useDispatch<AppDispatch>();
+  // const { user, status } = useSelector((state: RootState) => state.user);
+
   
   // 페이지 처음 로드 시, 리프레시 토큰이 있는지 확인
-  const refreshCheck = ():void => {
+  const refreshCheck = async ():Promise<void> => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
     if(localStorage.getItem("refreshToken")){
-      // 임시 로직
-      console.log("리프레시 토큰 있습니다");
+      
+      // 기존 사용자 정보와 상태 초기화
+      dispatch(resetUserState());
+      try{
+        // 그룹 정보 가져오기
+        const groupData = await getGroups();
+        console.log(groupData);
+        if (groupData.groups.length > 0) {
+          const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
+          navigate(`/projectlist/${groupId}`);
+        } else {
+          navigate(`/nogroup`);
+        }
+      }catch(error){
+        console.log(error);
+      }
     }
   }
 
   // 로그인 성공 시 컨텍스트에 프로필 정보를 담고 보내는 함수
   const setProfile = async() => {
+
+    // 기존 사용자 정보와 상태 초기화
+    dispatch(resetUserState());
     try{
-      // const profile: GetMyPageResponse = await getProfile();
-      // localStorage.setItem("email", profile.email);
-      // localStorage.setItem("name", profile.name);
-      // localStorage.setItem("image", profile.image);
-
-      // 프로필 정보 설정
-      // setUserProfile(profile);
-
       // 그룹 정보 가져오기
       const groupData = await getGroups();
+      console.log(groupData);
       if (groupData.groups.length > 0) {
         const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
         navigate(`/projectlist/${groupId}`);
@@ -93,8 +115,11 @@ const LoginPage: React.FC = () => {
     }
   }
 
-  refreshCheck();
   useEffect(() => {
+    
+
+    refreshCheck();
+
     // Particles.js 로드
     const particle = ():void => {
       const script = document.createElement('script');
@@ -158,9 +183,9 @@ const LoginPage: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gray-900">
       {/* Left Section */}
-      <div className="flex-[1.8] bg-gray-900 text-white flex flex-col items-center justify-center">
+      <div className="flex-[1.8] text-white flex flex-col items-center justify-center">
         <div id="particles-js" className="w-full h-full"></div>
         {/* <div className="absolute w-[50%] h-[70%]"> */}
         <div className="absolute w-[50%] h-[50%]">
@@ -170,13 +195,15 @@ const LoginPage: React.FC = () => {
       </div>
 
       {/* Right Section */}
-      <div className="flex-[1] flex flex-col items-center justify-center bg-white rounded-xl">
-        <h1 className="text-5xl font-bold mb-8">Padding</h1>
-        <div className="flex flex-col gap-4 w-3/4 max-w-sm">
-          <button className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 px-4 hover:bg-gray-100" onClick={googleLoginClick}>
-          <svg xmlns="https://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 40 48" aria-hidden="true"><path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path><path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path><path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path><path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path></svg>
-            <span>Google로 로그인</span>
-          </button>
+      <div className="flex-[1] bg-white rounded-l-xl justify-center relative">
+        <div className="relative w-full top-[25%] flex flex-col items-center">
+          <h1 className="text-5xl font-bold mb-8">Pading</h1>
+          <div className="flex flex-col gap-4 w-3/4 max-w-sm">
+            <button className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 px-4 hover:bg-gray-100" onClick={googleLoginClick}>
+            <svg xmlns="https://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 40 48" aria-hidden="true"><path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path><path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path><path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path><path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path></svg>
+              <span>Google로 로그인</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

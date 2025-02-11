@@ -62,10 +62,10 @@ const useMypageAxios = () => {
    * @returns 로그아웃 결과
    */
   const logout = async (): Promise<boolean> => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     try {
       const response = await mypageAxios.delete('/v1/mypage/logout');
-      sessionStorage.removeItem("accessToken");
-      sessionStorage.removeItem("refreshToken");
       navigate('/');
       return response.data = true;
     } catch (error) {
