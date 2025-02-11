@@ -3,6 +3,7 @@ import axios from 'axios';
 export type ChatMessage = {
     id: string;
     projectId: number;
+    userId: number;
     username: string;
     content: string;
     createdAt: string;
