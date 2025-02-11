@@ -18,6 +18,8 @@ import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
+import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
+import site.paircoding.paircoding.entity.dto.UserDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.repository.GroupRepository;
@@ -132,4 +134,56 @@ public class ProjectService {
         .orElseThrow(() -> new BadRequestException("Project not found"));
   }
 
+  public List<ProjectWithUsersResponse> getProjects(User user, Integer groupId) {
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new BadRequestException("Group user not found"));
+
+    List<Project> projects;
+    if (groupUser.getRole() == Role.MEMBER) {
+      List<ProjectUser> projectUsers = projectUserRepository.findByUser(user);
+      projects = projectUsers.stream()
+          .map(ProjectUser::getProject)
+          .toList();
+    } else {
+      projects = projectRepository.findByGroupId(groupId);
+    }
+
+    return projects.stream()
+        .map(project -> {
+          List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
+          List<UserDto> userDtos = projectUsers.stream()
+              .map(projectUser -> UserDto.builder()
+                  .id(projectUser.getUser().getId())
+                  .name(projectUser.getUser().getName())
+                  .image(projectUser.getUser().getImage())
+                  .email(projectUser.getUser().getEmail())
+                  .build())
+              .toList();
+          return ProjectWithUsersResponse.builder()
+              .project(project)
+              .users(userDtos)
+              .build();
+        })
+        .toList();
+  }
+
+  public ProjectWithUsersResponse getDetailProject(User user, Integer groupId, Integer projectId) {
+    Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+
+    List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
+    List<UserDto> userDtos = projectUsers.stream()
+        .map(projectUser -> UserDto.builder()
+            .id(projectUser.getUser().getId())
+            .name(projectUser.getUser().getName())
+            .image(projectUser.getUser().getImage())
+            .email(projectUser.getUser().getEmail())
+            .build())
+        .toList();
+
+    return ProjectWithUsersResponse.builder()
+        .project(project)
+        .users(userDtos)
+        .build();
+  }
 }
