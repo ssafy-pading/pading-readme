@@ -8,13 +8,18 @@ import { Client, IMessage } from '@stomp/stompjs';
 interface WebTerminalProps {
   height?: number;
   widthChange?: boolean;
+  groupId?: string;
+  projectId?: string;
 }
 
-const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange }) => {
+const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId, projectId }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const term = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
   const stompClient = useRef<Client | null>(null);
+  const apiUrl = import.meta.env.VITE_APP_API_BASE_URL
+  
+
 
   const projectName = 'test';
   const terminalId = crypto.randomUUID();
@@ -28,7 +33,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange }) => {
       disableStdin: false,
       // fontSize
       theme: {
-        background: '#0F172A'
+        background: '#141617'
       }
     });
     
@@ -40,26 +45,29 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange }) => {
       fitAddon.current.fit();
     }
 
-    const socket: WebSocket = new SockJS('http://localhost:8080/ws') as WebSocket;
+    const socket: WebSocket = new SockJS(`${apiUrl}/ws`) as WebSocket;
     stompClient.current = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000, // 자동 재연결 설정 (옵션)
+      connectHeaders: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
       onConnect: () => {
         stompClient.current?.subscribe(
-          `/sub/project/${projectName}/terminal/${terminalId}`,
+          `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
           (message: IMessage) => {
             term.current?.write(message.body);
           }
         );
 
         stompClient.current?.publish({
-          destination: `/pub/project/${projectName}/terminal/${terminalId}/connect`,
+          destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/connect`,
           body: ''
         });
 
         term.current?.onData((data) => {
           stompClient.current?.publish({
-            destination: `/pub/project/${projectName}/terminal/${terminalId}/input`,
+            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/input`,
             body: data
           });
         });
@@ -76,7 +84,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange }) => {
         const cols = term.current?.cols;
         const rows = term.current?.rows;
         stompClient.current.publish({
-          destination: `/pub/project/${projectName}/terminal/${terminalId}/resize`,
+          destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
           body: JSON.stringify({ cols, rows })
         });
       }
@@ -101,7 +109,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange }) => {
         const cols = term.current?.cols;
         const rows = term.current?.rows;
         stompClient.current.publish({
-          destination: `/pub/project/${projectName}/terminal/${terminalId}/resize`,
+          destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
           body: JSON.stringify({ cols, rows })
         });
       }
