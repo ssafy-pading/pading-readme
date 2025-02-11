@@ -21,7 +21,7 @@ function ProjectPage() {
   const [isHorizontalDragging, setIsHorizontalDragging] = useState(false); // 드래그 상태 관리
   const [terminalHeight, setTerminalHeight] = useState(250); // 터미널 높이 상태 관리
   const [widthChange, setwidthChange] = useState<boolean>(true);
-  const { groupId, projectId } = useParams();
+  const { groupId, projectId } = useParams<{groupId: string; projectId: string}>();
   {
     /*//////////////////////////////// 터미널 변수, 함수  ////////////////////////////////////////*/
   }
