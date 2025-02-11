@@ -10,5 +10,5 @@ import site.paircoding.paircoding.entity.Project;
 public class ProjectWithUsersResponse {
 
   private Project project;
-  private List<UserDto> users;
+  private List<ProjectUserDto> users;
 }

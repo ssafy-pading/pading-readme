@@ -18,8 +18,8 @@ import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
+import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
-import site.paircoding.paircoding.entity.dto.UserDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.repository.GroupRepository;
@@ -151,12 +151,13 @@ public class ProjectService {
     return projects.stream()
         .map(project -> {
           List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
-          List<UserDto> userDtos = projectUsers.stream()
-              .map(projectUser -> UserDto.builder()
+          List<ProjectUserDto> userDtos = projectUsers.stream()
+              .map(projectUser -> ProjectUserDto.builder()
                   .id(projectUser.getUser().getId())
                   .name(projectUser.getUser().getName())
                   .image(projectUser.getUser().getImage())
                   .email(projectUser.getUser().getEmail())
+                  .status(projectUser.getStatus())
                   .build())
               .toList();
           return ProjectWithUsersResponse.builder()
@@ -172,12 +173,13 @@ public class ProjectService {
         .orElseThrow(() -> new BadRequestException("Project not found"));
 
     List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
-    List<UserDto> userDtos = projectUsers.stream()
-        .map(projectUser -> UserDto.builder()
+    List<ProjectUserDto> userDtos = projectUsers.stream()
+        .map(projectUser -> ProjectUserDto.builder()
             .id(projectUser.getUser().getId())
             .name(projectUser.getUser().getName())
             .image(projectUser.getUser().getImage())
             .email(projectUser.getUser().getEmail())
+            .status(projectUser.getStatus())
             .build())
         .toList();
 
