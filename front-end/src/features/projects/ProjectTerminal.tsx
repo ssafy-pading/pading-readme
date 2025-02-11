@@ -33,7 +33,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
       disableStdin: false,
       // fontSize
       theme: {
-        background: '#0F172A'
+        background: '#141617'
       }
     });
     
