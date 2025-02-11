@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
     registry.addEndpoint("/ws")
-        .setAllowedOriginPatterns("*")
+        .setAllowedOriginPatterns("https://pading.site", "https://pading-c8f33.firebaseapp.com")
         .withSockJS();
   }
 
