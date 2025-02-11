@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 public class ProjectWithUsersResponse {
 
-  private Project project;
-  private List<ProjectUserDto> users;
+  private ProjectDto project;
+  private List<UserDto> users;
 }
