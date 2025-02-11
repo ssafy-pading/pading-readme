@@ -19,8 +19,8 @@ import site.paircoding.paircoding.entity.dto.ProjectDto;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
+import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
-import site.paircoding.paircoding.entity.dto.UserDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.repository.GroupRepository;
@@ -152,7 +152,16 @@ public class ProjectService {
 
     return projects.stream()
         .map(project -> {
-          List<UserDto> userDtos = getUserDtosByProject(project);
+          List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
+          List<ProjectUserDto> userDtos = projectUsers.stream()
+              .map(projectUser -> ProjectUserDto.builder()
+                  .id(projectUser.getUser().getId())
+                  .name(projectUser.getUser().getName())
+                  .image(projectUser.getUser().getImage())
+                  .email(projectUser.getUser().getEmail())
+                  .status(projectUser.getStatus())
+                  .build())
+              .toList();
           return ProjectWithUsersResponse.builder()
               .project(convertToProjectDto(project))
               .users(userDtos)
@@ -189,13 +198,13 @@ public class ProjectService {
   // 프로젝트와 연관된 사용자 정보(DTO) 목록 가져오기
   private List<UserDto> getUserDtosByProject(Project project) {
     List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
-
-    return projectUsers.stream()
-        .map(projectUser -> UserDto.builder()
+    List<ProjectUserDto> userDtos = projectUsers.stream()
+        .map(projectUser -> ProjectUserDto.builder()
             .id(projectUser.getUser().getId())
             .name(projectUser.getUser().getName())
             .image(projectUser.getUser().getImage())
             .email(projectUser.getUser().getEmail())
+            .status(projectUser.getStatus())
             .build())
         .toList();
   }
