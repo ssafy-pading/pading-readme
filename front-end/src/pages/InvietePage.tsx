@@ -94,7 +94,7 @@ const InvitePage = () => {
     useEffect(() => {
         // 로그인 상태 확인 (사용자 인증 확인 함수)
         const checkAuthStatus = () => {
-        const user = sessionStorage.getItem("accessToken"); // 여기에 사용자 상태 확인 로직 추가
+        const user = localStorage.getItem("accessToken"); // 여기에 사용자 상태 확인 로직 추가
         setIsAuthenticated(!!user);
         };
 
@@ -125,7 +125,7 @@ const InvitePage = () => {
             if(groupId != undefined && inviteCode != undefined){
                 const groupDetails:JoinGroupResponse = await joinGroup(Number(groupId), inviteCode);
 
-                navigate(`/proectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
+                navigate(`/projectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
             }
         } catch (error) {
             console.error(error);
