@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Modal from 'react-modal'
 
 // 모달 컴포넌트 불러오기
 import GroupCreateModal from './CreateGroupModal';
@@ -13,12 +14,26 @@ import { GetGroupListResponse } from '../shared/types/groupApiResponse';
 import logo from '../assets/logo.png';
 import groupCreateIcon from '../assets/group_create_icon.svg';
 
+Modal.setAppElement('#root')
+
 // 그룹 데이터 타입 정의
 type Group = GetGroupListResponse['groups'][number];
+
+// 현재 위치 받는 타입
+type Location = {
+  pathname: string;
+  search: string;     
+  hash: string;       
+  state: unknown; 
+  key: string;  
+}
 
 const GroupNavigationBar: React.FC = () => {
   // 모달 상태 관리 ('create' | 'join' | null)
   const [activeModal, setActiveModal] = useState<'create' | 'join' | null>(null);
+
+  const location: Location = useLocation()
+  const isNoGroupPage: boolean = location.pathname === "/nogroup";
 
   // 그룹 목록 상태 관리
   const [groups, setGroups] = useState<Group[]>([]);
@@ -30,8 +45,16 @@ const GroupNavigationBar: React.FC = () => {
   const navigate = useNavigate();
 
   // 모달 열기/닫기 핸들러
-  const openCreateModal = () => setActiveModal('create');
-  const openJoinModal = () => setActiveModal('join');
+  const openCreateModal = () => {
+    if (activeModal !== 'create') {
+      setActiveModal('create');
+    }
+  };
+  const openJoinModal = () => {
+    if (activeModal !== 'join') {
+      setActiveModal('join');
+    }
+  };
   const closeModal = () => setActiveModal(null);
 
   // 그룹 이름 길이 제한 함수
@@ -99,32 +122,58 @@ const GroupNavigationBar: React.FC = () => {
         </ul>
       </div>
 
-      {/* 그룹 추가 버튼 (클릭 시 모달 오픈) */}
-      <div className="mt-auto">
+      <div className="relative mt-auto">
+        {/* 그룹 추가 버튼 */}
         <button
           onClick={openCreateModal}
-          className="main-container w-12 h-12 relative mx-auto my-0 flex items-center justify-center transform transition-transform duration-200 hover:scale-110"
+          className="main-container w-12 h-12 relative mx-auto flex items-center justify-center transform transition-transform duration-200 hover:scale-110 "
         >
           <img src={groupCreateIcon} alt="group create icon" />
         </button>
+        {isNoGroupPage && (
+          <div className="absolute left-8 bottom-8 flex items-center">
+            {/* 🔹 화살표 */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 120 60"
+              className="w-28 h-16 transform scale-x-[-1] scale-y-[-1]"
+            >
+              <path
+                d="M0,80 C80,80 100,0 100,0"
+                stroke="black"
+                strokeWidth="4"
+                fill="none"
+              />
+              {/* 🔹 화살표 끝 */}
+              <path
+                d="M100,0 L70,20 M100,0 L110,35"
+                stroke="black"
+                strokeWidth="4"
+                fill="none"
+              />
+            </svg>
+
+            {/* 🔹 텍스트 */}
+            <span className="ml-2 text-black font-bold text-lg">
+              Create or join a group!
+            </span>
+          </div>
+      )}
+        
       </div>
 
+
       {/* 모달 컨테이너 */}
-      {/* react-modal 포털을 활용하므로 별도의 오버레이 `div`는 제거 */}
-      {activeModal === 'create' && (
-        <GroupCreateModal
-          isOpen={true}
-          onClose={closeModal}
-          onSwitchToJoin={openJoinModal}
-        />
-      )}
-      {activeModal === 'join' && (
-        <GroupJoinModal
-          isOpen={true}
-          onClose={closeModal}
-          onSwitchToCreate={openCreateModal}
-        />
-      )}
+      <GroupCreateModal
+        isOpen={activeModal === 'create'}
+        onClose={closeModal}
+        onSwitchToJoin={openJoinModal}
+      />
+      <GroupJoinModal
+        isOpen={activeModal === 'join'}
+        onClose={closeModal}
+        onSwitchToCreate={openCreateModal}
+      />
     </nav>
   );
 };

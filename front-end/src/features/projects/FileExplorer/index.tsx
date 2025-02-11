@@ -61,17 +61,17 @@ function FileExplorer() {
     }, [closeGlobalContextMenu]);
 
     return (
-        <div className="folderContainerBody"
+        <div className="folderContainerBody h-full flex flex-col text-white"
             onContextMenu={
                 (e) => {
                     e.preventDefault();
                 }
             }
         >
-            <div className="folder-container text-white w-full">
-                <div className="h-[30px] w-full border-b-2 border-[#273654] bg-[#0F172A] font-medium">
-                    Explorer
-                </div>
+            <div className="flex items-center h-[30px] w-full border-b border-[#666871] border-opacity-50 bg-[#2F3336] font-medium">
+                <p className="ml-3 text-xs font-bold">Explorer</p>
+            </div>
+            <div className="folder-container flex-1 w-full overflow-auto">
                 <Folder
                     handleInsertNode={handleInsertNode}
                     handleDeleteNode={handleDeleteNode}

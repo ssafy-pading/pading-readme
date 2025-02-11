@@ -21,6 +21,8 @@ const ProjectPage = lazy(() => import("../../pages/ProjectPage"))
 const LoginPage = lazy(() => import("../../pages/LoginPage"))
 // 초대 페이지
 const InvitePage = lazy(() => import("../../pages/InvietePage"))
+// 멤버 권한 변경 페이지
+const RoleChangePage = lazy(() => import("../../pages/RoleChangePage"))
 
 // UserProvider로 전체 앱을 감싸는 Layout 컴포넌트
 const AppLayout = () => (
@@ -75,6 +77,14 @@ const AppLayout = () => (
           element: (
             <Suspense fallback={Loading}>
               <InvitePage />
+            </Suspense>
+          ),
+        },
+        {
+          path: "rolechange/:groupId",
+          element: (
+            <Suspense fallback={Loading}>
+              <RoleChangePage />
             </Suspense>
           ),
         },
