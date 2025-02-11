@@ -59,7 +59,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#0F172A] overflow-hidden">
+    <div className="relative w-full h-full flex flex-col bg-[#212426] overflow-hidden">
       {hasJoined ? (
         <>
           <Slider ref={sliderRef} {...settings}>
@@ -114,8 +114,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
         </>
       ) : (
         <div className="flex flex-col justify-center h-full">
-          <div className="bg-gray-800 flex justify-center">
-            화상 회의
+          <div className="h-[30px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4">
+            Video
           </div>
           <div className="flex flex-1 justify-center items-center">
             <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">

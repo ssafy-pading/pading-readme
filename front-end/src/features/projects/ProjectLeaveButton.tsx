@@ -1,4 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom'
+import { MdExitToApp } from "react-icons/md";
 
 function ProjectOutButton() {
     // const { groupId } = useParams()
@@ -8,11 +9,11 @@ function ProjectOutButton() {
     return (
         <div>
             <button
-                className="flex items-center justify-center text-white bg-[#EF4444] h-7 px-4 rounded-md"
+                className="flex items-center justify-center text-[#A1A1AF] h-7 rounded-md"
                 onClick={() => navigate(`/projectlist/`)}
                 // onClick={() => navigate(`/project/${groupId}`)}
             >
-                <p className="text-sm">Leave</p>
+                <MdExitToApp /><p className="text-xs font-bold">나가기</p>
             </button>
         </div>
     )

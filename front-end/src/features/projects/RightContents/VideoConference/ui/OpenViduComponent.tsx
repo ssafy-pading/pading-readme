@@ -15,6 +15,7 @@ import VideoComponent from "./VideoComponent";
 import AudioComponent from "./AudioComponent";
 import { IoClose } from "react-icons/io5";
 import { FiInfo } from "react-icons/fi";
+import { PulseLoader } from "react-spinners";
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
@@ -40,6 +41,8 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [volume, setVolume] = useState<number>(0);
     const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
+
+    const [joiningRoom, setJoiningRoom] = useState<boolean>(false);
 
     useEffect(() => {
         if (localVideoTrack || localAudioTrack) {
@@ -105,6 +108,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
 
     // 룸에 실제로 입장
     const joinRoom = async () => {
+        setJoiningRoom(true);
         const room = new Room();
         setRoom(room);
         console.log("room", room);
@@ -134,6 +138,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
             console.log("room.localParticipant", room.localParticipant)
 
             setHasJoined(true);
+            setJoiningRoom(!false);
             closePreview();
         } catch (error) {
             console.error("Connection error:", error);
@@ -226,12 +231,12 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                     overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
                     ariaHideApp={false}
                 >
-                    <div className="bg-[#0F172A] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center border border-[#273654] relative">
+                    <div className="bg-[#212426] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center relative">
                         <button
                             onClick={closePreview}
                             className="absolute top-2 right-4 text-white text-xl flex items-center justify-center w-8 h-8 rounded-full hover:scale-110"
                         >
-                            <IoClose className="text-2xl" />
+                            <IoClose className="text-xl" />
                         </button>
                         <div className="mt-5">
                             {previewVideoTrack && (
@@ -243,9 +248,19 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                         </div>
 
                         <div className="flex justify-center mt-4">
-                            <button onClick={joinRoom} className="w-1/4 bg-blue-500 text-white px-4 py-2 rounded-md font-bold">
-                                입장
-                            </button>
+                            {joiningRoom ? (
+                                <div className="flex text-sm w-1/4 h-8 bg-blue-500 rounded-md justify-center items-center">
+                                    <PulseLoader 
+                                        size={8}
+                                        margin={4}
+                                        color={"#ffffff"}
+                                    />
+                                </div>
+                            ):(
+                                <button onClick={joinRoom} className="text-sm w-1/4 h-8 bg-blue-500 text-white rounded-md">
+                                    참여하기
+                                </button>    
+                            )}
                         </div>
                     </div>
                 </Modal>
