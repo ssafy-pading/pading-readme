@@ -15,12 +15,11 @@ import site.paircoding.paircoding.entity.ProjectUserId;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
-import site.paircoding.paircoding.entity.dto.ProjectDto;
 import site.paircoding.paircoding.entity.dto.ProjectLanguageDto;
 import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
+import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
-import site.paircoding.paircoding.entity.dto.UserDto;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.repository.GroupRepository;
@@ -135,7 +134,6 @@ public class ProjectService {
         .orElseThrow(() -> new BadRequestException("Project not found"));
   }
 
-  // 프로젝트 목록 조회
   public List<ProjectWithUsersResponse> getProjects(User user, Integer groupId) {
     GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
         .orElseThrow(() -> new BadRequestException("Group user not found"));
@@ -152,51 +150,43 @@ public class ProjectService {
 
     return projects.stream()
         .map(project -> {
-          List<UserDto> userDtos = getUserDtosByProject(project);
+          List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
+          List<ProjectUserDto> userDtos = projectUsers.stream()
+              .map(projectUser -> ProjectUserDto.builder()
+                  .id(projectUser.getUser().getId())
+                  .name(projectUser.getUser().getName())
+                  .image(projectUser.getUser().getImage())
+                  .email(projectUser.getUser().getEmail())
+                  .status(projectUser.getStatus())
+                  .build())
+              .toList();
           return ProjectWithUsersResponse.builder()
-              .project(convertToProjectDto(project))
+              .project(project)
               .users(userDtos)
               .build();
         })
         .toList();
   }
 
-  // 프로젝트 상세 조회
   public ProjectWithUsersResponse getDetailProject(User user, Integer groupId, Integer projectId) {
     Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
         .orElseThrow(() -> new BadRequestException("Project not found"));
 
-    List<UserDto> userDtos = getUserDtosByProject(project);
-
-    return ProjectWithUsersResponse.builder()
-        .project(convertToProjectDto(project))
-        .users(userDtos)
-        .build();
-  }
-
-  // 프로젝트 엔티티를 DTO로 변환
-  private ProjectDto convertToProjectDto(Project project) {
-    return ProjectDto.builder()
-        .id(project.getId())
-        .name(project.getName())
-        .containerId(project.getContainerId())
-        .status(project.getStatus())
-        .autoStop(project.getAutoStop())
-        .isDeleted(project.getIsDeleted())
-        .build();
-  }
-
-  // 프로젝트와 연관된 사용자 정보(DTO) 목록 가져오기
-  private List<UserDto> getUserDtosByProject(Project project) {
     List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
-
-    return projectUsers.stream()
-        .map(projectUser -> UserDto.builder()
+    List<ProjectUserDto> userDtos = projectUsers.stream()
+        .map(projectUser -> ProjectUserDto.builder()
             .id(projectUser.getUser().getId())
             .name(projectUser.getUser().getName())
             .image(projectUser.getUser().getImage())
             .email(projectUser.getUser().getEmail())
+            .status(projectUser.getStatus())
             .build())
         .toList();
+
+    return ProjectWithUsersResponse.builder()
+        .project(project)
+        .users(userDtos)
+        .build();
   }
+
 }
