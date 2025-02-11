@@ -50,8 +50,9 @@ public class WebSecurityConfig {
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 관리 설정
         .authorizeHttpRequests(request -> request
-            .requestMatchers("/v1/auth/**", "/oauth2/authorization/**").permitAll() // 인증없이 허용 주소
-            .anyRequest().authenticated()
+//            .requestMatchers("/v1/auth/**", "/oauth2/authorization/**").permitAll() // 인증없이 허용 주소
+//            .anyRequest().authenticated()
+                .anyRequest().permitAll()
         )
         .oauth2Login(oauth2 -> oauth2
                 .successHandler(new OAuth2MemberSuccessHandler(jwtUtil, cookieUtil))
