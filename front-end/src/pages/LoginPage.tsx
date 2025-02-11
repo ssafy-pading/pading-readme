@@ -7,10 +7,7 @@
 import React, { useEffect } from 'react';
 import TxtRotate from '../widgets/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
-// import useMypageAxios from '../shared/apis/useMypageAxios';
 import { useNavigate } from 'react-router-dom';
-// import { GetMyPageResponse } from '../shared/types/mypageApiResponse';
-// import { useUser } from '../context/userContext';
 import useGroupAxios from '../shared/apis/useGroupAxios';
 
 // redux 초기 import 
@@ -60,16 +57,13 @@ interface ParticlesOptions {
 
 const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuthAxios();
-  // const { getProfile } = useMypageAxios();
   const { getGroups } = useGroupAxios();
-  // const { setUserProfile } = useUser();
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
 
   // redux에서 사용하는 함수
   // redux dispatch, 유저 객체 사용
   const dispatch = useDispatch<AppDispatch>();
-  // const { user, status } = useSelector((state: RootState) => state.user);
 
   
   // 페이지 처음 로드 시, 리프레시 토큰이 있는지 확인
@@ -79,6 +73,7 @@ const LoginPage: React.FC = () => {
       
       // 기존 사용자 정보와 상태 초기화
       dispatch(resetUserState());
+
       try{
         // 그룹 정보 가져오기
         const groupData = await getGroups();

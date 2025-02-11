@@ -1,5 +1,5 @@
+// !!!!! -- 사용할 때 무한루프가 돌 수 있습니다. -- !!!!!
 // 유저를 호출하는 곳에서 아래 코드를 사용해주세요.
-
 
 // // redux 초기 import 
 // import { useSelector, useDispatch } from 'react-redux';
@@ -11,13 +11,13 @@
 // const { user, status } = useSelector((state: RootState) => state.user);
 
 // useEffect(() => {
-//   console.log("status", status)
-//   console.log("user1", user)
 //   if (!user && status === 'idle') {
 //     dispatch(fetchUserInfo()); // 유저 정보가 없으면 fetchUserInfo 호출
 //   }
-//   console.log("user1", user);
 // }, [dispatch, user, status]);
+
+// 삭제하고 싶다면 아래 코드를 사용
+// dispatch(resetUserState());
 
 
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
