@@ -33,9 +33,9 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
     String refreshToken = jwtUtil.createRefreshToken(authentication);
     jwtUtil.saveRefreshToken(authentication.getName(), refreshToken);
 
-    cookieUtil.addRefreshTokenCookie(response, refreshToken);
     cookieUtil.addAccessTokenCookie(response, accessToken);
+    cookieUtil.addRefreshTokenCookie(response, refreshToken);
 
-    response.sendRedirect("http://localhost:8080");
+    response.sendRedirect("http://localhost:5173");
   }
 }
