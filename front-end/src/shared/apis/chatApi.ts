@@ -14,7 +14,7 @@ export const getChatMessages = async (
   groupId: number,
   projectId: number
 ): Promise<FetchChatMessagesResponse> => {
-  const endpoint = `https://${import.meta.env.VITE_APP_API_BASE_URL}/v1/chat/groups/${groupId}/projects/${projectId}`;
+  const endpoint = `${import.meta.env.VITE_APP_API_BASE_URL}/v1/chat/groups/${groupId}/projects/${projectId}`;
 
   try {
     const response = await axios.get<FetchChatMessagesResponse>(endpoint, {
