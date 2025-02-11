@@ -18,7 +18,6 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const { value, setValue } = useProjectEditor();
   const [language, setLanguage] = useState("javascript");
   const isLocal = window.location.hostname === "localhost";
-
   const ws = useRef<WebSocket | null>(null);
   const signalingServer: string | null = isLocal
     ? "ws://localhost:4444"
@@ -30,25 +29,28 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   useEffect(() => {
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
-      console.log("웹소켓 새로 생성됨: ", ws.current);
-
       ws.current = new WebSocket("ws://localhost:4444");
-
       ws.current.onopen = () => console.log("✅ WebSocket Connected");
       ws.current.onclose = () => console.log("❌ WebSocket Disconnected");
 
-      ws.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "yjs-update") {
-          console.log("🔄 Yjs 업데이트 받음", data.content);
-
-          const update = new Uint8Array(data.content);
-          Y.applyUpdate(doc, update);
+      // 웹소켓 서버의 바이너리 코드 받기기 
+      ws.current.onmessage = async (event) => {  
+        try {
+          if (event.data instanceof Blob) {
+            // 🔹 Blob을 ArrayBuffer로 변환
+            const arrayBuffer = await event.data.arrayBuffer();
+            const update = new Uint8Array(arrayBuffer);
+            // yjs 문서에 동기화화
+            Y.applyUpdate(doc, update);
+          } else {
+            console.error("⚠️ Received unexpected data:", event.data);
+          }
+        } catch (error) {
+          console.error("⚠️ Error processing Yjs update:", error);
         }
       };
+      // yjs문서 변경 감지
       doc.on("update", (update) => {
-        // console.log("🔄 Yjs 문서 변경 감지:", update);
-
         sendYjsUpdate(update);
       });
     }
@@ -62,6 +64,23 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     };
   }, []); // ✅ 빈 배열을 사용하여 최초 한 번만 실행
 
+  // ✅ DOC이 변하면 Yjs 동기화 메시지 보내기
+  function sendYjsUpdate(update: Uint8Array) {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      ws.current.send(
+        JSON.stringify({
+          type: "yjs-update",
+          room: `${groupId}-${projectId}`,
+          content: {
+            type: "Buffer",
+            data: Array.from(update), // Uint8Array -> JSON 배열 변환
+          },
+        })
+      );
+    }
+  }
+
+  // Editor 열릴 때 초기 셋팅
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
     editor.focus();
@@ -81,21 +100,6 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       provider.awareness
     );
   };
-
-  // ✅ Yjs 동기화 메시지 보내기
-  function sendYjsUpdate(update: any) {
-    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      // console.log(update);
-
-      ws.current.send(
-        JSON.stringify({
-          type: "yjs-update",
-          room: "testroom",
-          content: update,
-        })
-      );
-    }
-  }
 
   return (
     <div className="h-full w-full">
