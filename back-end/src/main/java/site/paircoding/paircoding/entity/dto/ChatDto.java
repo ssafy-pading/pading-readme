@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ChatDto {
 
+  private Integer userId;
   private String username;
   private String content;
   private LocalDateTime createdAt;

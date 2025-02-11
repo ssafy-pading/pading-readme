@@ -13,10 +13,11 @@ public class ChatService {
   private final ChatRepository chatRepository;
 
   // 메시지 저장
-  public ChatDocument saveMessage(Integer projectId, String username,
+  public ChatDocument saveMessage(Integer userId, Integer projectId, String username,
       String content) {
 
     return chatRepository.save(ChatDocument.builder()
+        .userId(userId)
         .projectId(projectId)
         .username(username)
         .content(content)
