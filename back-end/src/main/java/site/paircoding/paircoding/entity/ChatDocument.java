@@ -18,6 +18,7 @@ public class ChatDocument {
   @Id
   private String id;  // MongoDB 기본 키
 
+  private Integer userId;
   private Integer projectId;     // 프로젝트 ID
   private String username;     // 사용자명
   private String content;      // 메시지 내용

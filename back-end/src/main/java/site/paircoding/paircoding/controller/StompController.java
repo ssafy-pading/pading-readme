@@ -21,9 +21,9 @@ public class StompController {
   public ChatDto sendMessage(ChatDto request,
       @DestinationVariable("projectId") Integer projectId) {
     // 메시지를 MongoDB에 저장
-    ChatDocument chatDocument = chatService.saveMessage(projectId, request.getUsername(),
-        request.getContent());
-    return new ChatDto(request.getUsername(), request.getContent(),
+    ChatDocument chatDocument = chatService.saveMessage(request.getUserId(), projectId,
+        request.getUsername(), request.getContent());
+    return new ChatDto(request.getUserId(), request.getUsername(), request.getContent(),
         chatDocument.getCreatedAt());
   }
 
