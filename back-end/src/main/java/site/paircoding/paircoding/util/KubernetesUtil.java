@@ -9,7 +9,11 @@ import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.ExecListener;
+import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import java.io.ByteArrayOutputStream;
+import java.util.concurrent.CountDownLatch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -67,6 +71,48 @@ public class KubernetesUtil {
     } catch (KubernetesClientException e) {
       e.printStackTrace();
       throw new BadRequestException("잠시 후 다시 요청해주세요.");
+    }
+  }
+
+  public String executeCommand(String podName, String command) {
+    CountDownLatch latch = new CountDownLatch(1); // 실행 완료를 기다릴 latch
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+
+    try (ExecWatch watch = kubernetesClient.pods()
+        .inNamespace(namespace)
+        .withName(podName)
+        .writingOutput(outputStream)  // 정상 출력 저장
+        .writingError(errorStream)    // 오류 출력 저장
+        .usingListener(new ExecListener() {
+          @Override
+          public void onOpen() {
+          }
+
+          @Override
+          public void onFailure(Throwable t, Response response) {
+            latch.countDown(); // 실패 시 즉시 종료
+          }
+
+          @Override
+          public void onClose(int code, String reason) {
+            latch.countDown(); // 명령어 실행 종료 시 countDown 호출
+          }
+        })
+        .exec("sh", "-c", command)) {
+
+      latch.await(); // 실행 완료될 때까지 대기
+      String output = outputStream.toString().trim();
+      String error = errorStream.toString().trim();
+
+      if (!error.isEmpty()) {
+        throw new KubernetesClientException("Command failed: " + error);
+      }
+
+      return output;
+    } catch (Exception e) {
+      Thread.currentThread().interrupt();
+      throw new KubernetesClientException("Error executing command: " + command, e);
     }
   }
 }
