@@ -25,12 +25,12 @@ public class TerminalController {
     terminalService.connectToPod(groupId, projectId, terminalId, destination);
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectName}/terminal/{terminalId}/input")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/terminal/{terminalId}/input")
   public void handleInput(@DestinationVariable("terminalId") String terminalId, String input) {
     terminalService.handleInput(terminalId, input);
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectName}/terminal/{terminalId}/resize")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/terminal/{terminalId}/resize")
   public void handleResize(@DestinationVariable("terminalId") String terminalId, Map<?, ?> resize) {
     terminalService.handleResize(terminalId, resize);
   }
