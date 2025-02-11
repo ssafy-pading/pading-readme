@@ -12,7 +12,7 @@ function RightContentsContainer(){
                 <OpenViduComponent isChatOpen={isChatOpen} />
             </div>
 
-            <div className={`bg-[#212426] transition-all relative ${isChatOpen ? 'h-[calc(50%)]' : 'h-[60px]'}`}>
+            <div className={`bg-[#212426] transition-all relative ${isChatOpen ? 'h-[calc(50%)]' : 'h-[50px]'}`}>
                 <ChatRoom 
                         isChatOpen={isChatOpen}
                         onOpenStateChange={setIsChatOpen}
