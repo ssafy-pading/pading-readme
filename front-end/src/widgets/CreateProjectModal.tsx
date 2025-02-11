@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import Select, { SingleValue, MultiValue } from "react-select";
-import cross from "../assets/cross.svg";
 import cpu from "/src/assets/cpu.svg";
 import memory from "/src/assets/memory.svg";
 import disk from "/src/assets/disk.svg";
 import { CreateProjectResponse } from "../shared/types/projectApiResponse";
 import useProjectAxios from "../shared/apis/useProjectAxios";
+import { RxCross2 } from "react-icons/rx";
+
+// 모달 루트 설정
+Modal.setAppElement("#root");
 
 /** 
  * 작동방식 
@@ -119,9 +122,6 @@ type MemberOption = {
   image: string; // 프로필 사진
 };
 
-// 모달 루트 설정
-Modal.setAppElement("#root");
-
 const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   groupId,
   isOpen,
@@ -145,7 +145,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   const [memberSelectOptions, setMemberOptions] = useState<MemberOption[]>([]);
 
   // 로딩상태
-  // const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 1. api 호출하여 각 options에 담아주기
   useEffect(() => {
@@ -302,66 +302,240 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
-      contentLabel="프로젝트 생성하기"
+      contentLabel="Create Project"
       overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-      className="bg-white rounded-xl py-5 px-4 shadow-lg relative w-[600px] max-h-[90vh] overflow-auto"
+      className="bg-white rounded-xl pt-5 pb-4 px-4 shadow-lg relative w-[550px] max-h-[90vh]"
+      shouldCloseOnOverlayClick={true}
+      shouldReturnFocusAfterClose={false}
     >
-      {/* 헤더 영역 */}
+      {/* 헤더 */}
       <div className="flex justify-between items-center mb-5">
-        <h2 className="text-xl font-bold">프로젝트 생성하기</h2>
+        <h2 className="text-lg font-bold">프로젝트 생성하기</h2>
         <button
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-300"
+          className="flex items-center justify-center rounded-full hover:bg-gray-300 p-1"
           onClick={onClose}
         >
-          <img src={cross} alt="close" className="w-5 h-5" />
+          <RxCross2 className="w-6 h-6"/>
         </button>
       </div>
 
-      {/* 내용 영역 */}
+      {/* 내용 */}
       <div>
         {/* 프로젝트 이름 */}
-        <label className="block text-gray-700 mb-1">프로젝트 이름</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">프로젝트 이름</label>
         <input
           type="text"
           placeholder="프로젝트 이름을 입력하세요"
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#5C8290] mb-4"
+          className="w-full border border-gray-300 rounded px-2.5 py-2 text-gray-700 text-[12.8px] focus:outline-none focus:ring-2 focus:ring-[#5C8290] mb-4"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
         />
 
         {/* 언어 선택 */}
+        <label className="block text-sm font-semibold text-gray-700 mb-2">언어 선택</label>
         <Select
           options={languageSelectOptions}
           value={selectedLanguage}
-          onChange={handleLanguageChange} // 변경된 함수로 연결
+          onChange={handleLanguageChange}
           placeholder="언어를 선택하세요"
           className="mb-4"
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: '0.25rem',
+              padding: '0.12rem 0.20rem',
+              fontSize: '0.8rem',
+              color: '#4A5568',
+              outline: 'none',
+              boxShadow: 'none',
+              backgroundColor: '#ffffff', // 기본 배경색
+              borderColor: state.isFocused ? '#5C8290' : '#d1d5db',
+              borderWidth: '1px',
+              '&:focus-within': {
+                boxShadow: 'none',
+                borderColor: '#5C8290',
+                borderWidth: '3px',
+                outline: 'none',
+              },
+              '&:hover': {
+                borderColor: '#5C8290',
+                boxShadow: 'none',
+                borderWidth: '1px',
+              },
+            }),
+
+            menu: (base) => ({
+              ...base,
+              backgroundColor: '#ffffff',
+              maxHeight: '150px',
+              overflowY: 'auto',
+            }),
+
+            option: (base, state) => ({
+              ...base,
+              fontSize: '0.8rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: state.isSelected
+                ? '#5C8290' // 선택된 항목의 배경색 (진한 회색)
+                : state.isFocused
+                ? '#e0e0e0' // 호버된 항목의 배경색 (연한 회색)
+                : '#f7f7f7', // 기본 항목의 배경색 (회색)
+              color: state.isSelected
+                ? '#ffffff' // 선택된 항목의 텍스트 색상
+                : '#4A5568', // 기본 항목의 텍스트 색상
+              // 선택된 항목에는 hover 효과 적용 안됨
+              '&:hover': {
+                backgroundColor: state.isSelected ? '#5C8290' : '#e0e0e0', // 선택된 항목은 호버 효과가 적용되지 않음
+                borderColor: 'transparent',
+                boxShadow: 'none',
+              },
+            }),
+          }}
         />
 
+
+
         {/* OS 선택 */}
+        <label className="block text-sm font-semibold text-gray-700 mb-2">OS</label>
         <Select
           options={osSelectOptions}
           value={selectedOs}
           onChange={(value: SingleValue<OsOption>) => setSelectedOs(value)}
           placeholder="OS를 선택하세요"
           className="mb-4"
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: '0.25rem',
+              padding: '0.12rem 0.20rem',
+              fontSize: '0.8rem',
+              color: '#4A5568',
+              outline: 'none',
+              boxShadow: 'none',
+              backgroundColor: '#ffffff', // 기본 배경색
+              borderColor: state.isFocused ? '#5C8290' : '#d1d5db',
+              borderWidth: '1px',
+              '&:focus-within': {
+                boxShadow: 'none',
+                borderColor: '#5C8290',
+                borderWidth: '3px',
+                outline: 'none',
+              },
+              '&:hover': {
+                borderColor: '#5C8290',
+                boxShadow: 'none',
+                borderWidth: '1px',
+              },
+            }),
+
+            menu: (base) => ({
+              ...base,
+              backgroundColor: '#ffffff',
+              maxHeight: '150px',
+              overflowY: 'auto',
+            }),
+
+            option: (base, state) => ({
+              ...base,
+              fontSize: '0.8rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: state.isSelected
+                ? '#5C8290' // 선택된 항목의 배경색 (진한 회색)
+                : state.isFocused
+                ? '#e0e0e0' // 호버된 항목의 배경색 (연한 회색)
+                : '#f7f7f7', // 기본 항목의 배경색 (회색)
+              color: state.isSelected
+                ? '#ffffff' // 선택된 항목의 텍스트 색상
+                : '#4A5568', // 기본 항목의 텍스트 색상
+              // 선택된 항목에는 hover 효과 적용 안됨
+              '&:hover': {
+                backgroundColor: state.isSelected ? '#5C8290' : '#e0e0e0', // 선택된 항목은 호버 효과가 적용되지 않음
+                borderColor: 'transparent',
+                boxShadow: 'none',
+              },
+            }),
+          }}
         />
 
 
         {/* 성능(사양) */}
-        <label className="block text-gray-700 mb-1">성능</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-2">성능</label>
         <Select
           options={performanceSelectOptions}
           value={selectedPerformance}
           onChange={(value: SingleValue<PerformanceOption>) => setSelectedPerformance(value)}
           placeholder="OS를 선택하세요"
           className="mb-4"
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: '0.25rem',
+              padding: '0.12rem 0.20rem',
+              fontSize: '0.8rem',
+              color: '#4A5568',
+              outline: 'none',
+              boxShadow: 'none',
+              backgroundColor: '#ffffff', // 기본 배경색
+              borderColor: state.isFocused ? '#5C8290' : '#d1d5db',
+              borderWidth: '1px',
+              '&:focus-within': {
+                boxShadow: 'none',
+                borderColor: '#5C8290',
+                borderWidth: '3px',
+                outline: 'none',
+              },
+              '&:hover': {
+                borderColor: '#5C8290',
+                boxShadow: 'none',
+                borderWidth: '1px',
+              },
+            }),
+
+            menu: (base) => ({
+              ...base,
+              backgroundColor: '#ffffff',
+              maxHeight: '150px',
+              overflowY: 'auto',
+            }),
+
+            option: (base, state) => ({
+              ...base,
+              fontSize: '0.8rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: state.isSelected
+                ? '#5C8290' // 선택된 항목의 배경색 (진한 회색)
+                : state.isFocused
+                ? '#e0e0e0' // 호버된 항목의 배경색 (연한 회색)
+                : '#f7f7f7', // 기본 항목의 배경색 (회색)
+              color: state.isSelected
+                ? '#ffffff' // 선택된 항목의 텍스트 색상
+                : '#4A5568', // 기본 항목의 텍스트 색상
+              // 선택된 항목에는 hover 효과 적용 안됨
+              '&:hover': {
+                backgroundColor: state.isSelected ? '#5C8290' : '#e0e0e0', // 선택된 항목은 호버 효과가 적용되지 않음
+                borderColor: 'transparent',
+                boxShadow: 'none',
+              },
+            }),
+          }}
         />
 
         
 
         {/* 구성원 추가 */}
-        <label className="block text-gray-700 mb-1">구성원 추가</label>
+        <label className="block text-sm font-semibold text-gray-700 mb-1">구성원 추가</label>
         <Select
           options={memberSelectOptions}
           isMulti
@@ -369,6 +543,62 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           onChange={handleMemberChange}
           placeholder="구성원을 검색하세요"
           className="mb-4"
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              borderRadius: '0.25rem',
+              padding: '0.12rem 0.20rem',
+              fontSize: '0.8rem',
+              color: '#4A5568',
+              outline: 'none',
+              boxShadow: 'none',
+              backgroundColor: '#ffffff', // 기본 배경색
+              borderColor: state.isFocused ? '#5C8290' : '#d1d5db',
+              borderWidth: '1px',
+              '&:focus-within': {
+                boxShadow: 'none',
+                borderColor: '#5C8290',
+                borderWidth: '3px',
+                outline: 'none',
+              },
+              '&:hover': {
+                borderColor: '#5C8290',
+                boxShadow: 'none',
+                borderWidth: '1px',
+              },
+            }),
+
+            menu: (base) => ({
+              ...base,
+              backgroundColor: '#ffffff',
+              maxHeight: '150px',
+              overflowY: 'auto',
+            }),
+
+            option: (base, state) => ({
+              ...base,
+              fontSize: '0.8rem',
+              padding: '0.5rem 1rem',
+              backgroundColor: state.isSelected
+                ? '#5C8290' // 선택된 항목의 배경색 (진한 회색)
+                : state.isFocused
+                ? '#e0e0e0' // 호버된 항목의 배경색 (연한 회색)
+                : '#f7f7f7', // 기본 항목의 배경색 (회색)
+              color: state.isSelected
+                ? '#ffffff' // 선택된 항목의 텍스트 색상
+                : '#4A5568', // 기본 항목의 텍스트 색상
+              // 선택된 항목에는 hover 효과 적용 안됨
+              '&:hover': {
+                backgroundColor: state.isSelected ? '#5C8290' : '#e0e0e0', // 선택된 항목은 호버 효과가 적용되지 않음
+                borderColor: 'transparent',
+                boxShadow: 'none',
+              },
+            }),
+          }}
           // react-select에서 기본 제공되는 filtering으로
           // 검색어가 name/email에 포함되면 필터링됩니다.
           // 더 정교한 검색이 필요하면 filterOption props를 따로 설정하세요.
@@ -376,10 +606,10 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         
         {/* 추가하기 버튼 */}
         <button
-          className="bg-[#5C8290] text-white py-3 px-6 rounded-xl w-full text-lg"
+          className="py-3 w-full rounded-xl text-sm text-white font-semibold bg-[#5C8290]"
           onClick={handleSubmit}
         >
-          추가하기
+          생성하기
         </button>
       </div>
     </Modal>

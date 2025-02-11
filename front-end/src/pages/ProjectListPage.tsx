@@ -17,9 +17,9 @@ import useProjectAxios from '../shared/apis/useProjectAxios';
 import { GetGroupMembersResponse } from '../shared/types/groupApiResponse';
 
 // 이미지 import
-import group_create_icon from '../assets/group_create_icon.svg';
 import InviteLink from '../widgets/CreateLinkComponents';
 import { useUser } from '../context/userContext';
+import { FaPlus } from 'react-icons/fa';
 
 // 타입 정의
 export type Project = GetProjectListResponse['projects'][number];
@@ -84,11 +84,14 @@ const ProjectListPage: React.FC = () => {
       fetchGroupDetails();
     }, [groupId, getGroupDetails ]);
 
-  // ───── 프로젝트 목록 가져오기 ─────
+  // // ───── 프로젝트 목록 가져오기 ─────
   // useEffect(() => {
   //   const fetchProjects = async () => {
+  //     if (!groupId) {
+  //       return
+  //     }
   //     try {
-  //       const projectData = await getProjects(groupId);
+  //       const projectData: GetProjectListResponse  = await getProjects(groupId);
   //       setProjectList(projectData.projects);
 
   //     } catch (err) {
@@ -96,7 +99,43 @@ const ProjectListPage: React.FC = () => {
   //     }
   //   };
   //   fetchProjects();
-  // }, [groupId, setProjectList]);
+  // }, [groupId, getProjects, setProjectList]);
+
+  useEffect(() => {
+    const sampleProjects: Project[] = [
+      {
+        id: 1,
+        os_id: 'ubuntu_20_04_lts',
+        language_id: 'javascript',
+        performance_id: 'medium',
+        name: 'Sample Project 1',
+        container_id: 'container_1',
+        status: 'active',
+        users: [] // 혹은 필요한 경우 더미 사용자 데이터를 추가
+      },
+      {
+        id: 2,
+        os_id: 'ubuntu_20_04_lts',
+        language_id: 'python',
+        performance_id: 'medium',
+        name: 'Sample Project 2',
+        container_id: 'container_2',
+        status: 'active',
+        users: []
+      },
+      {
+        id: 3,
+        os_id: 'ubuntu_20_04_lts',
+        language_id: 'java',
+        performance_id: 'medium',
+        name: 'Sample Project 3',
+        container_id: 'container_3',
+        status: 'inactive',
+        users: []
+      },
+    ];
+    setProjectList(sampleProjects);
+  }, []);
 
 
   /* ============================================
@@ -186,10 +225,14 @@ const ProjectListPage: React.FC = () => {
           {/* OWNER, MANAGER만 프로젝트 생성 버튼 표시 */}
           {(userRole === 'OWNER' || userRole === 'MANAGER') && (
             <button
-              className="w-full h-[216px] bg-[#e4e8e8] rounded-lg border border-[#d0d0d7] flex items-center justify-center relative group shadow-md transform transition-transform duration-300 hover:scale-110 p-5"
+              className="w-full h-[200px] bg-[#e4e8e8] rounded-lg border border-[#d0d0d7] flex items-center justify-center relative group shadow-md transform transition-transform duration-300 hover:scale-110 p-5"
               onClick={() => openModal('create')}
             >
-              <img src={group_create_icon} alt="group create icon" />
+              <div className="main-container w-16 h-16 rounded relative mx-auto bg-[#5c8290] flex items-center justify-center transform transition-transform duration-200 hover:scale-110 "
+              >
+                <FaPlus className="w-8 h-8 text-white"/>
+                
+              </div>
             </button>
           )}
 

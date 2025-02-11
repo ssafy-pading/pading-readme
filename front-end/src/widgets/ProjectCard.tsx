@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Project } from '../pages/ProjectListPage';
-import MenuDot from '../assets/menu-dots.png';
+import { RxDotsHorizontal } from "react-icons/rx";
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -47,51 +47,48 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div className="w-full bg-white border border-[#d0d0d7] shadow-md rounded-lg p-5 relative transform transition-transform duration-300 hover:scale-110 z-10">
+    <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 hover:scale-105 z-10">
       {/* 프로젝트 제목 및 드롭다운 버튼 */}
       <div className="flex justify-between items-center">
-        <p className="font-inter text-lg font-semibold text-[#68687b]">{name}</p>
+        <p className="font-inter text-base font-semibold text-[#68687b]">{name}</p>
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={toggleDropdown}
             className="hover:bg-gray-300 p-1 rounded-full focus:outline-none"
           >
-            <img
-              src={MenuDot}
-              alt="Menu Dot Icon"
-              className="w-5 h-5 object-contain"
-            />
+            <RxDotsHorizontal 
+            className="w-5 h-5 text-[#68687b]"/>
           </button>
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20 transition ease-out duration-100">
+            <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20 transition ease-out duration-100">
               <ul className="py-1" role="menu">
                 {userRole === 'OWNER' || userRole === 'MANAGER' ? (
                   <>
                     {/* EDIT 버튼 */}
                     <li role="none">
                       <button
-                        className="w-full flex items-center text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
                         onClick={() => {
                           console.log('Edit clicked');
                           setIsDropdownOpen(false);
                         }}
                         role="menuitem"
                       >
-                        <PencilSquareIcon className="w-5 h-5 mr-2 text-gray-500" />
+                        <PencilSquareIcon className="w-4 h-4 mr-2 text-gray-500" />
                         Edit
                       </button>
                     </li>
                     {/* DELETE 버튼 */}
                     <li role="none">
                       <button
-                        className="w-full flex items-center text-left px-4 py-2 text-sm text-[#EF4444] hover:bg-red-500 hover:text-white group"
+                        className="w-full flex items-center text-left px-4 py-2 text-xs text-[#EF4444] hover:bg-red-500 hover:text-white group"
                         onClick={() => {
                           onDelete(project);
                           setIsDropdownOpen(false);
                         }}
                         role="menuitem"
                       >
-                        <TrashIcon className="w-5 h-5 mr-2 text-[#EF4444] group-hover:text-white transition-colors duration-200" />
+                        <TrashIcon className="w-4 h-4 mr-2 text-[#EF4444] group-hover:text-white transition-colors duration-200" />
                         Delete
                       </button>
                     </li>
@@ -100,13 +97,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   // MEMBER의 경우 EXIT 버튼
                   <li role="none">
                     <button
-                      className="w-full flex items-center text-left px-4 py-2 text-sm text-[#4B5563] hover:bg-gray-100"
+                      className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
                       onClick={() => {
                         setIsDropdownOpen(false);
                       }}
                       role="menuitem"
                     >
-                      <ArrowRightOnRectangleIcon className="w-5 h-5 mr-2 text-gray-500" />
+                      <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-gray-500" />
                       Exit
                     </button>
                   </li>
@@ -118,13 +115,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       </div>
 
       {/* 프로젝트 세부 정보 */}
-      <p className="font-inter text-base font-semibold text-[#858595] mt-5">
+      <p className="font-inter text-sm font-semibold text-[#858595] mt-5">
         {language_id} | {performance_id} | {os_id}
       </p>
 
       {/* 참여자 목록 */}
       <div className="flex justify-end mt-8">
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-[#858595] font-semibold">
           참여중인 멤버 : {users.filter((user) => user.status).length}/{users.length}
         </p>
       </div>
@@ -134,7 +131,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         onClick={handleEnterProject}
         className="w-full h-10 font-inter text-base font-medium text-[#6893e8] rounded-lg bg-white border border-[#6893e8] hover:bg-[#6893e8] hover:text-white mt-3"
       >
-        <span className="flex justify-center">입장하기</span>
+        <span className="flex justify-center font-semibold">입장하기</span>
       </button>
     </div>
   );

@@ -12,7 +12,7 @@ import { GetGroupListResponse } from '../shared/types/groupApiResponse';
 
 // 이미지 불러오기
 import logo from '../assets/logo.png';
-import groupCreateIcon from '../assets/group_create_icon.svg';
+import { FaPlus } from "react-icons/fa";
 
 Modal.setAppElement('#root')
 
@@ -81,17 +81,16 @@ const GroupNavigationBar: React.FC = () => {
         const response = await getGroups();
         setGroups(response.groups);
 
-        // no group 페이지가 없음
-        // if (response.groups.length === 0) {
-        //   navigate('/nogroup'); 
-        // }
+        if (response.groups.length === 0) {
+          navigate('/nogroup'); 
+        }
       } catch (err) {
         console.error('그룹 목록을 불러오는 데 실패했습니다.', err);
       }
     };
 
     fetchGroups();
-  }, []);
+  }, [navigate, getGroups]);
 
   // 그룹 클릭 시 해당 그룹 상세 페이지로 이동
   const handleGroupClick = (groupId: number) => {
@@ -137,9 +136,9 @@ const GroupNavigationBar: React.FC = () => {
         {/* 그룹 추가 버튼 */}
         <button
           onClick={openCreateModal}
-          className="main-container w-12 h-12 relative mx-auto flex items-center justify-center transform transition-transform duration-200 hover:scale-110 "
+          className="main-container w-12 h-12 rounded relative mx-auto bg-[#5c8290] flex items-center justify-center transform transition-transform duration-200 hover:scale-110 "
         >
-          <img src={groupCreateIcon} alt="group create icon" />
+          <FaPlus className="w-6 h-6 text-white"/>
         </button>
         {isNoGroupPage && (
           <div className="absolute left-8 bottom-8 flex items-center">

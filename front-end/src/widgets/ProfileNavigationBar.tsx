@@ -120,6 +120,8 @@ const ProfileNavigationBar: React.FC = () => {
     };
   }, []);
 
+  //
+
 
   // url 파라미터에서 groupId 사용
   // nogroup 페이지에서는 undefined
@@ -145,7 +147,7 @@ const ProfileNavigationBar: React.FC = () => {
     const fetchGroupDetails = async () => {
       try {
         if (!groupId) {
-          // navigate("/nogroup") // 그룹 id가 없으면 nogroup 페이지로 이동
+          navigate("/nogroup")
           return
         }
 
@@ -157,10 +159,10 @@ const ProfileNavigationBar: React.FC = () => {
       }
     };
     fetchGroupDetails();
-  }, [groupId, getGroupDetails]);
+  }, [groupId, navigate, getGroupDetails]);
 
   /* --------------------------------------------
-    멤버 목록 관리 (프로젝트 목록 API 구현시까지 잠금금)
+    멤버 목록 관리 (프로젝트 목록 API 구현시까지 잠금)
   -------------------------------------------- */
   // // 그룹 멤버 목록
   // const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
@@ -276,7 +278,7 @@ const ProfileNavigationBar: React.FC = () => {
         <div className="p-4">
           <div className="grid grid-cols-4 gap-1 items-center">
             {/* 프로필 사진 */}
-            <div className="relative w-[50px] h-[50px] rounded-full bg-white flex items-center justify-center">
+            <div className="relative w-[45px] h-[45px] rounded-full bg-white flex items-center justify-center">
               <img
                 src={userProfile?.image || profileImage}
                 alt="ProfileImage"
@@ -292,37 +294,41 @@ const ProfileNavigationBar: React.FC = () => {
                 >
                   {userProfile?.name}
                 </span>
-                <button onClick={handleDropdownToggle} className="ml-2">
-                  {isDropdownOpen ? (
-                    <ChevronUpIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
-                  ) : (
-                    <ChevronDownIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
+
+                <div className="relative">
+                  <button onClick={handleDropdownToggle} className="ml-1">
+                    {isDropdownOpen ? (
+                      <ChevronUpIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
+                    ) : (
+                      <ChevronDownIcon className="w-4 h-4 text-[#4D4650]" strokeWidth={2} />
+                    )}
+                  </button>
+                  {/* 드롭다운 메뉴 */}
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-28 bg-white text-xs rounded-lg shadow-md overflow-hidden z-10">
+                      <button
+                        onClick={handleNavigateToMypage}
+                        className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <UserIcon className="w-4 h-4 mr-2" />
+                        마이페이지
+                      </button>
+                      <button
+                        onClick={handleLogout}
+                        className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <ArrowLeftOnRectangleIcon className="w-4 h-4 mr-2" />
+                        로그아웃
+                      </button>
+                    </div>
                   )}
-                </button>
-              </div>
-              <p className="text-sm text-gray-600 max-w-[150px] truncate overflow-hidden text-ellipsis">{userProfile?.email}</p>
-              {/* 드롭다운 메뉴 */}
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md overflow-hidden z-10">
-                  <button
-                    onClick={handleNavigateToMypage}
-                    className="block px-4 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <UserIcon className="w-5 h-5 mr-2" />
-                    마이페이지
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="block px-4 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
-                  >
-                    <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-2" />
-                    로그아웃
-                  </button>
                 </div>
-              )}
+              </div>
+              <p className="text-xs text-gray-600 max-w-[150px] truncate overflow-hidden text-ellipsis">{userProfile?.email}</p>
             </div>
           </div>
         </div>
+
 
         <hr className="border-1 mx-2" />
         {groupId && (
