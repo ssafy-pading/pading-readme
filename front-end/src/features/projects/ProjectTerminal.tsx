@@ -49,6 +49,9 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
     stompClient.current = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000, // 자동 재연결 설정 (옵션)
+      connectHeaders: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
       onConnect: () => {
         stompClient.current?.subscribe(
           `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
