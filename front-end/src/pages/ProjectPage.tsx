@@ -206,6 +206,8 @@ function ProjectPage() {
                         height={terminalHeight - 30}
                         widthChange={widthChange}
                         key={activeTerminal}
+                        groupId={groupId}
+                        projectId={projectId}
                       />
                     </div>
                   </div>
