@@ -15,6 +15,8 @@ import { useDispatch } from 'react-redux';
 import { resetUserState } from '../app/redux/user';
 import type { AppDispatch } from '../app/redux/store';
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
 
 declare global {
   interface Window {
@@ -172,13 +174,14 @@ const LoginPage: React.FC = () => {
     try{
         await loginWithGoogle();
       }catch(error){
-      alert('로그인 실패')
+        toast.error('로그인 실패')
       console.log(error);
     }
   }
 
   return (
     <div className="flex h-screen bg-gray-900">
+      <Toaster />
       {/* Left Section */}
       <div className="flex-[1.8] text-white flex flex-col items-center justify-center">
         <div id="particles-js" className="w-full h-full"></div>

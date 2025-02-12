@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { FaRegCopy } from "react-icons/fa6";
 import useGroupAxios from '../shared/apis/useGroupAxios';
+// import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Toaster, toast } from 'react-hot-toast';
 
 interface InviteLinkProps {
   groupId: number;
@@ -91,14 +94,18 @@ const InviteLink: React.FC<InviteLinkProps> = ({ groupId }) => {
     if (!inviteLink || isExpired) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
-      alert('초대 링크가 클립보드에 복사되었습니다.');
+      // alert('초대 링크가 클립보드에 복사되었습니다.');
+      toast.success("초대 링크가 클립보드에 복사되었습니다.");
+      // toast("초대 링크가 클립보드에 복사되었습니다.");
     } catch (err) {
-      alert('복사 실패: ' + err);
+      toast.error('복사 실패: ' + err);
     }
   };
 
   return (
     <div className="flex items-center max-w-xl rounded-lg">
+      {/* <ToastContainer /> */}
+      <Toaster />
       <div className="flex-1 text-gray-700 truncate pt-2">
         {inviteLink ? (
           <>

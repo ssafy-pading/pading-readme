@@ -4,6 +4,9 @@ import useGroupAxios from "../shared/apis/useGroupAxios";
 import { JoinGroupResponse } from "../shared/types/groupApiResponse";
 import { RxCross2 } from "react-icons/rx";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 Modal.setAppElement("#root");
 
 interface GroupJoinModalProps {
@@ -47,7 +50,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
 
     // 초대 링크 유효성 검사
     if (inviteLink.trim() === "") {
-      alert("초대 링크를 입력해주세요.");
+      toast.error("초대 링크를 입력해주세요.");
       return;
     }
 
@@ -55,7 +58,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
     if (inviteInfo == null) return;
     console.log(inviteInfo);
     if (!inviteInfo.groupId || !inviteInfo.code) {
-      alert("유효한 초대 링크를 입력해주세요.");
+      toast.error("유효한 초대 링크를 입력해주세요.");
       return;
     }
 
@@ -64,7 +67,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
       const response: JoinGroupResponse = await joinGroup(inviteInfo.groupId, inviteInfo.code);
       if (response) {
         const groupId: number = response.id
-        alert(
+        toast.success(
           `${response.name} 그룹에 성공적으로 참여하였습니다!`
         );
         setInviteLink(""); // 입력 필드 초기화
@@ -72,7 +75,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
         window.location.href = `/projectlist/${groupId}`
       }
     } catch (error) {
-      alert("그룹 참여에 실패하였습니다. 다시 시도해주세요.");
+      toast.error("그룹 참여에 실패하였습니다. 다시 시도해주세요.");
       console.error("그룹 참여 에러:", error);
     } finally {
       setIsLoading(false);
@@ -95,6 +98,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
       shouldReturnFocusAfterClose={false}
     >
       <div className="w-full h-full flex flex-col">
+      <Toaster />
         {/* 헤더 */}
         <div className="flex justify-between items-center w-[400px]">
           <span className="text-lg font-bold">그룹 참여하기</span>

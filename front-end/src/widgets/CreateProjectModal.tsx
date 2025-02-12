@@ -8,6 +8,9 @@ import { CreateProjectResponse } from "../shared/types/projectApiResponse";
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import { RxCross2 } from "react-icons/rx";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // 모달 루트 설정
 Modal.setAppElement("#root");
 
@@ -211,7 +214,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         setOsOptions(newOsOptions);
       } catch (error) {
         console.error("OS 목록을 불러오는데 실패했습니다.", error);
-        alert("OS 목록을 가져오는데 실패했습니다.");
+        toast.error("OS 목록을 가져오는데 실패했습니다.");
       }
     } else {
       setOsOptions([]); // 언어 선택이 해제되면 OS 목록도 초기화
@@ -232,31 +235,31 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     const projectNamePattern = /^[a-z0-9-]+$/; // 소문자, 숫자, '-'만 허용
   
     if (!projectName.trim()) {
-      alert("프로젝트 이름을 입력하세요.");
+      toast.error("프로젝트 이름을 입력하세요.");
       return false;
     }
     if (projectName.length > 20) {
-      alert("프로젝트 이름은 최대 20글자까지 입력할 수 있습니다.");
+      toast.error("프로젝트 이름은 최대 20글자까지 입력할 수 있습니다.");
       return false;
     }
     if (projectName.startsWith('-')) {
-      alert("프로젝트 이름은 '-'로 시작할 수 없습니다.");
+      toast.error("프로젝트 이름은 '-'로 시작할 수 없습니다.");
       return false;
     }
     if (!projectNamePattern.test(projectName)) {
-      alert("프로젝트 이름은 영어 소문자, 숫자, '-'만 사용할 수 있습니다.");
+      toast.error("프로젝트 이름은 영어 소문자, 숫자, '-'만 사용할 수 있습니다.");
       return false;
     }
     if (!selectedLanguage) {
-      alert("언어를 선택하세요.");
+      toast.error("언어를 선택하세요.");
       return false;
     }
     if (!selectedOs) {
-      alert("OS를 선택하세요.");
+      toast.error("OS를 선택하세요.");
       return false;
     }
     if (!selectedPerformance) {
-      alert("성능(사양)을 선택하세요.");
+      toast.error("성능(사양)을 선택하세요.");
       return false;
     }
   
@@ -282,9 +285,9 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     };
 
     console.log("보낼 폼 데이터:", formData);
-    alert("프로젝트 생성 완료");
+    toast.success("프로젝트 생성 완료");
 
-    // API 호출 로직 (createProject) - 백엔드 미완성으로 주석 처리
+    // API 호출 로직 (createProject)
       try{
         const newProject:CreateProjectResponse = await createProject(groupId, formData);
         console.log(newProject);
@@ -301,7 +304,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         
       }catch(error){
         console.error(error);
-        alert("작업 중 오류가 발생했습니다.");
+        toast.error("작업 중 오류가 발생했습니다.");
       };
 
   };
@@ -319,6 +322,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     >
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-5">
+        <Toaster />
         <h2 className="text-lg font-bold">프로젝트 생성하기</h2>
         <button
           className="flex items-center justify-center rounded-full hover:bg-gray-300 p-1"
@@ -608,9 +612,6 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
               },
             }),
           }}
-          // react-select에서 기본 제공되는 filtering으로
-          // 검색어가 name/email에 포함되면 필터링됩니다.
-          // 더 정교한 검색이 필요하면 filterOption props를 따로 설정하세요.
         />
         
         {/* 추가하기 버튼 */}

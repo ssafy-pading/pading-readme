@@ -11,6 +11,9 @@ import {
 } from "react-icons/vsc";
 import { FileType, FileNode } from "../type/directoryTypes";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 interface FolderProps {
   explorerData: FileNode;
   handleInsertNode: (parentId: number, name: string, type: FileType) => void;
@@ -88,7 +91,14 @@ const Folder: React.FC<FolderProps> = ({
     if (e.key === "Enter" && e.currentTarget.value && showInput.type) {
       const newName = e.currentTarget.value.trim();
       if (isNameExists(newName)) {
-        alert('A folder or file name is already exists');
+        toast.error('A folder or file name is already exists', {
+          style: {
+            border: '1px solid #666871',
+            padding: '16px',
+            color: '#EAEAEA',
+            backgroundColor: '#474B4F',
+          },
+        });
         e.currentTarget.select();
         return;
       }
@@ -170,6 +180,7 @@ const Folder: React.FC<FolderProps> = ({
 
   return (
     <div onContextMenu={handleContextMenu} className="relative flex-1 w-full overflow-auto">
+      <Toaster />{/* 토스터 컴포넌트 */}
       <div
         className={`node-container cursor-pointer mt-1 pl-2 w-full hover:bg-[#2F3336]
           ${selectedId === explorerData.id 

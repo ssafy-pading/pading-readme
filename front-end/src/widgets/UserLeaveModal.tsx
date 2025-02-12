@@ -3,6 +3,9 @@ import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import useMypageAxios from "../shared/apis/useMypageAxios";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 interface LeaveModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -18,7 +21,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({
   const { deleteAccount } = useMypageAxios();
   const onConfirmLeave = async () => {
     try{
-      alert('탈퇴되었습니다.')
+      toast.success('탈퇴되었습니다.')
       // 여기에 탈퇴 로직
       deleteAccount();
       // 로그인 페이지로
@@ -39,6 +42,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({
       className="bg-white rounded-xl py-6 px-8 shadow-lg relative w-[320px]"
     >
       <div className="text-center">
+      <Toaster />
         {/* 상단 텍스트 */}
         <h2 className="text-lg font-semibold mb-2">탈퇴하시겠습니까?</h2>
         <p className="text-sm text-gray-500 mb-6">
