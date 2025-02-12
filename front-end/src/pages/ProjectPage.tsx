@@ -118,10 +118,18 @@ function ProjectPage() {
               <div className="flex-1 w-full bg-[#212426]">
                 {/* <p className="text-3xl">Pading</p> */}
                 {/* <ProjectEditor /> */}
+                {
+                  ProjectEditor ? 
+                  (<ProjectEditor groupId={groupId} projectId={projectId} />) 
+                    :
+                  (<div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
+                    <p>Pading IDE</p>
+                  </div>)
+                }
                 {/* <ProjectEditor groupId={groupId} projectId={projectId} /> */}
-                <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
+                {/* <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>
-                </div>
+                </div> */}
               </div>
               <div className="w-full">
                 <ResizableBox
