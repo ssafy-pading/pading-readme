@@ -110,8 +110,7 @@ public class GroupService {
   //그룹 삭제
   @Transactional
   public void deleteGroup(Integer groupId) {
-
-    //그룹 삭제
+    groupUserRepository.deleteAllByGroupId(groupId);
     groupRepository.deleteById(groupId);
   }
 
