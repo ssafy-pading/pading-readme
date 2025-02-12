@@ -11,11 +11,20 @@ const useMypageAxios = () => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_APP_API_BASE_URL;
 
+  /**
+   * Access Token을 Authorization 헤더에 추가하는 함수
+   * @returns Authorization 헤더가 포함된 객체
+   */
   const withAuthHeader = useCallback(() => {
     const token = localStorage.getItem('accessToken');
     return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   }, []);
 
+  /**
+   * 401 에러 발생 시 Access Token 갱신을 시도하는 함수
+   * @param originalRequest - 재시도할 요청 함수
+   * @returns 토큰 갱신 성공 여부
+   */
   const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
     if (!localStorage.getItem('refreshToken')) {
       navigate('/');
@@ -56,6 +65,12 @@ const useMypageAxios = () => {
     }
   }, [navigate]);
 
+  /**
+   * API 요청을 처리하고 401 에러 발생 시 토큰 갱신 후 재시도하는 함수
+   * @param request - 원래의 요청 함수
+   * @param retryCallback - 토큰 갱신 후 재시도할 함수
+   * @returns 요청 결과 또는 에러
+   */
   const apiRequest = useCallback(
     async (request: () => Promise<any>, retryCallback: () => Promise<any>) => {
       try {
@@ -75,7 +90,8 @@ const useMypageAxios = () => {
   );
 
   /**
-   * 프로필 조회
+   * 프로필 조회 요청 함수
+   * @returns 프로필 데이터
    */
   const getProfile = useCallback((): Promise<GetMyPageResponse> => {
     const request = () => axios.get(`${baseURL}/v1/mypage`, withAuthHeader()).then((res) => res.data.data);
@@ -83,7 +99,9 @@ const useMypageAxios = () => {
   }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 이름(닉네임) 변경
+   * 이름(닉네임) 변경 요청 함수
+   * @param nickname - 변경할 닉네임
+   * @returns 변경된 닉네임 데이터
    */
   const updateNickname = useCallback((nickname: string): Promise<UpdateNameResponse> => {
     const request = () =>
@@ -92,7 +110,8 @@ const useMypageAxios = () => {
   }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 로그아웃
+   * 로그아웃 요청 함수
+   * @returns 로그아웃 성공 여부
    */
   const logout = useCallback(async (): Promise<boolean> => {
     try {
@@ -108,7 +127,8 @@ const useMypageAxios = () => {
   }, [baseURL, navigate, withAuthHeader]);
 
   /**
-   * 회원탈퇴
+   * 회원탈퇴 요청 함수
+   * @returns 회원탈퇴 성공 여부
    */
   const deleteAccount = useCallback(async (): Promise<boolean> => {
     try {
