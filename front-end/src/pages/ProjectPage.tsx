@@ -54,7 +54,7 @@ function ProjectPage() {
     <ProjectEditorProvider>
       <div className="flex flex-col h-screen">
         {/* 네비게이션 바 */}
-        <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content">
+        <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
           <div className="flex items-center h-[25px] text-white text-sm">
             {/* <ProjectMemberListButton/> */}
             <p className="font-semibold text-center">프로젝트 이름</p>
@@ -97,7 +97,7 @@ function ProjectPage() {
             }
             handleSize={[5, 5]}
           >
-            <div className="flex flex-col justify-start h-full bg-[#212426]">
+            <div className="flex flex-col justify-start h-full bg-[#212426] select-none">
               <div className="w-full overflow-x-hidden">
                 {/* 파일 탐색기 들어갈 자리 */}
                 <FileExplorer />
@@ -108,14 +108,14 @@ function ProjectPage() {
           {/* 중앙 컨텐츠 */}
           <div className="flex-1 flex-col flex min-w-[600px]">
             <div className="h-full w-full top-0 left-0 right-0 bg-[#212426] flex flex-col justify-between text-[#141617]">
-              <div className="w-full h-[30px] bg-[#2F3336]">
+              <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50">
                 {/* 파일 탭 자리 */}
               </div>
               {/* 코드 편집기 자리 */}
-              <div className="flex-1 w-full bg-[#141617]">
+              <div className="flex-1 w-full bg-[#212426]">
                 {/* <p className="text-3xl">Pading</p> */}
                 {/* <ProjectEditor /> */}
-                <div className="text-3xl font-bold text-center mt-40 text-[#2F3336]">
+                <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>
                 </div>
               </div>
@@ -145,7 +145,7 @@ function ProjectPage() {
                     {/* 상단 탭과 + 버튼 */}
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
-                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow">
+                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none">
                         {terminals.map((_, index) => (
                           <div className="flex flex-row items-center">
                             <div
@@ -206,7 +206,7 @@ function ProjectPage() {
 
 
           {/* 오른쪽 메인 콘텐츠 */}
-          <div className="flex flex-col h-full aspect-[1/3] border-l border-[#666871] border-opacity-90 overflow-hidden">
+          <div className="flex flex-col h-full aspect-[1/3] overflow-hidden border-l border-[#666871] border-opacity-50">
             <RightContentsContainer />
           </div>
         </div>

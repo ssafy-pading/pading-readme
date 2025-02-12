@@ -160,7 +160,7 @@ const ChatRoom: React.FC = () => {
                   isMe ? 'bg-[#3B82F6] ml-5' : 'bg-[#273654] mr-5'
                 } text-white`}
               >
-                <div className="w-full text-sm break-all whitespace-pre-wrap text-xs">
+                <div className="w-full break-all whitespace-pre-wrap text-xs">
                   {chat.content}
                 </div>
               </div>

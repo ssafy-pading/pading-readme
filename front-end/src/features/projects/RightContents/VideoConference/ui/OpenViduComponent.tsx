@@ -9,13 +9,13 @@ import {
     RemoteAudioTrack,
 } from "livekit-client";
 import { useState, useEffect, useRef } from "react";
-import VerticalCarousel, { Participant } from './VerticalCarousel';
+import VerticalCarousel from './VerticalCarousel';
 import Modal from "react-modal";
 import VideoComponent from "./VideoComponent";
-import AudioComponent from "./AudioComponent";
 import { IoClose } from "react-icons/io5";
 import { FiInfo } from "react-icons/fi";
 import { PulseLoader } from "react-spinners";
+import { Participant } from "../type/VideoConferenceTypes";
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;

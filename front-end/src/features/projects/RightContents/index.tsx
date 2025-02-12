@@ -1,9 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import OpenViduComponent from './VideoConference/ui/OpenViduComponent';
 import ChatRoom from '../../../widgets/ChatListComponents';
 
 function RightContentsContainer(){
     const [isChatOpen, setIsChatOpen] = useState<boolean>(true);
+
+    useEffect(() => {
+        const totalHeight = `calc(100vh - 25px)`; // 50px(네비게이션) + 30px(버튼)
+        const carouselHeight = isChatOpen 
+          ? `calc((${totalHeight}-30px) * 0.5)` 
+          : totalHeight;
+    
+        document.documentElement.style.setProperty('--carousel-container-height', carouselHeight);
+      }, [isChatOpen]);
 
     return(
         <div className="flex flex-col h-full overflow-hidden">

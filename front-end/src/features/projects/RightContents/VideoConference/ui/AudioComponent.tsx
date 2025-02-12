@@ -1,9 +1,5 @@
-import { LocalAudioTrack, RemoteAudioTrack } from "livekit-client";
 import { useEffect, useRef } from "react";
-
-interface AudioComponentProps {
-    audioTrack: LocalAudioTrack | RemoteAudioTrack;
-}
+import { AudioComponentProps } from "../type/VideoConferenceTypes";
 
 function AudioComponent({ audioTrack }: AudioComponentProps) {
     const audioRef = useRef<HTMLAudioElement | null>(null);

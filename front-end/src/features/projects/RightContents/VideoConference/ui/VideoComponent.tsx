@@ -1,12 +1,6 @@
-// VideoComponent.tsx
 import { useRef, useEffect } from 'react';
-import { LocalVideoTrack, RemoteVideoTrack } from 'livekit-client';
+import { VideoComponentProps } from '../type/VideoConferenceTypes';
 
-interface VideoComponentProps {
-  videoTrack: LocalVideoTrack | RemoteVideoTrack;
-  participantIdentity: string;
-  muted?: boolean;
-}
 
 const VideoComponent = ({ videoTrack, participantIdentity, muted=false }: VideoComponentProps) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
