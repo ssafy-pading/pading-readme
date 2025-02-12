@@ -29,7 +29,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   useEffect(() => {
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
-      ws.current = new WebSocket("ws://localhost:4444");
+      ws.current = new WebSocket(signalingServer);
       ws.current.onopen = () => {
         console.log("✅ WebSocket Connected");
         ws.current?.send(
