@@ -375,7 +375,7 @@ const ProfileNavigationBar: React.FC = () => {
                 )}
                 <div className="flex items-center justify-between flex-1 text-[#4D4650]">
                   <span className="text-base font-semibold">
-                    멤버 ({activeMemberCount}/{groupCapacity})
+                    멤버 ({activeMemberCount}/{groupUsers.length})
                   </span>
                   {(userRole === "OWNER" || userRole === "MANAGER") && (
                     <Cog6ToothIcon
