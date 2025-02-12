@@ -11,13 +11,17 @@ const useMypageAxios = () => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_APP_API_BASE_URL;
 
-  const withAuthHeader = useCallback(() => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    },
-  }), []);
+  const withAuthHeader = useCallback(() => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }, []);
 
-  const handle401Error = useCallback(async (originalRequest: () => Promise<any>) => {
+  const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
+    if (!localStorage.getItem('refreshToken')) {
+      navigate('/');
+      return false;
+    }
+
     if (!isRefreshing) {
       isRefreshing = true;
       try {
@@ -25,60 +29,67 @@ const useMypageAxios = () => {
         if (newAccessToken) {
           failedQueue.forEach((retry) => retry());
           failedQueue = [];
+          return true;
         } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           navigate('/');
+          return false;
         }
       } catch (error) {
         console.error('Failed to refresh token:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         navigate('/');
+        return false;
       } finally {
         isRefreshing = false;
       }
     } else {
-      // 이미 갱신중이면 큐에 넣고 대기
       return new Promise((resolve) => {
-        failedQueue.push(() => resolve(originalRequest()));
+        failedQueue.push(() =>
+          originalRequest()
+            .then(() => resolve(true))
+            .catch(() => resolve(false))
+        );
       });
     }
   }, [navigate]);
 
+  const apiRequest = useCallback(
+    async (request: () => Promise<any>, retryCallback: () => Promise<any>) => {
+      try {
+        return await request();
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          const refreshed = await handle401Error(request);
+          if (refreshed) {
+            return retryCallback();
+          }
+          throw new Error('Token refresh failed, redirected to login');
+        }
+        throw error;
+      }
+    },
+    [handle401Error]
+  );
+
   /**
    * 프로필 조회
    */
-  const getProfile = useCallback(async (): Promise<GetMyPageResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/mypage`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getProfile(); // 재요청
-      }
-      throw error;
-    }
-  }, [baseURL, handle401Error, withAuthHeader]);
+  const getProfile = useCallback((): Promise<GetMyPageResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/mypage`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, getProfile);
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
    * 이름(닉네임) 변경
    */
-  const updateNickname = useCallback(async (nickname: string): Promise<UpdateNameResponse> => {
-    const request = async () => {
-      const response = await axios.patch(`${baseURL}/v1/mypage`, { nickname }, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateNickname(nickname); // 재요청
-      }
-      throw error;
-    }
-  }, [baseURL, handle401Error, withAuthHeader]);
+  const updateNickname = useCallback((nickname: string): Promise<UpdateNameResponse> => {
+    const request = () =>
+      axios.patch(`${baseURL}/v1/mypage`, { nickname }, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => updateNickname(nickname));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
    * 로그아웃
@@ -102,8 +113,8 @@ const useMypageAxios = () => {
   const deleteAccount = useCallback(async (): Promise<boolean> => {
     try {
       await axios.delete(`${baseURL}/v1/mypage`, withAuthHeader());
-      sessionStorage.removeItem('accessToken');
-      sessionStorage.removeItem('refreshToken');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       navigate('/');
       return true;
     } catch (error) {
