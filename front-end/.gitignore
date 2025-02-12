@@ -7,10 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+package-lock.json
 node_modules
 dist
 dist-ssr
 *.local
+build
+out/
+temp/
+tmp/
+
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.test
+.env.production
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +34,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.pem
