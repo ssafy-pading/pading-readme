@@ -1,5 +1,6 @@
 package site.paircoding.paircoding.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +40,7 @@ public class ProjectController {
   @GroupRoleCheck(Role.MANAGER)
   public ApiResponse<Project> createProject(
       @PathVariable("groupId") Integer groupId,
-      @RequestBody ProjectCreateRequest request) {
+      @Valid @RequestBody ProjectCreateRequest request) {
     return ApiResponse.success(projectService.createProject(groupId, request));
   }
 

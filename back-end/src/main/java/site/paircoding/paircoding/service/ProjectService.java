@@ -22,6 +22,7 @@ import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
+import site.paircoding.paircoding.global.exception.NotFoundException;
 import site.paircoding.paircoding.repository.GroupRepository;
 import site.paircoding.paircoding.repository.GroupUserRepository;
 import site.paircoding.paircoding.repository.PerformanceRepository;
@@ -74,7 +75,8 @@ public class ProjectService {
   @Transactional
   public Project createProject(Integer groupId, ProjectCreateRequest request) {
     // 그룹 확인
-    Group group = groupRepository.findById(groupId).orElseThrow();
+    Group group = groupRepository.findById(groupId)
+        .orElseThrow(() -> new NotFoundException("Group not found"));
 
     // 유저 확인
     List<User> users = userRepository.findAllById(request.getUserIds());
@@ -95,7 +97,7 @@ public class ProjectService {
 
     // 사양 확인
     Performance performance = performanceRepository.findById(request.getPerformanceId())
-        .orElseThrow();
+        .orElseThrow(() -> new BadRequestException("Performance not found"));
 
     // 고유한 파드명 생성
     String podName;
