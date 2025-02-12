@@ -229,14 +229,22 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
   // 폼 유효성 검사 (간단 예시)
   const validateForm = () => {
-    const projectNamePattern = /^[a-z0-9_-]+$/; // 소문자, 숫자, '_', '-'만 허용
+    const projectNamePattern = /^[a-z0-9-]+$/; // 소문자, 숫자, '-'만 허용
   
     if (!projectName.trim()) {
       alert("프로젝트 이름을 입력하세요.");
       return false;
     }
+    if (projectName.length > 20) {
+      alert("프로젝트 이름은 최대 20글자까지 입력할 수 있습니다.");
+      return false;
+    }
+    if (projectName.startsWith('-')) {
+      alert("프로젝트 이름은 '-'로 시작할 수 없습니다.");
+      return false;
+    }
     if (!projectNamePattern.test(projectName)) {
-      alert("프로젝트 이름은 영어 소문자, 숫자, '_', '-'만 사용할 수 있습니다.");
+      alert("프로젝트 이름은 영어 소문자, 숫자, '-'만 사용할 수 있습니다.");
       return false;
     }
     if (!selectedLanguage) {
@@ -254,6 +262,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   
     return true;
   };
+  
 
   // 2. 폼 제출 시 함수
   // api 사용시 async 붙여주세요!

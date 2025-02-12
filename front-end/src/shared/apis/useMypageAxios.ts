@@ -11,13 +11,26 @@ const useMypageAxios = () => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_APP_API_BASE_URL;
 
-  const withAuthHeader = useCallback(() => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    },
-  }), []);
+  /**
+   * Access Token을 Authorization 헤더에 추가하는 함수
+   * @returns Authorization 헤더가 포함된 객체
+   */
+  const withAuthHeader = useCallback(() => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }, []);
 
-  const handle401Error = useCallback(async (originalRequest: () => Promise<any>) => {
+  /**
+   * 401 에러 발생 시 Access Token 갱신을 시도하는 함수
+   * @param originalRequest - 재시도할 요청 함수
+   * @returns 토큰 갱신 성공 여부
+   */
+  const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
+    if (!localStorage.getItem('refreshToken')) {
+      navigate('/');
+      return false;
+    }
+
     if (!isRefreshing) {
       isRefreshing = true;
       try {
@@ -25,63 +38,80 @@ const useMypageAxios = () => {
         if (newAccessToken) {
           failedQueue.forEach((retry) => retry());
           failedQueue = [];
+          return true;
         } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           navigate('/');
+          return false;
         }
       } catch (error) {
         console.error('Failed to refresh token:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         navigate('/');
+        return false;
       } finally {
         isRefreshing = false;
       }
     } else {
-      // 이미 갱신중이면 큐에 넣고 대기
       return new Promise((resolve) => {
-        failedQueue.push(() => resolve(originalRequest()));
+        failedQueue.push(() =>
+          originalRequest()
+            .then(() => resolve(true))
+            .catch(() => resolve(false))
+        );
       });
     }
   }, [navigate]);
 
   /**
-   * 프로필 조회
+   * API 요청을 처리하고 401 에러 발생 시 토큰 갱신 후 재시도하는 함수
+   * @param request - 원래의 요청 함수
+   * @param retryCallback - 토큰 갱신 후 재시도할 함수
+   * @returns 요청 결과 또는 에러
    */
-  const getProfile = useCallback(async (): Promise<GetMyPageResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/mypage`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getProfile(); // 재요청
+  const apiRequest = useCallback(
+    async (request: () => Promise<any>, retryCallback: () => Promise<any>) => {
+      try {
+        return await request();
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          const refreshed = await handle401Error(request);
+          if (refreshed) {
+            return retryCallback();
+          }
+          throw new Error('Token refresh failed, redirected to login');
+        }
+        throw error;
       }
-      throw error;
-    }
-  }, [baseURL, handle401Error, withAuthHeader]);
+    },
+    [handle401Error]
+  );
 
   /**
-   * 이름(닉네임) 변경
+   * 프로필 조회 요청 함수
+   * @returns 프로필 데이터
    */
-  const updateNickname = useCallback(async (nickname: string): Promise<UpdateNameResponse> => {
-    const request = async () => {
-      const response = await axios.patch(`${baseURL}/v1/mypage`, { nickname }, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateNickname(nickname); // 재요청
-      }
-      throw error;
-    }
-  }, [baseURL, handle401Error, withAuthHeader]);
+  const getProfile = useCallback((): Promise<GetMyPageResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/mypage`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, getProfile);
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 로그아웃
+   * 이름(닉네임) 변경 요청 함수
+   * @param nickname - 변경할 닉네임
+   * @returns 변경된 닉네임 데이터
+   */
+  const updateNickname = useCallback((nickname: string): Promise<UpdateNameResponse> => {
+    const request = () =>
+      axios.patch(`${baseURL}/v1/mypage`, { nickname }, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => updateNickname(nickname));
+  }, [baseURL, withAuthHeader, apiRequest]);
+
+  /**
+   * 로그아웃 요청 함수
+   * @returns 로그아웃 성공 여부
    */
   const logout = useCallback(async (): Promise<boolean> => {
     try {
@@ -97,13 +127,14 @@ const useMypageAxios = () => {
   }, [baseURL, navigate, withAuthHeader]);
 
   /**
-   * 회원탈퇴
+   * 회원탈퇴 요청 함수
+   * @returns 회원탈퇴 성공 여부
    */
   const deleteAccount = useCallback(async (): Promise<boolean> => {
     try {
       await axios.delete(`${baseURL}/v1/mypage`, withAuthHeader());
-      sessionStorage.removeItem('accessToken');
-      sessionStorage.removeItem('refreshToken');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       navigate('/');
       return true;
     } catch (error) {
