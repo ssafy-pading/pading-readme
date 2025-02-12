@@ -21,7 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry.addMapping("/**")
         .allowedOrigins("https://pading.site", "https://pading-c8f33.firebaseapp.com",
-            "http://localhost:5173")
+            "http://localhost:5173", "https://pair-coding.site")
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(true);
