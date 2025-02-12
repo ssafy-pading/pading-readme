@@ -4,23 +4,7 @@ import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 import "./VerticalCarousel.css";
-import { LocalVideoTrack, LocalAudioTrack, RemoteVideoTrack, RemoteAudioTrack } from "livekit-client";
-
-export interface Participant {
-  id: string;
-  identity: string;
-  isLocal: boolean;
-  videoTrack: LocalVideoTrack | RemoteVideoTrack | undefined;
-  audioTrack?: LocalAudioTrack | RemoteAudioTrack | undefined;
-}
-
-interface VerticalCarouselProps {
-  isChatOpen: boolean;
-  localParticipant?: Participant;
-  remoteParticipants: Participant[];
-  hasJoined: boolean;
-  onJoin: () => void;
-}
+import { VerticalCarouselProps } from '../type/VideoConferenceTypes'
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
@@ -32,20 +16,31 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   const sliderRef = useRef<Slider>(null);
 
   useEffect(() => {
-    const slideHeight = isChatOpen ? "50%" : "25%";
-    document.documentElement.style.setProperty("--slide-height", slideHeight);
+    const handleResize = () => {
+      const slideHeight = isChatOpen
+        ? `calc(var(--carousel-container-height) / 2)`
+        : `calc(var(--carousel-container-height) / 4)`;
+
+      document.documentElement.style.setProperty("--slide-height", slideHeight);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [isChatOpen]);
 
   const getSlideCount = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
-    return isChatOpen ? Math.min(participantCount, 2) : Math.min(participantCount, 4);
+    const maxSlides = isChatOpen ? 2 : 4;
+    return Math.min(participantCount, maxSlides);
   };
-  
+
+
   const shouldShowCarouselButtons = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
     return isChatOpen ? participantCount >= 3 : participantCount >= 5;
   };
-  
+
   const settings = {
     dots: false,
     infinite: false,
@@ -76,23 +71,23 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
               </div>
             )}
 
-            {remoteParticipants.map((participant) => 
+            {remoteParticipants.map((participant) =>
               participant.videoTrack ? (
-              <div key={participant.id} className="relative p-2">
-                {participant.videoTrack && (
-                  <VideoComponent
-                    videoTrack={participant.videoTrack}
-                    participantIdentity={participant.identity}
-                  />
-                )}
-                {participant.audioTrack && (
-                  <AudioComponent audioTrack={participant.audioTrack} />
-                )}
-                <div className="absolute top-0 left-4 mt-2 text-sm text-white">
-                  {participant.identity}
+                <div key={participant.id} className="relative p-2">
+                  {participant.videoTrack && (
+                    <VideoComponent
+                      videoTrack={participant.videoTrack}
+                      participantIdentity={participant.identity}
+                    />
+                  )}
+                  {participant.audioTrack && (
+                    <AudioComponent audioTrack={participant.audioTrack} />
+                  )}
+                  <div className="absolute top-0 left-4 mt-2 text-sm text-white">
+                    {participant.identity}
+                  </div>
                 </div>
-              </div>
-            ):null)}
+              ) : null)}
           </Slider>
 
           {shouldShowCarouselButtons() && (
@@ -114,7 +109,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
         </>
       ) : (
         <div className="flex flex-col justify-center h-full">
-          <div className="h-[30px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4">
+          <div className="h-[25px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4 border-b border-[#666871] border-opacity-50">
             Video
           </div>
           <div className="flex flex-1 justify-center items-center">
