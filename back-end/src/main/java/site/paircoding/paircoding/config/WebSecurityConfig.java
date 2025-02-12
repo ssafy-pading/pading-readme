@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -65,6 +66,13 @@ public class WebSecurityConfig {
               response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 응답
               response.getWriter().write("Access Denied");
             })
+        )
+        .headers(headers -> headers
+            .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable) // X-Frame-Options 비활성화
+            .contentSecurityPolicy(csp -> csp
+                .policyDirectives(
+                    "frame-ancestors 'self' https://pair-coding.site https://pading.site http://localhost:5173 https://pading-c8f33.firebaseapp.com/;")
+            )
         )
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
