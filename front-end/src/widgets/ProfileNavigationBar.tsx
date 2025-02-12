@@ -210,9 +210,10 @@ const ProfileNavigationBar: React.FC = () => {
         // 삭제 후 최신 그룹 목록을 가져와 첫 번째 그룹으로 리다이렉트, 없으면 /nogroup
         const groupsResponse = await getGroups();
         if (groupsResponse.groups && groupsResponse.groups.length > 0) {
-          navigate(`/projectlist/${groupsResponse.groups[0].id}`);
+          window.location.href = `/projectlist/${groupsResponse.groups[0].id}`;
         } else {
-          navigate("/nogroup");
+          window.location.href = `/nogroup`;
+
         }
       }
     } catch (error) {
@@ -394,7 +395,7 @@ const ProfileNavigationBar: React.FC = () => {
               <div
                 className="ml-10 mb-2 overflow-y-auto"
                 style={{
-                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 380px)",
+                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 450px)",
                 }}
               >
                 <ul>

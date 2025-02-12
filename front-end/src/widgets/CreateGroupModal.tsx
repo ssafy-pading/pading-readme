@@ -84,7 +84,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
         setDuplicateChecked(false);
         setIsNameAvailable(false);
         onClose();
-        navigate(`/projectlist/${groupId}`);
+        window.location.href = `/projectlist/${groupId}`
       }
     } catch (error) {
       alert("그룹 생성 실패: 알 수 없는 오류가 발생했습니다.");
