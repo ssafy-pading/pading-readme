@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Modal from "react-modal";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // 모달 속성 타입 정의
 interface PictureChangeModalProps {
   isOpen: boolean; // 모달 열림 여부
@@ -34,7 +37,7 @@ const PictureModal: React.FC<PictureChangeModalProps> = ({
 
   // 프로필 사진 변경 확인
   const onConfirmChange = (): void => {
-    alert("프로필 사진이 변경되었습니다.");
+    toast.success("프로필 사진이 변경되었습니다.");
     // 여기에 파일 업로드 처리 로직 추가
 
 
@@ -65,6 +68,7 @@ const PictureModal: React.FC<PictureChangeModalProps> = ({
       className="bg-white rounded-xl py-6 px-8 shadow-lg relative w-[320px]"
     >
       <div className="text-center">
+      <Toaster />
         {/* 상단 텍스트 */}
         <div>
           <h2 className="text-lg font-semibold mb-2">프로필 사진 변경</h2>

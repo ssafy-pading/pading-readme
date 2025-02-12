@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupDetailsResponse, JoinGroupResponse } from "../shared/types/groupApiResponse";
+import { Toaster, toast } from 'react-hot-toast';
 
 declare global {
     interface Window {
@@ -105,7 +106,7 @@ const InvitePage = () => {
                 const group:GetGroupDetailsResponse = await getGroupDetails(Number(groupId)); // 여기에 그룹 정보 가져오는 API 연결
                 setGroupName(group?.name || "Unknown Group");
             }else{
-                alert("잘못된 경로입니다.");
+              toast("잘못된 경로입니다.");
             }
         } catch (error) {
             setGroupName(null);
@@ -134,6 +135,7 @@ const InvitePage = () => {
 
     return (
         <div className="flex min-h-screen h-full items-center justify-center bg-gray-900">
+            <Toaster />
             <div id="particles-js" className="w-full h-full"></div>
             {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
             <div className="px-7 pb-2 h-1/4 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-md absolute">

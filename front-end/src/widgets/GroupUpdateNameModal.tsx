@@ -4,6 +4,9 @@ import Modal from "react-modal";
 import cross from "../assets/cross.svg";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 Modal.setAppElement("#root");
 
 interface GroupUpdateModalProps {
@@ -38,7 +41,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
 
   const handleCheckDuplicate = async () => {
     if (newName.trim() === "") {
-      alert("먼저 그룹 이름을 입력해주세요.");
+      toast.error("먼저 그룹 이름을 입력해주세요.");
       return;
     }
     try {
@@ -50,7 +53,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
       }
       setDuplicateChecked(true);
     } catch (error) {
-      alert("그룹명 중복 확인 중 오류가 발생했습니다.");
+      toast.error("그룹명 중복 확인 중 오류가 발생했습니다.");
     }
   };
 
@@ -58,21 +61,21 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
     e.preventDefault();
 
     if (newName.trim() === "") {
-      alert("새 그룹 이름을 입력해주세요.");
+      toast.error("새 그룹 이름을 입력해주세요.");
       return;
     }
 
     if (newName.trim() === currentName.trim()) {
-      alert("변경된 그룹명이 없습니다. 수정이 필요합니다.");
+      toast.error("변경된 그룹명이 없습니다. 수정이 필요합니다.");
       return;
     }
 
     if (!duplicateChecked) {
-      alert("먼저 그룹명 중복 확인을 해주세요.");
+      toast.error("먼저 그룹명 중복 확인을 해주세요.");
       return;
     }
     if (!isNameAvailable) {
-      alert("이미 사용 중인 그룹명입니다. 다른 이름을 입력해주세요.");
+      toast.error("이미 사용 중인 그룹명입니다. 다른 이름을 입력해주세요.");
       return;
     }
 
@@ -80,13 +83,13 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
     try {
       const success = await updateGroupName(groupId, newName);
       if (success) {
-        alert("그룹 이름이 성공적으로 수정되었습니다!");
+        toast.error("그룹 이름이 성공적으로 수정되었습니다!");
         onUpdate(newName);
         onClose();
         window.location.href = `/projectlist/${groupId}`;
       }
     } catch (error) {
-      alert("그룹 이름 수정 중 오류가 발생했습니다.");
+      toast.error("그룹 이름 수정 중 오류가 발생했습니다.");
       console.error("그룹 수정 에러:", error);
     } finally {
       setIsLoading(false);
@@ -110,6 +113,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
       shouldCloseOnOverlayClick={true}
     >
       <div className="flex justify-between items-center w-96">
+      <Toaster />
         <span className="text-xl font-bold">그룹 이름 수정</span>
         <button
           className="w-8 h-8 flex items-center justify-center hover:bg-gray-300 rounded-full"

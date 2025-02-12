@@ -9,6 +9,9 @@ import "../assets/css/CustomSelect.css";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // Redux 관련 import
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../app/redux/store";
@@ -96,10 +99,10 @@ const RoleChangePage: React.FC = () => {
       setGroupUsers((users) =>
         users.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
       );
-      alert("권한 변경에 성공했습니다.");
+      toast.success("권한 변경에 성공했습니다.");
     } catch (error) {
       console.error(`Error updating role for user ${userId}:`, error);
-      alert("권한 업데이트에 실패했습니다.");
+      toast.error("권한 업데이트에 실패했습니다.");
     }
   };
 
@@ -112,7 +115,7 @@ const RoleChangePage: React.FC = () => {
       const success = await expelMember(groupId, userId);
       if (success) {
         setGroupUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
-        alert("멤버가 성공적으로 제외되었습니다.");
+        toast.success("멤버가 성공적으로 제외되었습니다.");
       }
     } catch (error) {
       console.error(`Error expelling user ${userId}:`, error);
@@ -126,6 +129,7 @@ const RoleChangePage: React.FC = () => {
 
   return (
     <div className={`transition-all duration-700 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>
+      <Toaster />
       <div className="pl-8 pr-12 pb-6 h-screen overflow-y-hidden max-h-screen transition-all duration-1000 ml-32 mt-20 z-0">
         <h1 className="text-[#4D4650] text-xl font-bold mb-3">멤버 설정</h1>
         <hr className="mb-5" />

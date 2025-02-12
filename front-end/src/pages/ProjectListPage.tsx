@@ -15,6 +15,9 @@ import useProjectAxios from '../shared/apis/useProjectAxios';
 import InviteLink from '../widgets/CreateLinkComponents';
 import { FaPlus } from 'react-icons/fa';
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // Redux 관련 import
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../app/redux/store';
@@ -141,15 +144,16 @@ const ProjectListPage: React.FC = () => {
         prev.filter((item) => item.project.id !== selectedDeleteProject.project.id)
       );
       closeDeleteConfirmModal();
-      alert('프로젝트가 성공적으로 삭제되었습니다.');
+      toast.success('프로젝트가 성공적으로 삭제되었습니다.');
     } catch (err) {
       console.error('프로젝트 삭제 실패:', err);
-      alert('프로젝트 삭제에 실패했습니다.');
+      toast.error('프로젝트 삭제에 실패했습니다.');
     }
   };
 
   return (
     <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
+      <Toaster />
       {/* 프로젝트 목록 영역 */}
       <div className="relative pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
         <div className="flex justify-between items-center relative mt-20 mb-3">
