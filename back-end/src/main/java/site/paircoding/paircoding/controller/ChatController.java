@@ -22,6 +22,6 @@ public class ChatController {
   @GetMapping("/groups/{groupId}/projects/{projectId}")
   public List<ChatDocument> getChatMessages(@PathVariable("groupId") Integer groupId,
       @PathVariable("projectId") Integer projectId) {
-    return chatService.getMessages(projectId);
+    return chatService.getMessages(groupId, projectId);
   }
 }
