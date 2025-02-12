@@ -17,11 +17,8 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
   const term = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
   const stompClient = useRef<Client | null>(null);
-  const apiUrl = import.meta.env.VITE_APP_API_BASE_URL
-  
 
-
-  const projectName = 'test';
+  // const projectName = 'test';
   const terminalId = crypto.randomUUID();
 
   useEffect(() => {
@@ -45,13 +42,13 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
       fitAddon.current.fit();
     }
 
-    const socket: WebSocket = new SockJS(`${apiUrl}/ws`) as WebSocket;
+    const socket: WebSocket = new SockJS(`${import.meta.env.VITE_APP_API_BASE_URL}/ws`) as WebSocket;
     stompClient.current = new Client({
       webSocketFactory: () => socket,
-      reconnectDelay: 5000, // 자동 재연결 설정 (옵션)
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
+      reconnectDelay: 5000, // 자동 재연결 설정 (옵션)
       onConnect: () => {
         stompClient.current?.subscribe(
           `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
