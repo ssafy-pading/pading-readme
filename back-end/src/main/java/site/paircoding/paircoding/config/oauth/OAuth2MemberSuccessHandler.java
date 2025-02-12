@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
+import site.paircoding.paircoding.config.AppConfig;
 import site.paircoding.paircoding.util.JwtUtil;
 
 @Component
@@ -18,6 +19,7 @@ import site.paircoding.paircoding.util.JwtUtil;
 public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
   private final JwtUtil jwtUtil;
+  private final AppConfig appConfig;
 
   /**
    * 인증 성공 시 호출되는 메서드입니다.
@@ -46,7 +48,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     // 리다이렉트 전략을 사용하여 리다이렉트할 수 있습니다. (주석 처리됨)
     URI uri = UriComponentsBuilder
-        .fromUriString("http://localhost:5173")
+        .fromUriString(appConfig.getDomain())
         .queryParams(queryParams)
         .build()
         .toUri();
