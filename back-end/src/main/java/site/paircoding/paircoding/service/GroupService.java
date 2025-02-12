@@ -51,9 +51,6 @@ public class GroupService {
   //그룹 생성
   @Transactional
   public GroupDto createGroup(User user, String name, int capacity) {
-    if (capacity < 2) {
-      throw new BadRequestException("2명 이상의 인원이 필요합니다");
-    }
     if (checkDuplicate(name)) {
       throw new BadRequestException("중복된 그룹명입니다.");
     }
@@ -192,16 +189,16 @@ public class GroupService {
         .orElseThrow(() -> new NotFoundException("Group not found."));
     //redis에 초대 코드 가져오기
     String redisCode = (String) redisUtil.get(INVITATION_PREFIX.formatted(groupId));
-    if (redisCode == null || !redisCode.equals(code)) {
-      throw new BadRequestException("유효하지 않은 초대 코드입니다.");
-    }
+
     if (groupUserRepository.findByGroupIdAndUserId(groupId, user.getId()).isPresent()) {
       throw new BadRequestException("이미 가입한 그룹입니다.");
     }
     if (groupUserRepository.countByGroupId(groupId) >= group.getCapacity()) {
       throw new BadRequestException("정원이 초과되었습니다.");
     }
-
+    if (redisCode == null || !redisCode.equals(code)) {
+      throw new BadRequestException("유효하지 않은 초대 코드입니다.");
+    }
     //그룹 가입
     GroupUser groupUser = GroupUser.builder()
         .group(group)
