@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -66,6 +67,13 @@ public class WebSecurityConfig {
               response.getWriter().write("Access Denied");
             })
         )
+        .headers(headers -> headers
+            .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable) // X-Frame-Options 비활성화
+            .contentSecurityPolicy(csp -> csp
+                .policyDirectives(
+                    "frame-ancestors 'self' https://pair-coding.site https://pading.site http://localhost:5173 https://pading-c8f33.firebaseapp.com/;")
+            )
+        )
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 추가
 
 //                .exceptionHandling(exception -> exception.accessDeniedPage("/403"));
@@ -80,6 +88,7 @@ public class WebSecurityConfig {
     configuration.addAllowedOrigin("https://pading.site");
     configuration.addAllowedOrigin("https://pading-c8f33.firebaseapp.com");
     configuration.addAllowedOrigin("http://localhost:5173");
+    configuration.addAllowedOrigin("https://pair-coding.site");
     configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
     configuration.addAllowedHeader("*"); // 모든 헤더 허용
     configuration.setAllowCredentials(true); // 자격 증명 허용
