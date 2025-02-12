@@ -18,7 +18,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
   const fitAddon = useRef<FitAddon | null>(null);
   const stompClient = useRef<Client | null>(null);
 
-  const projectName = 'test';
+  // const projectName = 'test';
   const terminalId = crypto.randomUUID();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
       disableStdin: false,
       // fontSize
       theme: {
-        background: '#0F172A'
+        background: '#141617'
       }
     });
     

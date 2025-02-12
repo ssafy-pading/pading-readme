@@ -98,37 +98,37 @@ const InviteLink: React.FC<InviteLinkProps> = ({ groupId }) => {
   };
 
   return (
-    <div className="absolute bottom-0 right-0 flex items-center w-full max-w-xl mb-1 border border-gray-300 rounded-lg pl-3 pr-1 py-1">
-      <div className="flex-1 text-gray-700 truncate">
+    <div className="flex items-center max-w-xl rounded-lg">
+      <div className="flex-1 text-gray-700 truncate pt-2">
         {inviteLink ? (
           <>
-            <span className="text-blue-600 font-medium cursor-pointer" onClick={handleCopyToClipboard}>{inviteLink}</span>
-            <span className="ml-2 text-red-500 text-sm">
+            <span className="text-xs text-blue-500 font-medium cursor-pointer" onClick={handleCopyToClipboard}>{inviteLink}</span>
+            <span className="ml-2 text-red-500 text-xs">
                 {isExpired ? '만료됨' : ` ${formatTime(timeLeftSec)}`}
             </span>
           </>
         ) : (
-          <span className="text-gray-400">초대 링크를 생성해 주세요</span>
+          <span className="text-xs text-gray-400">초대 링크를 생성해 주세요</span>
         )}
       </div>
 
       {inviteLink ? (
         <button
           onClick={isExpired ? handleCreateInvitationLink : handleCopyToClipboard}
-          className={`ml-3 flex items-center gap-2 px-4 py-2 rounded-md hover:scale-105 ${
+          className={`flex items-center gap-2 text-xs rounded-md hover:scale-105 ${
             isExpired
-              ? 'bg-[#5C8290] hover:bg-[#3F6673] text-white'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+              ? 'bg-[#5C8290] hover:bg-[#3F6673] text-white px-3 py-2 ml-3'
+              : 'hover:bg-gray-300 text-gray-700 mt-2 ml-1 p-2'
           } transition-all`}
         >
-          {isExpired ? '초대 링크 재발급' : '초대 링크 복사'}
+          {isExpired ? '초대 링크 재발급' : ''}
           {!isExpired && <FaRegCopy />}
         </button>
       ) : (
         <button
           onClick={fetchExistingLink}
           disabled={isLoading}
-          className="ml-3 px-4 py-2 bg-[#5C8290] hover:bg-[#3F6673] hover:scale-105 text-white rounded-md transition-all"
+          className="ml-3 mt-2 px-2.5 py-1.5 bg-[#5C8290] hover:bg-[#3F6673] hover:scale-105 text-xs text-white rounded-md transition-all"
         >
           {isLoading ? '생성 중...' : '초대 링크 생성'}
         </button>

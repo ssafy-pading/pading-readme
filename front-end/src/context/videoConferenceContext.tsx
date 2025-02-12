@@ -1,6 +1,6 @@
 // videoConferenceContext.tsx
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { VideoConferenceContextType, VideoAction, LocalParticipant } from '../shared/types/videoConferenceType';
+import { VideoConferenceContextType, VideoAction } from '../shared/types/videoConferenceType';
 
 const initialState: VideoConferenceContextType = {
     isMute: false,
