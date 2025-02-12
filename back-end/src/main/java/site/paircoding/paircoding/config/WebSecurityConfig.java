@@ -32,6 +32,7 @@ public class WebSecurityConfig {
 
   private final JwtUtil jwtUtil;
   private final JwtFilter jwtFilter;
+  private final AppConfig appConfig;
 
   /**
    * SecurityFilterChain을 구성합니다.
@@ -55,7 +56,8 @@ public class WebSecurityConfig {
             .anyRequest().permitAll() // 모든 요청 허용
         )
         .oauth2Login(oauth2 -> oauth2
-            .successHandler(new OAuth2MemberSuccessHandler(jwtUtil)) // OAuth2 로그인 성공 핸들러 설정
+                .successHandler(new OAuth2MemberSuccessHandler(jwtUtil, appConfig))
+            // OAuth2 로그인 성공 핸들러 설정
         )
         .exceptionHandling(exception -> exception
             // 인증되지 않은 사용자 처리 (401)
