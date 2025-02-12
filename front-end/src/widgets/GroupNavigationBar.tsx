@@ -9,6 +9,10 @@ import { GetGroupListResponse } from '../shared/types/groupApiResponse';
 import logo from '../assets/logo.png';
 import { FaPlus } from "react-icons/fa";
 
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchUserInfo } from '../app/redux/user';
+import type { RootState, AppDispatch } from '../app/redux/store'
+
 Modal.setAppElement('#root');
 
 // 그룹 데이터 타입 정의
@@ -24,6 +28,15 @@ type LocationType = {
 };
 
 const GroupNavigationBar: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, status } = useSelector((state: RootState) => state.user);
+
+  useEffect(() => {
+    if (!user && status === 'idle') {
+      dispatch(fetchUserInfo());
+    }
+  }, [dispatch, user, status]);
+  
   // 모달 상태 관리 ('create' | 'join' | null)
   const [activeModal, setActiveModal] = useState<'create' | 'join' | null>(null);
   const location: LocationType = useLocation();
@@ -47,7 +60,8 @@ const GroupNavigationBar: React.FC = () => {
       const response = await getGroups();
       setGroups(response.groups);
       if (response.groups.length === 0) {
-        navigate('/nogroup');
+        navigate('/nogroup')
+
       }
     } catch (err) {
       console.error('그룹 목록을 불러오는 데 실패했습니다.', err);
@@ -66,7 +80,30 @@ const GroupNavigationBar: React.FC = () => {
 
   // 그룹 클릭 시 해당 그룹 상세 페이지로 이동
   const handleGroupClick = (groupId: number) => {
-    navigate(`/projectlist/${groupId}`);
+    window.location.href = `/projectlist/${groupId}`;
+  };
+
+  const handleLogoClick = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      try {
+        const groupsResponse = await getGroups();
+        if (groupsResponse.groups && groupsResponse.groups.length > 0) {
+          // 로그인 상태이며 그룹이 하나 이상 있을 경우, 첫 번째 그룹 페이지로 리다이렉트 (전체 페이지 새로고침)
+          window.location.href = `/projectlist/${groupsResponse.groups[0].id}`;
+        } else {
+          // 로그인 상태이나 그룹이 없는 경우, 그룹이 없는 페이지로 이동
+          window.location.href = "/nogroup";
+        }
+      } catch (error) {
+        console.error("그룹 목록 조회 중 오류:", error);
+        // 에러 발생 시 홈으로 이동
+        navigate('/');
+      }
+    } else {
+      // 로그인 정보가 없으면 루트('/')로 이동
+      navigate('/');
+    }
   };
 
   // 그룹 이름 길이 제한 함수
@@ -81,7 +118,7 @@ const GroupNavigationBar: React.FC = () => {
     <nav className="fixed top-0 left-0 w-[80px] h-full bg-[#93B0BA] p-4 flex flex-col">
       {/* 프로젝트 로고 (홈 이동) */}
       <div className="flex items-center justify-center mb-4">
-        <button onClick={() => navigate('/')} className="focus:outline-none">
+        <button onClick={() => handleLogoClick()} className="focus:outline-none">
           <img src={logo} alt="logo" className="w-12 h-12" />
         </button>
       </div>

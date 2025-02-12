@@ -63,11 +63,13 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
     try {
       const response: JoinGroupResponse = await joinGroup(inviteInfo.groupId, inviteInfo.code);
       if (response) {
+        const groupId: number = response.id
         alert(
           `${response.name} 그룹에 성공적으로 참여하였습니다!`
         );
         setInviteLink(""); // 입력 필드 초기화
         onClose(); // 모달 닫기
+        window.location.href = `/projectlist/${groupId}`
       }
     } catch (error) {
       alert("그룹 참여에 실패하였습니다. 다시 시도해주세요.");
