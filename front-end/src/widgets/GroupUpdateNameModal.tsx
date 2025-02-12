@@ -29,9 +29,12 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   // 중복 확인 상태 관리
-  const [duplicateChecked, setDuplicateChecked] = useState(false);
-  const [isNameAvailable, setIsNameAvailable] = useState(false);
-
+  const [duplicateChecked, setDuplicateChecked] = useState<boolean>(false);
+  const [isNameAvailable, setIsNameAvailable] = useState<boolean>(false);
+  const [validMessage, setValidMessage] = useState<string>("")
+  // 특수문자
+  const specialCharRegex:RegExp = /[^a-zA-Z0-9가-힣\s]/;
+  
   // currentName이 바뀌면 입력값 및 중복 확인 상태 갱신
   useEffect(() => {
     setNewName(currentName);
@@ -39,15 +42,31 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
     setIsNameAvailable(false);
   }, [currentName]);
 
-  const handleCheckDuplicate = async () => {
+  const handleCheckDuplicate = async (): Promise<void> => {
     if (newName.trim() === "") {
-      toast.error("먼저 그룹 이름을 입력해주세요.");
+      setValidMessage("그룹 이름을 입력하세요");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
       return;
     }
+    if (newName.length < 3 || newName.length > 15) {
+      setValidMessage("그룹 이름은 3~15 글자로 설정 할 수 있습니다");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
+      return;
+    }
+    if (specialCharRegex.test(newName)) {
+      setValidMessage("특수문자는 허용되지 않습니다");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
+      return;
+    }
+    
     try {
       const duplicateCheck = await checkGroupNameDuplicate(newName);
       if (duplicateCheck.duplicated) {
         setIsNameAvailable(false);
+        setValidMessage("이미 사용 중인 그룹명입니다");
       } else {
         setIsNameAvailable(true);
       }
@@ -56,26 +75,28 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
       toast.error("그룹명 중복 확인 중 오류가 발생했습니다.");
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (newName.trim() === "") {
-      toast.error("새 그룹 이름을 입력해주세요.");
-      return;
-    }
-
-    if (newName.trim() === currentName.trim()) {
-      toast.error("변경된 그룹명이 없습니다. 수정이 필요합니다.");
-      return;
-    }
-
     if (!duplicateChecked) {
       toast.error("먼저 그룹명 중복 확인을 해주세요.");
       return;
     }
-    if (!isNameAvailable) {
-      toast.error("이미 사용 중인 그룹명입니다. 다른 이름을 입력해주세요.");
+    if (newName.trim() === "") {
+      toast.error("그룹 이름을 입력하세요.");
+      return;
+    }
+    if (newName.trim() === currentName.trim()) {
+      toast.error("이미 사용 중인 그룹명입니다.");
+      return;
+    }
+    if (newName.length < 3 || newName.length > 15) {
+      toast.error("그룹 이름은 3~15 글자로 설정 할 수 있습니다.");
+      return;
+    }
+    if (specialCharRegex.test(newName)) {
+      toast.error("특수문자는 허용되지 않습니다")
       return;
     }
 
@@ -132,6 +153,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
               setNewName(e.target.value);
               setDuplicateChecked(false);
               setIsNameAvailable(false);
+              setValidMessage("")
             }}
             className="w-full border border-gray-300 rounded-lg px-4 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-[#5C8290] pr-20"
           />
@@ -148,7 +170,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
           <span className="ml-2 text-sm text-gray-700">
             {isNameAvailable
               ? "사용 가능한 그룹명입니다."
-              : "이미 사용중인 그룹명입니다."}
+              : `${validMessage}.`}
           </span>
         )}
         <button
