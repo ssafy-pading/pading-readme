@@ -1,10 +1,10 @@
 package site.paircoding.paircoding.service;
 
-import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.Performance;
@@ -133,8 +133,8 @@ public class ProjectService {
     // 프로젝트 생성 확인 후 파드 생성 요청
     kubernetesUtil.createPod(podName, projectImage, performance, project.getNodePort());
 
-    // nginx config 파일 생성 및 reload
-    nginxConfigUtil.executeSshCommands(project.getContainerId(), project.getNodePort());
+    // 서브도메인 설정 - nginx config 파일 생성 및 reload
+    nginxConfigUtil.createSubdomain(project.getContainerId(), project.getNodePort());
 
     return projectRepository.save(project);
   }
@@ -199,4 +199,22 @@ public class ProjectService {
         .build();
   }
 
+  @Transactional
+  public void deleteProject(Integer groupId, Integer projectId) {
+    Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+
+    // 프로젝트 유저 삭제
+    projectUserRepository.deleteByProject(project);
+
+    // 프로젝트 삭제
+    projectRepository.delete(project);
+
+    // pod 삭제
+    kubernetesUtil.deletePod(project.getContainerId());
+
+    // nginx config 삭제
+    nginxConfigUtil.deleteSubdomain(project.getContainerId());
+
+  }
 }

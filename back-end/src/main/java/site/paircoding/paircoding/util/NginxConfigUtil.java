@@ -27,7 +27,42 @@ public class NginxConfigUtil {
   private static final String NGINX_AVAILABLE_PATH = "/etc/nginx/sites-available/";
   private static final String NGINX_ENABLED_PATH = "/etc/nginx/sites-enabled/";
 
-  public void executeSshCommands(String subdomain, int nodePort) {
+  public void deleteSubdomain(String subdomain) {
+    Session session = null;
+
+    String configFileName = subdomain + ".conf"; // Nginx 설정 파일명 변환
+    String configFilePath = NGINX_AVAILABLE_PATH + configFileName;
+
+    try {
+      // SSH 연결
+      JSch jsch = new JSch();
+      session = jsch.getSession(SSH_USER, SSH_HOST, SSH_PORT);
+      session.setPassword(SSH_PASSWORD);
+      session.setConfig("StrictHostKeyChecking", "no");
+      session.connect();
+
+      // 설정 파일 삭제
+      String createConfigCommand = "rm " + configFilePath;
+      executeCommand(session, createConfigCommand);
+
+      // 심볼릭 링크 삭제
+      String linkCommand = "rm " + NGINX_ENABLED_PATH + configFileName;
+      executeCommand(session, linkCommand);
+
+      // Nginx 재시작
+      String reloadNginxCommand = "sudo nginx -s reload";
+      executeCommand(session, reloadNginxCommand);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      if (session != null) {
+        session.disconnect();
+      }
+    }
+  }
+
+  public void createSubdomain(String subdomain, int nodePort) {
     Session session = null;
 
     String configFileName = subdomain + ".conf"; // Nginx 설정 파일명 변환

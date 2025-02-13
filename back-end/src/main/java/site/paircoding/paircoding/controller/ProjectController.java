@@ -3,6 +3,7 @@ package site.paircoding.paircoding.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,4 +60,14 @@ public class ProjectController {
       @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
     return ApiResponse.success(projectService.getDetailProject(user, groupId, projectId));
   }
+
+  // 프로젝트 삭제
+  @DeleteMapping("/{projectId}")
+  @GroupRoleCheck(Role.MANAGER)
+  public ApiResponse<?> deleteProject(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
+    projectService.deleteProject(groupId, projectId);
+    return ApiResponse.success();
+  }
+
 }
