@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { useUser } from "../context/userContext";
 import Plus from "/src/assets/plus.svg";
-import cross from "/src/assets/cross.svg"
+import cross from "/src/assets/cross.svg";
+
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // 모달 속성 타입
 interface MypageProps {
     isOpen: boolean;
@@ -76,7 +80,7 @@ const MypageModal: React.FC<MypageProps> = ({
       ...prevProfile,
       username: inputValue,
     }));
-    alert('변경되었습니다!')
+    toast.success('변경되었습니다!')
     setIsEditing(false); // 편집 모드 비활성화
   };
 
@@ -95,6 +99,7 @@ const MypageModal: React.FC<MypageProps> = ({
       className="bg-white rounded-xl py-5 px-6 shadow-lg relative w-[400px]"
     >
       <div className="w-full flex flex-col">
+      <Toaster />
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">마이 페이지</h2>
           <button

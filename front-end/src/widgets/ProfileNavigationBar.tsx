@@ -15,6 +15,9 @@ import {
 } from "@heroicons/react/24/outline";
 import profileImage from "../assets/profile_image.png";
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
 // --- Redux 관련 임포트 ---
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../app/redux/store";
@@ -206,17 +209,18 @@ const ProfileNavigationBar: React.FC = () => {
       const success = await deleteGroup(groupId);
       console.log("deleteGroup 결과:", success);
       if (success) {
-        alert("그룹이 삭제되었습니다.");
+        toast.success("그룹이 삭제되었습니다.");
         // 삭제 후 최신 그룹 목록을 가져와 첫 번째 그룹으로 리다이렉트, 없으면 /nogroup
         const groupsResponse = await getGroups();
         if (groupsResponse.groups && groupsResponse.groups.length > 0) {
-          navigate(`/projectlist/${groupsResponse.groups[0].id}`);
+          window.location.href = `/projectlist/${groupsResponse.groups[0].id}`;
         } else {
-          navigate("/nogroup");
+          window.location.href = `/nogroup`;
+
         }
       }
     } catch (error) {
-      alert("그룹 삭제 중 오류가 발생했습니다.");
+      toast.error("그룹 삭제 중 오류가 발생했습니다.");
       console.error("그룹 삭제 에러:", error);
     }
   };
@@ -374,7 +378,7 @@ const ProfileNavigationBar: React.FC = () => {
                 )}
                 <div className="flex items-center justify-between flex-1 text-[#4D4650]">
                   <span className="text-base font-semibold">
-                    멤버 ({activeMemberCount}/{groupCapacity})
+                    멤버 ({activeMemberCount}/{groupUsers.length})
                   </span>
                   {(userRole === "OWNER" || userRole === "MANAGER") && (
                     <Cog6ToothIcon
@@ -394,7 +398,7 @@ const ProfileNavigationBar: React.FC = () => {
               <div
                 className="ml-10 mb-2 overflow-y-auto"
                 style={{
-                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 380px)",
+                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 450px)",
                 }}
               >
                 <ul>
