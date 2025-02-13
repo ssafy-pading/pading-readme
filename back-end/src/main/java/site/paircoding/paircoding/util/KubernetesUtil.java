@@ -39,10 +39,10 @@ public class KubernetesUtil {
   private String namespace;
 
   @Value("${kubernetes.nodeport.min}")
-  private Integer nodePortMin;
+  private int nodePortMin;
 
   @Value("${kubernetes.nodeport.max}")
-  private Integer nodePortMax;
+  private int nodePortMax;
 
   private final KubernetesClient kubernetesClient;
 
@@ -75,7 +75,7 @@ public class KubernetesUtil {
   /**
    * 사용 가능한 NodePort 반환
    */
-  private int getAvailableNodePort() {
+  public int getAvailableNodePort() {
     for (int nodePort = nodePortMin; nodePort < nodePortMax; nodePort++) {
       if (!getUsedNodePorts().contains(nodePort)) {
         return nodePort; // 사용되지 않은 포트 반환
@@ -90,7 +90,8 @@ public class KubernetesUtil {
     return podResource.get() != null;
   }
 
-  public void createPod(String podName, ProjectImage projectImage, Performance performance) {
+  public void createPod(String podName, ProjectImage projectImage, Performance performance,
+      int nodePort) {
     try {
 
       // 리소스 제한 설정
@@ -143,7 +144,7 @@ public class KubernetesUtil {
           .withProtocol("TCP")
           .withPort(projectImage.getPort()) // 서비스가 제공하는 포트
           .withTargetPort(new IntOrString(projectImage.getPort())) // 컨테이너 내부 포트
-          .withNodePort(getAvailableNodePort()) // NodePort 지정 (30000~32767 범위에서 지정 가능)
+          .withNodePort(nodePort) // NodePort 지정 (30000~32767 범위에서 지정 가능)
           .endPort()
           .addToSelector("app", podName) // 파드와 서비스 매칭
           .endSpec()
