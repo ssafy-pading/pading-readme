@@ -116,8 +116,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, isTerminalWidthChange
   return <div ref={terminalRef}
     style={{
       width: '100%',
-      // height: `${height}px`,
-      height: '95%',
+      height: `${height}px`,
       padding: "4px 8px",
       overflow: "hidden",
       scrollbarColor: "#4a5568 #2d3748",
