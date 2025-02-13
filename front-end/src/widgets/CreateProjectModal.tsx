@@ -285,7 +285,6 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     };
 
     console.log("보낼 폼 데이터:", formData);
-    toast.success("프로젝트 생성 완료");
 
     // API 호출 로직 (createProject)
       try{
@@ -299,6 +298,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         setSelectedPerformance(null);
         setSelectedMembers([]);
 
+        toast.success("프로젝트 생성 완료");
         // 완료 후 모달 닫기
         onClose();
         
