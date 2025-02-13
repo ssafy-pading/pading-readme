@@ -95,7 +95,10 @@ const LoginPage: React.FC = () => {
         }
       }catch(error){
         console.log(error);
+        setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
+    }else{
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
