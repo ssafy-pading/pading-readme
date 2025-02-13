@@ -31,6 +31,7 @@ import site.paircoding.paircoding.repository.ProjectRepository;
 import site.paircoding.paircoding.repository.ProjectUserRepository;
 import site.paircoding.paircoding.repository.UserRepository;
 import site.paircoding.paircoding.util.KubernetesUtil;
+import site.paircoding.paircoding.util.NginxConfigUtil;
 import site.paircoding.paircoding.util.RandomUtil;
 
 @Service
@@ -42,6 +43,7 @@ public class ProjectService {
   private final ProjectImageRepository projectImageRepository;
   private final PerformanceRepository performanceRepository;
   private final KubernetesUtil kubernetesUtil;
+  private final NginxConfigUtil nginxConfigUtil;
   private final ProjectRepository projectRepository;
   private final GroupUserRepository groupUserRepository;
   private final ProjectUserRepository projectUserRepository;
@@ -113,7 +115,6 @@ public class ProjectService {
         .name(request.getName())
         .containerId(podName)
         .build();
-    projectRepository.save(project);
 
     // 유효한 유저들을 필터링 (해당 유저가 그룹에 속한 유저인지 확인)
     List<ProjectUser> projectUsers = users.stream()
@@ -125,10 +126,16 @@ public class ProjectService {
         .toList();
     projectUserRepository.saveAll(projectUsers);
 
-    // 프로젝트 생성 확인 후 파드 생성 요청
-    kubernetesUtil.createPod(podName, projectImage, performance);
+    // 사용 가능한 nodePort 조회
+    project.setNodePort(kubernetesUtil.getAvailableNodePort());
 
-    return project;
+    // 프로젝트 생성 확인 후 파드 생성 요청
+    kubernetesUtil.createPod(podName, projectImage, performance, project.getNodePort());
+
+    // nginx config 파일 생성 및 reload
+    nginxConfigUtil.executeSshCommands(project.getContainerId(), project.getNodePort());
+
+    return projectRepository.save(project);
   }
 
   public Project getProject(Integer groupId, Integer projectId) {

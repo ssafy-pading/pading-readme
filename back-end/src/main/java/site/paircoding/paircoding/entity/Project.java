@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -46,6 +47,10 @@ public class Project extends BaseEntity {
 
   @Column(nullable = false)
   private String containerId;
+
+  @Setter
+  @Column(nullable = false)
+  private int nodePort;
 
   @Column(nullable = false)
   private Boolean status;
