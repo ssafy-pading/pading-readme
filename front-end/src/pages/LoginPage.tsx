@@ -72,6 +72,7 @@ const LoginPage: React.FC = () => {
   const refreshCheck = async ():Promise<void> => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
     if(localStorage.getItem("refreshToken")){
+      console.log("리프레시 토큰 이씀");
       
       // 기존 사용자 정보와 상태 초기화
       dispatch(resetUserState());
@@ -92,8 +93,8 @@ const LoginPage: React.FC = () => {
     }
   }
 
-  // 로그인 성공 시 컨텍스트에 프로필 정보를 담고 보내는 함수
-  const setProfile = async() => {
+  // 로그인 성공 시 디폴트 페이지(그룹을 순회하여 가장 낮은 id의 그룹의 프로젝트 리스트 페이지)로 이동하는 함수
+  const redirectDefault = async() => {
 
     // 기존 사용자 정보와 상태 초기화
     dispatch(resetUserState());
@@ -163,9 +164,15 @@ const LoginPage: React.FC = () => {
       if(accessToken&&refreshToken){
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-        setProfile();
+        const redirectPath = sessionStorage.getItem("redirectPath");
+        if(redirectPath){
+          sessionStorage.removeItem("redirectPath");
+          navigate(redirectPath);
+        }else{
+          redirectDefault();
+        }
       }
-    } 
+    }
     tokenCheck();
     particle();
   }, []);
