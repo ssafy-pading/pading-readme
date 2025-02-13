@@ -201,4 +201,21 @@ public class KubernetesUtil {
       throw new KubernetesClientException("Error executing command: " + command, e);
     }
   }
+
+  public void deletePod(String podName) {
+    try {
+      kubernetesClient.pods()
+          .inNamespace(namespace)
+          .withName(podName)
+          .delete();
+
+      kubernetesClient.services()
+          .inNamespace(namespace)
+          .withName(podName + "-service")
+          .delete();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
+  }
 }
