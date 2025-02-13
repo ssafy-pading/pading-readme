@@ -72,26 +72,45 @@ export type CreateProjectResponse = {
   status: string;       // 프로젝트 상태 (예: active)
   created_at: string;   // 프로젝트 생성 시간
 };
+
 // 프로젝트 상세 조회
 export type GetProjectDetailsResponse = {
-  id: number;             // 프로젝트 ID
-  name: string;           // 프로젝트 이름
-  os_id: string;          // 운영 체제 ID (예: ubuntu_20_04_lts)
-  language_id: string;    // 언어 ID (예: java)
-  performance_id: string; // 성능 레벨 ID (예: medium)
-  container_id: string;   // 컨테이너 ID
-  status: string;         // 프로젝트 상태 (예: active)
-  created_at: string;     // 프로젝트 생성 시간
-  updated_at: string;     // 프로젝트 업데이트 시간
+  project: {
+      id: number; // 프로젝트 ID
+      group: {
+          id: number; // 그룹 아이디
+          name: string; // 그룹 이름
+          capacity: number; // 그룹 정원
+      };
+      projectImage: {
+          tag: string; // OS 이름
+          language: string; // 언어 (예: java)
+          os: string; // 운영 체제 (예: ubuntu_20_04_lts)
+      };
+      performance: {
+          id: number; // 성능 id
+          cpu: string; // cpu
+          cpuDescription: string; // cpu CPU 이름
+          memory: string; // 메모리
+          memoryDescription: string; // 메모리 이름
+          storage: string; // 저장공간
+          storageDescription: string; // 저장공간 이름
+      };
+      name: string; // 프로젝트 이름
+      containerId: string; // 컨테이너 ID
+      status: boolean; // 프로젝트 상태 (예: active)
+      autoStop: boolean; // autoStop 여부
+      isDeleted: boolean; // 삭제 여부
+  };
   users: {
-      user_id: number;          // 사용자 ID
-      name: string;             // 사용자 이름
-      email: string;            // 사용자 이메일
-      role: string;             // 사용자 역할 (예: OWNER, MANAGER)
-      profile_image: string;    // 사용자 프로필 이미지 URL
-      status: boolean;          // 사용자 상태 (true: 활성, false: 비활성)
+      id: number; // 사용자 ID
+      name: string; // 사용자 이름
+      image: string | null; // 사용자 프로필 이미지 URL
+      email: string; // 사용자 이메일
+      status: boolean; // 사용자 상태 (true: 활성, false: 비활성)
   }[]; // 프로젝트 사용자 목록
 };
+
 // 프로젝트 접속
 export type AccessProjectResponse = {
   project_id: number;   // 프로젝트 ID
