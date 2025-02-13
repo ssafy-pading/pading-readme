@@ -53,6 +53,9 @@ public class Project extends BaseEntity {
   private int nodePort;
 
   @Column(nullable = false)
+  private String runCommand;
+
+  @Column(nullable = false)
   private Boolean status;
 
   @Column(nullable = false)
@@ -76,12 +79,13 @@ public class Project extends BaseEntity {
 
   @Builder
   public Project(Group group, ProjectImage projectImage, Performance performance, String name,
-      String containerId, Boolean status, Boolean autoStop, Boolean isDeleted) {
+      String containerId, String runCommand, Boolean status, Boolean autoStop, Boolean isDeleted) {
     this.group = group;
     this.projectImage = projectImage;
     this.performance = performance;
     this.name = name;
     this.containerId = containerId;
+    this.runCommand = runCommand;
     this.status = (status != null) ? status : true;
     this.autoStop = (autoStop != null) ? autoStop : false;
     this.isDeleted = (isDeleted != null) ? isDeleted : false;

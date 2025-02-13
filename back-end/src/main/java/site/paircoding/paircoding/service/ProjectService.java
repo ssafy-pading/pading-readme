@@ -111,6 +111,7 @@ public class ProjectService {
     Project project = Project.builder()
         .group(group)
         .projectImage(projectImage)
+        .runCommand(projectImage.getDefaultRunCommand())
         .performance(performance)
         .name(request.getName())
         .containerId(podName)

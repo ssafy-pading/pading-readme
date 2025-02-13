@@ -21,4 +21,8 @@ public class ProjectImage {
 
   @Column(nullable = false)
   private Integer port;
+
+  @Column(nullable = false)
+  private String defaultRunCommand;
+
 }
