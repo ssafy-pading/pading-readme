@@ -1,5 +1,5 @@
 import { fetchCpu, fetchMemory, fetchMemoryPercent } from "../api/monitoringApis";
-import { MonitoringResourceModel } from "../types/monitoringTypes";
+import { ResourceData } from "../types/monitoringTypes";
 /**
  * CPU 사용량 퍼센티지 계산 함수
  * cpuUsage: 초당 사용된 CPU 시간 (예: 0.003682554)
@@ -15,7 +15,8 @@ function calculateCpuUsagePercentage(cpuUsage: number, allocatedVCpu = 1): numbe
    */
   export const getMonitoringResource = async(
     containerId:string,
-  ): Promise<MonitoringResourceModel> => {
+    cpuName:string,
+  ): Promise<ResourceData> => {
     // API 함수 호출 (임시)
     const [cpuTime, cpuStr] = await fetchCpu(containerId);
     const [memoryTime, memoryStr] = await fetchMemory(containerId);
@@ -24,9 +25,10 @@ function calculateCpuUsagePercentage(cpuUsage: number, allocatedVCpu = 1): numbe
     // const networkData = [uploadNetworkData, downloadNetworkData];
     const [memoryPercentageTime, memoryPercentageValue] = await fetchMemoryPercent(containerId);
 
-    // CPU 값 변환 및 퍼센티지 계산 (allocated vCPU는 1로 가정)
+    // CPU 값 변환 및 퍼센티지 계산
+    const allocatedVCpu = parseFloat(cpuName);
     const cpuValue = Number(cpuStr);
-    const cpuPercentage = parseFloat(calculateCpuUsagePercentage(cpuValue, 1).toFixed(2));
+    const cpuPercentage = parseFloat(calculateCpuUsagePercentage(cpuValue, allocatedVCpu).toFixed(2));
     
     // 메모리 값 변환: 문자열(바이트) → number → 메가바이트 변환 및 소수점 2자리까지 반올림
     const memoryBytes = Number(memoryStr);

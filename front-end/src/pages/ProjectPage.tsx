@@ -28,7 +28,7 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
-import { MonitoringResourceModel } from "../features/projects/monitoring/types/monitoringTypes";
+import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 
 function ProjectPage() {
@@ -103,7 +103,7 @@ function ProjectPage() {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
     
-  const [monitoringDataList, setMonitoringDataList] = useState<MonitoringResourceModel[]>([]);
+  const [monitoringDataList, setMonitoringDataList] = useState<ResourceData[]>([]);
   const [triggerFetch, setTriggerFetch] = useState(false);
 
   useEffect(() => {
@@ -111,10 +111,9 @@ function ProjectPage() {
 
     const fetchMonitoringData = async () => {
       try {
-        const monitoringData = await getMonitoringResource(projectDetail.project.containerId);
+        const monitoringData = await getMonitoringResource(projectDetail.project.containerId, projectDetail.project.performance.cpu);
         // 이전 데이터 배열에 새 데이터를 추가 (불변성 유지)
         setMonitoringDataList((prevList) => [...prevList, monitoringData]);
-        console.log("Fetched data:", monitoringData);
       } catch (error) {
         console.error("Failed to fetch monitoring data:", error);
       }
