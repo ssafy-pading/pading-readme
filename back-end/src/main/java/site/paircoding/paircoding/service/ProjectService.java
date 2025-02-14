@@ -5,6 +5,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.paircoding.paircoding.config.AppConfig;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.Performance;
@@ -20,6 +21,7 @@ import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
 import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
+import site.paircoding.paircoding.entity.enums.LabelKey;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.global.exception.NotFoundException;
@@ -38,6 +40,7 @@ import site.paircoding.paircoding.util.RandomUtil;
 @RequiredArgsConstructor
 public class ProjectService {
 
+  private final AppConfig appConfig;
   private final UserRepository userRepository;
   private final GroupRepository groupRepository;
   private final ProjectImageRepository projectImageRepository;
@@ -131,10 +134,13 @@ public class ProjectService {
     project.setNodePort(kubernetesUtil.getAvailableNodePort());
 
     // 프로젝트 생성 확인 후 파드 생성 요청
-    kubernetesUtil.createPod(podName, projectImage, performance, project.getNodePort());
+    kubernetesUtil.createPod(group.getId(), podName, projectImage, performance,
+        project.getNodePort());
 
     // 서브도메인 설정 - nginx config 파일 생성 및 reload
-    nginxConfigUtil.createSubdomain(project.getContainerId(), project.getNodePort());
+    String subdomain = nginxConfigUtil.createSubdomain(project.getContainerId(),
+        project.getNodePort());
+    project.setDeploymentUrl(subdomain + "." + appConfig.getDomain());
 
     return projectRepository.save(project);
   }
@@ -211,7 +217,7 @@ public class ProjectService {
     projectRepository.delete(project);
 
     // pod 삭제
-    kubernetesUtil.deletePod(project.getContainerId());
+    kubernetesUtil.deletePod(LabelKey.POD_NAME, project.getContainerId());
 
     // nginx config 삭제
     nginxConfigUtil.deleteSubdomain(project.getContainerId());
