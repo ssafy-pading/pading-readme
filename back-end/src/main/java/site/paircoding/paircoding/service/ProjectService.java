@@ -5,6 +5,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import site.paircoding.paircoding.config.AppConfig;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
 import site.paircoding.paircoding.entity.Performance;
@@ -38,6 +39,7 @@ import site.paircoding.paircoding.util.RandomUtil;
 @RequiredArgsConstructor
 public class ProjectService {
 
+  private final AppConfig appConfig;
   private final UserRepository userRepository;
   private final GroupRepository groupRepository;
   private final ProjectImageRepository projectImageRepository;
@@ -134,7 +136,9 @@ public class ProjectService {
     kubernetesUtil.createPod(podName, projectImage, performance, project.getNodePort());
 
     // 서브도메인 설정 - nginx config 파일 생성 및 reload
-    nginxConfigUtil.createSubdomain(project.getContainerId(), project.getNodePort());
+    String subdomain = nginxConfigUtil.createSubdomain(project.getContainerId(),
+        project.getNodePort());
+    project.setDeploymentUrl(subdomain + "." + appConfig.getDomain());
 
     return projectRepository.save(project);
   }

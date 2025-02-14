@@ -96,7 +96,7 @@ public class NginxConfigUtil {
     channel.disconnect();
   }
 
-  public void createSubdomain(String podName, int nodePort) {
+  public String createSubdomain(String podName, int nodePort) {
     Session session = null;
 
     String subdomain = SUBDOMAIN_PREFIX + podName;
@@ -127,6 +127,8 @@ public class NginxConfigUtil {
         session.disconnect();
       }
     }
+
+    return subdomain;
   }
 
   public void deleteSubdomain(String subdomain) {

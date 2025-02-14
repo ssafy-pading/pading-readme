@@ -52,6 +52,10 @@ public class Project extends BaseEntity {
   @Column(nullable = false)
   private int nodePort;
 
+  @Setter
+  @Column(nullable = false)
+  private String deploymentUrl;
+
   @Column(nullable = false)
   private String runCommand;
 
