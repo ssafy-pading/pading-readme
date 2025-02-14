@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
-import useMypageAxios from "../shared/apis/useMypageAxios";
+import useMypageAxios from "../../../../shared/apis/useMypageAxios";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';

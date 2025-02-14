@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { NavigationProvider, useNavigation } from "../context/navigationContext";
-import GroupNavigationBar from "../widgets/GroupNavigationBar";
-import ProfileNavigationBar from "../widgets/ProfileNavigationBar";
-import CustomSelect, { Option } from "../widgets/CustomSelect";
+import GroupNavigationBar from "../features/navigationbar/components/GroupNavigationBar";
+import ProfileNavigationBar from "../features/navigationbar/components/ProfileNavigationBar";
+import CustomSelect, { Option } from "../features/groups/widgets/components/CustomSelect";
 import "../assets/css/CustomSelect.css";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";

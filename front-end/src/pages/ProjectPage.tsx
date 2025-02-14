@@ -6,16 +6,16 @@ import { VscChromeClose, VscAdd } from "react-icons/vsc";
 import { ProjectEditorProvider } from "../context/ProjectEditorContext"; // useContext
 
 // Widgets
-import ProjectLeaveButton from "../features/projects/ProjectLeaveButton";
-import ParticipantsButton from "../features/projects/ProjectParticipants";
-import MuteButton from "../features/projects/ProjectMuteButton";
-import CamButton from "../features/projects/ProjectCameraButton";
+import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
+import ParticipantsButton from "../features/projects/projectpage/widgets/buttons/ProjectParticipants";
+import MuteButton from "../features/projects/projectpage/widgets/buttons/ProjectMuteButton";
+import CamButton from "../features/projects/projectpage/widgets/buttons/ProjectCameraButton";
 
 // Projects
-import ProjectEditor from "../features/projects/ProjectEditor";
-import ProjectTerminal from "../features/projects/ProjectTerminal";
-import FileExplorer from "../features/projects/FileExplorer";
-import RightContentsContainer from "../features/projects/RightContents";
+import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
+import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
+import FileExplorer from "../features/projects/fileexplorer/components";
+import RightContentsContainer from "../features/projects/videochat";
 
 // Css
 import "react-resizable/css/styles.css";

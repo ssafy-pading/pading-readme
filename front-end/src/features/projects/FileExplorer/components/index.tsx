@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
-import { dummyFileSystem } from "./api/folderData";
-import Folder from "./ui/Folder";
-import useTraverseTree from "./model/useTraverseTree";
+import { dummyFileSystem } from "../api/folderData";
+import Folder from "../widgets/Folder";
+import useTraverseTree from "../model/useTraverseTree";
 
-import { FileType, FileNode } from "./type/directoryTypes";
+import { FileType, FileNode } from "../type/directoryTypes";
 
 function FileExplorer() {
     const [explorerData, setExplorerData] = useState<FileNode>(dummyFileSystem);
