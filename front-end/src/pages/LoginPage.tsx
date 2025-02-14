@@ -5,7 +5,7 @@
 
 // src/pages/LoginPage.tsx
 import React, { useEffect, useState } from 'react';
-import TxtRotate from '../widgets/TxtRotate';
+import TxtRotate from '../app/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
 import { useNavigate } from 'react-router-dom';
 import useGroupAxios from '../shared/apis/useGroupAxios';
@@ -19,7 +19,7 @@ import type { AppDispatch } from '../app/redux/store';
 import { Toaster, toast } from 'react-hot-toast';
 
 // 스피너
-import ProjectSpinner from "../widgets/spinners/ProjectSpinner";
+import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 declare global {
   interface Window {

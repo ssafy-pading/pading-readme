@@ -3,13 +3,13 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import paperPlane from '/src/assets/paper-plane 1.svg';
 import profileImage from "../assets/profile_image.png";
-import { getChatMessages } from '../shared/apis/chatApi';
+import { getChatMessages } from '../../../../../shared/apis/chatApi';
 // import { useUser } from '../context/userContext';
 
 // redux 초기 import 
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserInfo } from '../app/redux/user';
-import type { RootState, AppDispatch } from '../app/redux/store';
+import { fetchUserInfo } from '../../../../../app/redux/user';
+import type { RootState, AppDispatch } from '../../../../../app/redux/store';
 
 
 interface ChatMessage {

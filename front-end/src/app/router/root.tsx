@@ -5,7 +5,7 @@ import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
 
 import { UserProvider } from "../../context/userContext"; // 경로에 맞게 수정
 
-import ProjectSpinner from "../../widgets/spinners/ProjectSpinner";
+import ProjectSpinner from "../../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 const Loading = <div>로딩중입니다...</div>
 

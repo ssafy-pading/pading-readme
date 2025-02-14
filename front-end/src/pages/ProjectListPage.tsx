@@ -5,9 +5,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 // 컴포넌트 import
 import { GetProjectListResponse, ProjectListItem } from '../shared/types/projectApiResponse';
 import ProjectCard from '../widgets/ProjectCard';
-import GroupNavigationBar from '../widgets/GroupNavigationBar';
-import ProfileNavigationBar from '../widgets/ProfileNavigationBar';
-import DeleteConfirmModal from '../widgets/DeleteConfirmModal';
+import GroupNavigationBar from '../features/navigationbar/components/GroupNavigationBar';
+import ProfileNavigationBar from '../features/navigationbar/components/ProfileNavigationBar';
+import DeleteConfirmModal from '../features/groups/widgets/modals/DeleteConfirmModal';
 import ProjectCreateModal from '../widgets/CreateProjectModal';
 import { NavigationProvider, useNavigation } from '../context/navigationContext';
 import useGroupAxios from '../shared/apis/useGroupAxios';

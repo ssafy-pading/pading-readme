@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import OpenViduComponent from './VideoConference/ui/OpenViduComponent';
-import ChatRoom from '../../../widgets/ChatListComponents';
+import OpenViduComponent from './widgets/OpenViduComponent';
+import ChatRoom from './widgets/components/ChatListComponents';
 
 function RightContentsContainer(){
     const [isChatOpen, setIsChatOpen] = useState<boolean>(true);

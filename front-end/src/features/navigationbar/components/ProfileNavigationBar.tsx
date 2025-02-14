@@ -1,7 +1,7 @@
 // ProfileNavigationBar.tsx
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useNavigation } from "../context/navigationContext";
+import { useNavigation } from "../../../context/navigationContext";
 // heroicons 아이콘 임포트
 import { 
   ChevronUpIcon, 
@@ -20,18 +20,18 @@ import { Toaster, toast } from 'react-hot-toast';
 
 // --- Redux 관련 임포트 ---
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState, AppDispatch } from "../app/redux/store";
-import { fetchUserInfo } from "../app/redux/user";
+import type { RootState, AppDispatch } from "../../../app/redux/store";
+import { fetchUserInfo } from "../../../app/redux/user";
 
 // --- 커스텀 훅 임포트 ---
-import useGroupAxios from "../shared/apis/useGroupAxios"; 
-import useProjectAxios from "../shared/apis/useProjectAxios";
-import MyPageModal from "../widgets/MypageModal";
-import useMypageAxios from "../shared/apis/useMypageAxios";
-import LeaveModal from "./UserLeaveModal";
-import PictureModal from "./PictureChangeModal";
-import GroupUpdateNameModal from "./GroupUpdateNameModal";
-import { GetProjectListResponse } from "../shared/types/projectApiResponse";
+import useGroupAxios from "../../../shared/apis/useGroupAxios"; 
+import useProjectAxios from "../../../shared/apis/useProjectAxios";
+import MyPageModal from "../../users/widgets/modals/MypageModal";
+import useMypageAxios from "../../../shared/apis/useMypageAxios";
+import LeaveModal from "../../users/widgets/modals/UserLeaveModal";
+import PictureModal from "../../users/widgets/modals/PictureChangeModal";
+import GroupUpdateNameModal from "../../widgets/GroupUpdateNameModal";
+import { GetProjectListResponse } from "../../../shared/types/projectApiResponse";
 
 interface GroupUser {
   id: number;

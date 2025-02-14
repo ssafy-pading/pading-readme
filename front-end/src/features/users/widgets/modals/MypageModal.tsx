@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
-import { useUser } from "../context/userContext";
+import { useUser } from "../../../../context/userContext";
 import Plus from "/src/assets/plus.svg";
 import cross from "/src/assets/cross.svg";
 
