@@ -7,12 +7,12 @@ import { Client, IMessage } from '@stomp/stompjs';
 
 interface WebTerminalProps {
   height?: number;
-  widthChange?: boolean;
+  isTerminalWidthChange?: boolean;
   groupId?: string;
   projectId?: string;
 }
 
-const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId, projectId }) => {
+const WebTerminal: React.FC<WebTerminalProps> = ({ height, isTerminalWidthChange, groupId, projectId }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const term = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
@@ -111,7 +111,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, widthChange, groupId,
         });
       }
     }, 100);
-  }, [height, widthChange]);
+  }, [height, isTerminalWidthChange]);
   
   return <div ref={terminalRef}
     style={{
