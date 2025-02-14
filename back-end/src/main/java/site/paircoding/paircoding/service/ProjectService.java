@@ -21,6 +21,7 @@ import site.paircoding.paircoding.entity.dto.ProjectOSDto;
 import site.paircoding.paircoding.entity.dto.ProjectPerformanceDto;
 import site.paircoding.paircoding.entity.dto.ProjectUserDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
+import site.paircoding.paircoding.entity.enums.LabelKey;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 import site.paircoding.paircoding.global.exception.NotFoundException;
@@ -133,7 +134,8 @@ public class ProjectService {
     project.setNodePort(kubernetesUtil.getAvailableNodePort());
 
     // 프로젝트 생성 확인 후 파드 생성 요청
-    kubernetesUtil.createPod(podName, projectImage, performance, project.getNodePort());
+    kubernetesUtil.createPod(group.getId(), podName, projectImage, performance,
+        project.getNodePort());
 
     // 서브도메인 설정 - nginx config 파일 생성 및 reload
     String subdomain = nginxConfigUtil.createSubdomain(project.getContainerId(),
@@ -215,7 +217,7 @@ public class ProjectService {
     projectRepository.delete(project);
 
     // pod 삭제
-    kubernetesUtil.deletePod(project.getContainerId());
+    kubernetesUtil.deletePod(LabelKey.POD_NAME, project.getContainerId());
 
     // nginx config 삭제
     nginxConfigUtil.deleteSubdomain(project.getContainerId());

@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import site.paircoding.paircoding.entity.Performance;
 import site.paircoding.paircoding.entity.ProjectImage;
+import site.paircoding.paircoding.entity.enums.LabelKey;
 import site.paircoding.paircoding.global.exception.BadRequestException;
 
 @Component
@@ -37,6 +38,9 @@ public class KubernetesUtil {
 
   @Value("${kubernetes.namespace}")
   private String namespace;
+
+  @Value("${kubernetes.env-label}")
+  private String ENV_LABEL;
 
   @Value("${kubernetes.nodeport.min}")
   private int nodePortMin;
@@ -90,9 +94,12 @@ public class KubernetesUtil {
     return podResource.get() != null;
   }
 
-  public void createPod(String podName, ProjectImage projectImage, Performance performance,
+  public void createPod(int groupId, String podName, ProjectImage projectImage,
+      Performance performance,
       int nodePort) {
     try {
+
+      // pv, pvc 생성 with label
 
       // 리소스 제한 설정
       ResourceRequirements resources = new ResourceRequirementsBuilder()
@@ -116,7 +123,9 @@ public class KubernetesUtil {
           .withNewMetadata()
           .withName(podName)
           .withNamespace(namespace)
-          .addToLabels("app", podName)
+          .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
+          .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
+          .addToLabels(LabelKey.POD_NAME.getKey(), podName)
           .endMetadata()
           .withNewSpec()
           .withContainers(container)
@@ -126,17 +135,14 @@ public class KubernetesUtil {
       // 파드 생성
       kubernetesClient.pods().inNamespace(namespace).create(pod);
 
-      /**
-       * nodeport 포트 번호 관리 - 기존 svc 조회 후 안쓰는 포트 사용
-       * 이미지에 따라 포트 번호 지정
-       *
-       */
-
       // NodePort 방식의 서비스 생성
       Service service = new ServiceBuilder()
           .withNewMetadata()
           .withName(podName + "-service")
           .withNamespace(namespace)
+          .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
+          .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
+          .addToLabels(LabelKey.POD_NAME.getKey(), podName)
           .endMetadata()
           .withNewSpec()
           .withType("NodePort")
@@ -146,17 +152,34 @@ public class KubernetesUtil {
           .withTargetPort(new IntOrString(projectImage.getPort())) // 컨테이너 내부 포트
           .withNodePort(nodePort) // NodePort 지정 (30000~32767 범위에서 지정 가능)
           .endPort()
-          .addToSelector("app", podName) // 파드와 서비스 매칭
+          .addToSelector(LabelKey.POD_NAME.getKey(), podName) // 파드와 서비스 매칭
           .endSpec()
           .build();
 
       // 서비스 생성
       kubernetesClient.services().inNamespace(namespace).create(service);
 
-
     } catch (KubernetesClientException e) {
       e.printStackTrace();
       throw new BadRequestException("잠시 후 다시 요청해주세요.");
+    }
+  }
+
+  public void deletePod(LabelKey labelKey, String labelValue) {
+    try {
+
+      kubernetesClient.pods()
+          .inNamespace(namespace)
+          .withLabel(labelKey.getKey(), labelValue)
+          .delete();
+
+      kubernetesClient.services()
+          .inNamespace(namespace)
+          .withLabel(labelKey.getKey(), labelValue)
+          .delete();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     }
   }
 
@@ -199,23 +222,6 @@ public class KubernetesUtil {
     } catch (Exception e) {
       Thread.currentThread().interrupt();
       throw new KubernetesClientException("Error executing command: " + command, e);
-    }
-  }
-
-  public void deletePod(String podName) {
-    try {
-      kubernetesClient.pods()
-          .inNamespace(namespace)
-          .withName(podName)
-          .delete();
-
-      kubernetesClient.services()
-          .inNamespace(namespace)
-          .withName(podName + "-service")
-          .delete();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
     }
   }
 }
