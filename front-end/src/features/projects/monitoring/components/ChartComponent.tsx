@@ -36,7 +36,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, newData }) => {
     }
   }, [newData]);
 
-  const latestData = data[data.length - 1] || { percentage: 0, value: 0 };
+  const latestData = data.length > 0 ? data[data.length - 1] : { percentage: 0, value: 0 };
 
   return (
     <div className="w-full h-[300px] bg-[#212426] p-4 rounded-md relative">
@@ -51,17 +51,13 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, newData }) => {
           <XAxis
             dataKey="time"
             tickFormatter={(time) => {
-                const parts = time.split(':'); // HH:MM:SS 형식 분할
-                if (parts.length === 3) {
-                  return `${parts[1]}:${parts[2]}`; // MM:SS 형식 반환
-                }
-                return time; // 형식이 다를 경우 원래 값 반환
-              }}
-              
+              const parts = time.split(':');
+              return parts.length === 3 ? `${parts[1]}:${parts[2]}` : time;
+            }}
             axisLine={false}
             tickLine={false}
           />
-          <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} axisLine={false} tick={true} />
+          <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} axisLine={false} tick={false} />
           <Tooltip contentStyle={{ backgroundColor: '#333', borderColor: '#333' }} />
           <Area type="monotone" dataKey="percentage" stroke="#82ca9d" fill="rgba(130, 202, 157, 0.3)" />
           <Line type="monotone" dataKey="percentage" stroke="#82ca9d" strokeWidth={2} dot={false} />
@@ -69,6 +65,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, newData }) => {
       </ResponsiveContainer>
     </div>
   );
+
 };
 
 export default ChartComponent;
