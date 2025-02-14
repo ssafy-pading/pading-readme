@@ -48,7 +48,7 @@ public class OAuth2MemberSuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     // 리다이렉트 전략을 사용하여 리다이렉트할 수 있습니다. (주석 처리됨)
     URI uri = UriComponentsBuilder
-        .fromUriString("http://" + appConfig.getDomain())
+        .fromUriString(appConfig.getLOGIN_REDIRECT_DOMAIN())
         .queryParams(queryParams)
         .build()
         .toUri();
