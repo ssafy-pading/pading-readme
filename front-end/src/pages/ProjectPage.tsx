@@ -1,5 +1,5 @@
 // React
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
@@ -42,12 +42,12 @@ function ProjectPage() {
   const [deployedLink, setDeployedLink] = useState<string>("");
 
   // Project Information
-  const [projectDetail, setprojectDetail] = useState<GetProjectDetailsResponse | null>(null);
+  const [projectDetail, setProjectDetail] = useState<GetProjectDetailsResponse | null>(null);
   useEffect(() => {
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
         setDeployedLink(`http://${response.project.containerId}.pading.site`);
-        setprojectDetail(response);
+        setProjectDetail(response);
       })
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
@@ -103,31 +103,39 @@ function ProjectPage() {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
     
-    const monitoringDataListRef = useRef<MonitoringResourceModel[]>([]);
+  const [monitoringDataList, setMonitoringDataList] = useState<MonitoringResourceModel[]>([]);
+  const [triggerFetch, setTriggerFetch] = useState(false);
 
-    useEffect(() => {
-      let isMounted = true;
+  useEffect(() => {
+    if (!projectDetail?.project?.containerId) return;
+
+    const fetchMonitoringData = async () => {
+      try {
+        const monitoringData = await getMonitoringResource(projectDetail.project.containerId);
+        // 이전 데이터 배열에 새 데이터를 추가 (불변성 유지)
+        setMonitoringDataList((prevList) => [...prevList, monitoringData]);
+        console.log("Fetched data:", monitoringData);
+      } catch (error) {
+        console.error("Failed to fetch monitoring data:", error);
+      }
+    };
+
+    fetchMonitoringData(); // 첫 호출
+    const intervalId = setInterval(fetchMonitoringData, 5000); // 5초마다 호출
+
+    return () => clearInterval(intervalId); // 언마운트 시 정리
+  }, [triggerFetch]);
+
+  // 예시: 특정 조건이 만족되면 triggerFetch 변경 (projectDetail.containerId가 변경될 때)
+  useEffect(() => {
+    if (projectDetail?.project?.containerId) {
+      setTriggerFetch((prev) => !prev);
+    }
+  }, [projectDetail?.project?.containerId]);
+
     
-      const fetchMonitoringData = async () => {
-        if (!isMounted || projectDetail === null) return;
     
-        try {
-          const monitoringData = await getMonitoringResource(projectDetail.project.containerId);
-          monitoringDataListRef.current.push(monitoringData);
-        } catch (error) {
-          console.error('Failed to fetch monitoring data:', error);
-        }
     
-        // 5초 후에 다시 호출
-        setTimeout(fetchMonitoringData, 10000);
-      };
-    
-      fetchMonitoringData(); // 첫 호출
-    
-      return () => {
-        isMounted = false; // 언마운트 시 플래그 변경
-      };
-    }, [projectDetail]);
   {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
@@ -194,7 +202,7 @@ function ProjectPage() {
               <div className="w-full overflow-x-hidden">
                 {/* 리소스 모니터링 바 */}
                 <ResourceMonitorBar 
-                  monitoringDataListRef={monitoringDataListRef}
+                  monitoringDataList={monitoringDataList}
                 />
               </div>
             </div>
