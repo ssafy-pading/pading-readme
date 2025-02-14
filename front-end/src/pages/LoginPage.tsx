@@ -4,7 +4,7 @@
 // 3. 1, 2번 처리 후 context에 프로필도 넣어줘야 함
 
 // src/pages/LoginPage.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TxtRotate from '../widgets/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,9 @@ import type { AppDispatch } from '../app/redux/store';
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+
+// 스피너
+import ProjectSpinner from "../widgets/spinners/ProjectSpinner";
 
 declare global {
   interface Window {
@@ -60,6 +63,10 @@ interface ParticlesOptions {
 const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuthAxios();
   const { getGroups } = useGroupAxios();
+
+  // 스피너 체크
+  const [isLoading, setIsLoading] = useState(true);
+  
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
 
@@ -89,7 +96,10 @@ const LoginPage: React.FC = () => {
         }
       }catch(error){
         console.log(error);
+        setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
+    }else{
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
@@ -110,6 +120,7 @@ const LoginPage: React.FC = () => {
       }
     }catch(error){
       console.log(error);
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
@@ -175,7 +186,7 @@ const LoginPage: React.FC = () => {
     }
     tokenCheck();
     particle();
-  }, []);
+  }, [isLoading]);
 
   const googleLoginClick = async () => {
     try{
@@ -186,6 +197,9 @@ const LoginPage: React.FC = () => {
     }
   }
 
+  if (isLoading) {
+    return <ProjectSpinner />
+  }
   return (
     <div className="flex h-screen bg-gray-900">
       <Toaster />
