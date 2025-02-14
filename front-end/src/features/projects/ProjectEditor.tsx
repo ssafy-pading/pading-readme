@@ -31,7 +31,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
       ws.current.onopen = () => {
-        console.log("✅ WebSocket Connected");
+        console.log("✅ YJS WebSocket Connected");
         ws.current?.send(
           JSON.stringify({
             type: "subscribe",
@@ -39,7 +39,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
           })
         );
       };
-      ws.current.onclose = () => console.log("❌ WebSocket Disconnected");
+      ws.current.onclose = () => console.log("❌ YJS WebSocket Disconnected");
       // 웹소켓 서버의 바이너리 코드 받기기
       ws.current.onmessage = async (event) => {
         try {

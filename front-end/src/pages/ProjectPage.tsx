@@ -26,21 +26,23 @@ import useProjectAxios from "../shared/apis/useProjectAxios";
 
 function ProjectPage() {
   // Props
-  const { groupId, projectId } = useParams<{ groupId?: string; projectId?: string; }>();
-  const { getProjectDetails } = useProjectAxios()
+  const { groupId, projectId } = useParams<{
+    groupId?: string;
+    projectId?: string;
+  }>();
+  const { getProjectDetails } = useProjectAxios();
 
   // Project Information
-  const [projectDetail, setprojectDetail] = useState<object | any>(null)
-  useEffect(() =>  {
-      getProjectDetails(Number(groupId), Number(projectId))
-      .then(response => {
-        setprojectDetail(response)
-      })         
-      .catch(error => {
-        console.error("프로젝트 상세 정보 호출 오류: ", error);
+  const [projectDetail, setprojectDetail] = useState<object | any>(null);
+  useEffect(() => {
+    getProjectDetails(Number(groupId), Number(projectId))
+      .then((response) => {
+        setprojectDetail(response);
       })
-  },
-    [groupId, projectId, getProjectDetails]);
+      .catch((error) => {
+        console.error("프로젝트 상세 정보 호출 오류: ", error);
+      });
+  }, [groupId, projectId, getProjectDetails]);
 
   // Chat
   const [isChatOpen, setIsChatOpen] = useState(true);
@@ -48,38 +50,39 @@ function ProjectPage() {
   // Resize
   const [isVerticalDragging, setIsVerticalDragging] = useState(false); // 드래그 상태 관리
   const [isHorizontalDragging, setIsHorizontalDragging] = useState(false); // 드래그 상태 관리
+  const [terminalHeight, setTerminalHeight] = useState(250); // 터미널 높이 상태 관리
+  const [isTerminalWidthChange, setisTerminalWidthChange] =
+    useState<boolean>(true); // 터미널 너비 상태 관리
 
   {
     /*//////////////////////////////// Terminal State or Function  ////////////////////////////////////////*/
   }
-  const [terminalHeight, setTerminalHeight] = useState(250); // 터미널 높이 상태 관리
-  const [isTerminalWidthChange, setisTerminalWidthChange] =
-    useState<boolean>(true); // 터미널 너비 상태 관리
+  // 터미널 상태 (터미널 id 배열로 관리)
+  const [terminalIds, setTerminalIds] = useState<number[]>([0]);
   const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
 
-  // 터미널 목록
-  const [terminals, setTerminals] = useState([
-    <ProjectTerminal height={terminalHeight} key={0} />,
-  ]); // 터미널 리스트
-
   // 터미널 생성
-  const addNewTerminal = () => {
-    setTerminals([...terminals, <ProjectTerminal key={terminals.length} />]);
-    setActiveTerminal(terminals.length);
-  };
+const addNewTerminal = () => {
+  setTerminalIds((prev) => {
+    const newIds = [...prev, prev.length];
+    setActiveTerminal(newIds.length - 1);
+    return newIds;
+  });
+};
 
-  // 터미널 삭제
-  const deleteTerminal = (index: number) => {
-    if (terminals.length === 1) return;
-    const updatedTerminals = terminals.filter((_, i) => i !== index);
-
-    setTerminals(updatedTerminals);
-    if (activeTerminal >= updatedTerminals.length) {
-      setActiveTerminal(updatedTerminals.length - 1);
-    }
-  };
+// 터미널 삭제
+const deleteTerminal = (index: number) => {
+  setTerminalIds((prev) => {
+    if (prev.length === 1) return prev; // 하나밖에 없으면 삭제하지 않음
+    const newIds = prev.filter((_, i) => i !== index);
+    setActiveTerminal((prevActive) =>
+      prevActive >= newIds.length ? newIds.length - 1 : prevActive
+    );
+    return newIds;
+  });
+};
   {
-    /*//////////////////////////////// 터미널 변수, 함수  ////////////////////////////////////////*/
+    /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
   }
   return (
     <ProjectEditorProvider>
@@ -87,7 +90,9 @@ function ProjectPage() {
         {/* 네비게이션 바 */}
         <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
           <div className="flex items-center h-[25px] text-white text-sm">
-            <p className="font-semibold text-center">{projectDetail?.project?.name}</p>
+            <p className="font-semibold text-center">
+              {projectDetail?.project?.name}
+            </p>
           </div>
           <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
@@ -185,10 +190,9 @@ function ProjectPage() {
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
                       <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none">
-                        {terminals.map((_, index) => (
-                          <div className="flex flex-row items-center">
+                        {terminalIds.map((id, index) => (
+                          <div key={id} className="flex flex-row items-center">
                             <div
-                              key={index}
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                                 activeTerminal === index
                                   ? "border-b-2 border-b-[#3B82F6] text-white"
@@ -196,9 +200,9 @@ function ProjectPage() {
                               }  cursor-pointer`}
                               onClick={() => setActiveTerminal(index)}
                             >
-                              Terminal
+                              Terminal ({id + 1})
                             </div>
-                            {terminals.length > 1 && (
+                            {terminalIds.length > 1 && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -219,6 +223,7 @@ function ProjectPage() {
                           onClick={() => {
                             addNewTerminal();
                             setActiveTerminal(terminals.length); // 새로 추가된 터미널로 포커싱
+                            
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
                           title="Add new terminal"
@@ -231,14 +236,23 @@ function ProjectPage() {
 
                     {/* 터미널 화면 */}
                     <div className="flex-1 w-full h-[calc(100%-30px)] bg-[#141617] relative">
-                      {/* {terminals[activeTerminal]} */}
-                      <ProjectTerminal
-                        height={terminalHeight - 30}
-                        isTerminalWidthChange={isTerminalWidthChange}
-                        key={activeTerminal}
-                        groupId={groupId}
-                        projectId={projectId}
-                      />
+                      {terminalIds.map((id, index) => (
+                        <div
+                          key={id}
+                          style={{
+                            display:
+                              activeTerminal === index ? "block" : "none",
+                          }}
+                        >
+                          <ProjectTerminal
+                            height={terminalHeight - 30}
+                            isTerminalWidthChange={isTerminalWidthChange}
+                            groupId={groupId}
+                            projectId={projectId}
+                            // 필요하다면 각 터미널에 id 또는 기타 props 전달
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </ResizableBox>
