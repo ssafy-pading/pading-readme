@@ -163,7 +163,7 @@ function ProjectPage() {
               </div>
               {/* 코드 편집기 자리 */}
               <div className="flex-1 w-full bg-[#212426] overflow-hidden">
-                {false ? (
+                {ProjectEditor ? (
                   <ProjectEditor groupId={groupId} projectId={projectId} />
                 ) : (
                   <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
