@@ -19,7 +19,7 @@ import RightContentsContainer from "../features/projects/videochat";
 
 // Css
 import "react-resizable/css/styles.css";
-import "../features/projects/projectpage/css/ProjectPage.css"
+import "../features/projects/projectpage/css/ProjectPage.css";
 
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
@@ -33,13 +33,13 @@ function ProjectPage() {
   }>();
   const { getProjectDetails } = useProjectAxios();
   // 배포 링크 주소
-  const [deployedLink, setDeployedLink] = useState<string>("")
+  const [deployedLink, setDeployedLink] = useState<string>("");
 
-// Project Information
-const [projectDetail, setprojectDetail] = useState<object | null>(null);
-useEffect(() => {
-  getProjectDetails(Number(groupId), Number(projectId))
-  .then((response) => {
+  // Project Information
+  const [projectDetail, setprojectDetail] = useState<object | null>(null);
+  useEffect(() => {
+    getProjectDetails(Number(groupId), Number(projectId))
+      .then((response) => {
         setDeployedLink(`http://${response.project.containerId}.pading.site`);
         setprojectDetail(response);
       })
@@ -64,28 +64,30 @@ useEffect(() => {
   // 터미널 상태 (터미널 id 배열로 관리)
   const [terminalIds, setTerminalIds] = useState<number[]>([0]);
   const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
-
+  const [nextTerminalId, setNextTerminalId] = useState(1);
   // 터미널 생성
-const addNewTerminal = () => {
-  setTerminalIds((prev) => {
-    const newIds = [...prev, prev.length];
-    setActiveTerminal(newIds.length - 1);
-    return newIds;
-  });
-};
+  const addNewTerminal = () => {
+    setTerminalIds((prev) => {
+      const newTerminalIds = [...prev, nextTerminalId];
+      setActiveTerminal(newTerminalIds.length - 1);
+      return newTerminalIds;
+    });
+    setNextTerminalId((prev) => prev + 1);
+  };
 
-// 터미널 삭제
-const deleteTerminal = (index: number) => {
-  setTerminalIds((prev) => {
-    if (prev.length === 1) return prev; // 하나밖에 없으면 삭제하지 않음
-    const newIds = prev.filter((_, i) => i !== index);
-    setActiveTerminal((prevActive) =>
-      prevActive >= newIds.length ? newIds.length - 1 : prevActive
-    );
-    return newIds;
-  });
-};
-
+  // 터미널 삭제
+  const deleteTerminal = (index: number) => {
+    setTerminalIds((prev) => {
+      if (prev.length === 1) return prev; // 하나밖에 없으면 삭제하지 않음
+      const newTerminalIds = prev.filter((_, i) => i !== index);
+      setActiveTerminal((prevActive) =>
+        prevActive >= newTerminalIds.length
+          ? newTerminalIds.length - 1
+          : prevActive
+      );
+      return newTerminalIds;
+    });
+  };
 
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
@@ -101,7 +103,7 @@ const deleteTerminal = (index: number) => {
             </p>
           </div>
           <div className="flex">
-              <DeployedLinkButton link={deployedLink} />
+            <DeployedLinkButton link={deployedLink} />
           </div>
           <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
@@ -233,7 +235,6 @@ const deleteTerminal = (index: number) => {
                           onClick={() => {
                             addNewTerminal();
                             setActiveTerminal(terminalIds.length); // 새로 추가된 터미널로 포커싱
-                          
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
                           title="Add new terminal"
