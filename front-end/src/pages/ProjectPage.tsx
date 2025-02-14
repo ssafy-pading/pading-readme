@@ -256,7 +256,7 @@ function ProjectPage() {
                           }}
                         >
                           <ProjectTerminal
-                            active={activeTerminal === id}
+                            active={activeTerminal === index}
                             height={terminalHeight - 30}
                             isTerminalWidthChange={isTerminalWidthChange}
                             groupId={groupId}
