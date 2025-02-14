@@ -19,10 +19,11 @@ import RightContentsContainer from "../features/projects/videochat";
 
 // Css
 import "react-resizable/css/styles.css";
-import "../assets/css/ProjectPage.css";
+import "../features/projects/projectpage/css/ProjectPage.css"
 
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
+import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
 
 function ProjectPage() {
   // Props
@@ -31,12 +32,15 @@ function ProjectPage() {
     projectId?: string;
   }>();
   const { getProjectDetails } = useProjectAxios();
+  // 배포 링크 주소
+  const [deployedLink, setDeployedLink] = useState<string>("")
 
-  // Project Information
-  const [projectDetail, setprojectDetail] = useState<object | any>(null);
-  useEffect(() => {
-    getProjectDetails(Number(groupId), Number(projectId))
-      .then((response) => {
+// Project Information
+const [projectDetail, setprojectDetail] = useState<object | null>(null);
+useEffect(() => {
+  getProjectDetails(Number(groupId), Number(projectId))
+  .then((response) => {
+        setDeployedLink(`http://${response.project.containerId}.pading.site`);
         setprojectDetail(response);
       })
       .catch((error) => {
@@ -81,6 +85,8 @@ const deleteTerminal = (index: number) => {
     return newIds;
   });
 };
+
+
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
   }
@@ -94,10 +100,14 @@ const deleteTerminal = (index: number) => {
               {projectDetail?.project?.name}
             </p>
           </div>
+          <div className="flex">
+              <DeployedLinkButton link={deployedLink} />
+          </div>
           <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
               <ParticipantsButton />
             </div>
+            {/* 버튼 */}
             <div className="flex items-center justify-center gap-4 mr-16">
               <MuteButton />
               <CamButton />

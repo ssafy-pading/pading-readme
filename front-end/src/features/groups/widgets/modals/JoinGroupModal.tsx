@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
-import useGroupAxios from "../shared/apis/useGroupAxios";
-import { JoinGroupResponse } from "../shared/types/groupApiResponse";
 import { RxCross2 } from "react-icons/rx";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import useGroupAxios from "../../../../shared/apis/useGroupAxios";
+import { JoinGroupResponse } from "../../../../shared/types/groupApiResponse";
 
 Modal.setAppElement("#root");
 

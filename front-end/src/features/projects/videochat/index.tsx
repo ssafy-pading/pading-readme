@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import OpenViduComponent from './widgets/OpenViduComponent';
+import OpenViduComponent from './widgets/components/OpenViduComponent';
 import ChatRoom from './widgets/components/ChatListComponents';
 
 function RightContentsContainer(){

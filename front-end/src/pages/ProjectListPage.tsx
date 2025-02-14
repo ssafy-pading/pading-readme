@@ -4,15 +4,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 // 컴포넌트 import
 import { GetProjectListResponse, ProjectListItem } from '../shared/types/projectApiResponse';
-import ProjectCard from '../widgets/ProjectCard';
 import GroupNavigationBar from '../features/navigationbar/components/GroupNavigationBar';
 import ProfileNavigationBar from '../features/navigationbar/components/ProfileNavigationBar';
 import DeleteConfirmModal from '../features/groups/widgets/modals/DeleteConfirmModal';
-import ProjectCreateModal from '../widgets/CreateProjectModal';
 import { NavigationProvider, useNavigation } from '../context/navigationContext';
 import useGroupAxios from '../shared/apis/useGroupAxios';
 import useProjectAxios from '../shared/apis/useProjectAxios';
-import InviteLink from '../widgets/CreateLinkComponents';
 import { FaPlus } from 'react-icons/fa';
 
 // 토스트
@@ -22,6 +19,9 @@ import { Toaster, toast } from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../app/redux/store';
 import { fetchUserInfo } from '../app/redux/user';
+import ProjectCard from '../features/groups/widgets/components/ProjectCard';
+import InviteLink from '../features/groups/widgets/components/CreateLinkComponents';
+import ProjectCreateModal from '../features/groups/widgets/modals/CreateProjectModal';
 
 // 타입 정의
 export type Project = ProjectListItem['project'];

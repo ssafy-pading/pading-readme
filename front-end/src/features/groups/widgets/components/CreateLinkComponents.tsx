@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { FaRegCopy } from "react-icons/fa6";
-import useGroupAxios from '../shared/apis/useGroupAxios';
 // import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Toaster, toast } from 'react-hot-toast';
+import useGroupAxios from '../../../../shared/apis/useGroupAxios';
 
 interface InviteLinkProps {
   groupId: number;
