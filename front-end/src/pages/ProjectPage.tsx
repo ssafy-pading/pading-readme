@@ -24,6 +24,8 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
+import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
+import RunButton from "../features/projects/editorterminal/widgets/buttons/RunButton";
 
 function ProjectPage() {
   // Props
@@ -35,12 +37,13 @@ function ProjectPage() {
   // 배포 링크 주소
   const [deployedLink, setDeployedLink] = useState<string>("");
 
-  // Project Information
-  const [projectDetail, setprojectDetail] = useState<object | null>(null);
-  useEffect(() => {
-    getProjectDetails(Number(groupId), Number(projectId))
-      .then((response) => {
-        setDeployedLink(`http://${response.project.containerId}.pading.site`);
+// Project Information
+const [projectDetail, setprojectDetail] = useState<GetProjectDetailsResponse | null>(null);
+useEffect(() => {
+  getProjectDetails(Number(groupId), Number(projectId))
+  .then((response) => {
+        setDeployedLink(`https://${response.project.deploymentUrl}`);
+        console.log(response.project)
         setprojectDetail(response);
       })
       .catch((error) => {
@@ -64,7 +67,9 @@ function ProjectPage() {
   // 터미널 상태 (터미널 id 배열로 관리)
   const [terminalIds, setTerminalIds] = useState<number[]>([0]);
   const [activeTerminal, setActiveTerminal] = useState(0); // 활성화된 터미널
-  const [nextTerminalId, setNextTerminalId] = useState(1);
+  const [nextTerminalId, setNextTerminalId] = useState(1);// 터미널 탭 상태 관리
+  const [activePanel, setActivePanel] = useState<"terminal" | "run">("terminal");
+
   // 터미널 생성
   const addNewTerminal = () => {
     setTerminalIds((prev) => {
@@ -88,7 +93,12 @@ function ProjectPage() {
       return newTerminalIds;
     });
   };
+  const [executionOutput, setExecutionOutput] = useState<string>(""); // 터미널의 실행 버튼을 눌렀을 떄 결과 저장
 
+  // 파일 실행 버튼 클릭 시 호출되는 함수
+  const handleFileExecution = async () => {
+    setActivePanel("run"); // 실행 결과 탭으로 전환
+  };
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
   }
@@ -103,7 +113,12 @@ function ProjectPage() {
             </p>
           </div>
           <div className="flex">
-            <DeployedLinkButton link={deployedLink} />
+            <div className="flex">
+                <RunButton onExecute={handleFileExecution} />
+            </div>
+            <div className="flex">
+                <DeployedLinkButton link={deployedLink} />
+            </div>
           </div>
           <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
@@ -202,15 +217,30 @@ function ProjectPage() {
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
                       <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none">
+                        {/* Run 탭 */}
+                        <button
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                            activePanel === "run"
+                              ? "border-b-2 border-b-[#3B82F6] text-white"
+                              : "text-[#858595] hover:text-white"
+                          } cursor-pointer`}
+                          onClick={() => setActivePanel("run")}
+                        >
+                          Run
+                        </button>
+                        {/* Terminal 탭들 */}
                         {terminalIds.map((id, index) => (
                           <div key={id} className="flex flex-row items-center">
                             <div
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                                 activeTerminal === index
                                   ? "border-b-2 border-b-[#3B82F6] text-white"
-                                  : "bg-[#141617] text-[#858595] hover:text-white"
-                              }  cursor-pointer`}
-                              onClick={() => setActiveTerminal(index)}
+                                  : "text-[#858595] hover:text-white"
+                              } cursor-pointer`}
+                              onClick={() => {
+                                setActivePanel("terminal");
+                                setActiveTerminal(index);
+                              }}
                             >
                               Terminal ({id + 1})
                             </div>
@@ -234,7 +264,9 @@ function ProjectPage() {
                         <button
                           onClick={() => {
                             addNewTerminal();
-                            setActiveTerminal(terminalIds.length); // 새로 추가된 터미널로 포커싱
+                            // 새 터미널 추가 후, activePanel을 터미널 모드로 설정
+                            setActivePanel("terminal");
+                            setActiveTerminal(terminalIds.length);
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
                           title="Add new terminal"

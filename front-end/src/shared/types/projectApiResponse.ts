@@ -129,6 +129,7 @@ export type GetProjectDetailsResponse = {
       status: boolean; // 프로젝트 상태 (예: active)
       autoStop: boolean; // autoStop 여부
       isDeleted: boolean; // 삭제 여부
+      deploymentUrl: string;
   };
   users: {
       id: number; // 사용자 ID

@@ -11,6 +11,10 @@ interface WebTerminalProps {
   groupId?: string;
   projectId?: string;
   active?: boolean;
+  runCommand?: string; // 실행 명령어
+  mode?: "terminal" | "run"  // 터미널 탭 상태
+  runOutput?: string; // Run 모드일 때 표시할 실행 결과 (부모에서 전달받은 값)
+  onOutput?: (output: string) => void; // 실행 결과
 }
 
 const WebTerminal: React.FC<WebTerminalProps> = ({
@@ -19,6 +23,10 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
   groupId,
   projectId,
   active,
+  runCommand, // 실행 명령어
+  mode,  // 터미널 탭 상태
+  runOutput,
+  onOutput
 }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const term = useRef<Terminal | null>(null);
@@ -160,19 +168,25 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
     }
   }, [height, isTerminalWidthChange, active]);
 
-  return (
-    <div
-      ref={terminalRef}
-      style={{
-        display: active ? "block" : "none",
-        width: "100%",
-        height: `${height}px`,
-        padding: "4px 8px",
-        overflow: "hidden",
-        scrollbarColor: "#4a5568 #2d3748",
-      }}
-    />
+  // 터미널과 Run 탭에 동일한 스타일을 적용
+  const containerStyle = {
+    width: '100%',
+    height: `${height}px`,
+    padding: "4px 8px",
+    overflow: "hidden",
+    scrollbarColor: "#4a5568 #2d3748",
+    background: '#141617'
+  };
+
+  return mode === "run" ? (
+    <div style={containerStyle}>
+      {runOutput || "실행 결과가 아직 없습니다."}
+    </div>
+  ) : (
+    <div ref={terminalRef} style={containerStyle} />
   );
+  
 };
+
 
 export default WebTerminal;
