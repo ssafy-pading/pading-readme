@@ -15,7 +15,11 @@ import CamButton from "../features/projects/projectpage/widgets/buttons/ProjectC
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/videochat";
+import RightContentsContainer from "../features/projects/VideoChat";
+import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
+
+// Models
+import { getMonitoringResource } from "../features/projects/monitoring/model/resourceModel";
 
 // Css
 import "react-resizable/css/styles.css";
@@ -24,6 +28,8 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
+import { MonitoringResourceModel } from "../features/projects/monitoring/types/monitoringTypes";
+import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 
 function ProjectPage() {
   // Props
@@ -36,7 +42,7 @@ function ProjectPage() {
   const [deployedLink, setDeployedLink] = useState<string>("");
 
   // Project Information
-  const [projectDetail, setprojectDetail] = useState<object | null>(null);
+  const [projectDetail, setprojectDetail] = useState<GetProjectDetailsResponse | null>(null);
   useEffect(() => {
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
@@ -48,8 +54,8 @@ function ProjectPage() {
       });
   }, [groupId, projectId, getProjectDetails]);
 
-  // Chat
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  // // Chat
+  // const [isChatOpen, setIsChatOpen] = useState(true);
 
   // Resize
   const [isVerticalDragging, setIsVerticalDragging] = useState(false); // 드래그 상태 관리
@@ -91,6 +97,39 @@ function ProjectPage() {
 
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
+  }
+
+  {
+    /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
+  }
+    
+    const monitoringDataListRef = useRef<MonitoringResourceModel[]>([]);
+
+    useEffect(() => {
+      let isMounted = true;
+    
+      const fetchMonitoringData = async () => {
+        if (!isMounted || projectDetail === null) return;
+    
+        try {
+          const monitoringData = await getMonitoringResource(projectDetail.project.containerId);
+          monitoringDataListRef.current.push(monitoringData);
+        } catch (error) {
+          console.error('Failed to fetch monitoring data:', error);
+        }
+    
+        // 5초 후에 다시 호출
+        setTimeout(fetchMonitoringData, 10000);
+      };
+    
+      fetchMonitoringData(); // 첫 호출
+    
+      return () => {
+        isMounted = false; // 언마운트 시 플래그 변경
+      };
+    }, [projectDetail]);
+  {
+    /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
   return (
     <ProjectEditorProvider>
@@ -147,10 +186,16 @@ function ProjectPage() {
             }
             handleSize={[5, 5]}
           >
-            <div className="flex flex-col justify-start h-full bg-[#212426] select-none">
+            <div className="flex flex-col justify-between h-full bg-[#212426] select-none">
               <div className="w-full overflow-x-hidden">
                 {/* 파일 탐색기 */}
                 <FileExplorer />
+              </div>
+              <div className="w-full overflow-x-hidden">
+                {/* 리소스 모니터링 바 */}
+                <ResourceMonitorBar 
+                  monitoringDataListRef={monitoringDataListRef}
+                />
               </div>
             </div>
           </ResizableBox>
