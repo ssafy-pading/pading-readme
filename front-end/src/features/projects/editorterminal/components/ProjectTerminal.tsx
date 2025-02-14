@@ -10,9 +10,10 @@ interface WebTerminalProps {
   isTerminalWidthChange?: boolean;
   groupId?: string;
   projectId?: string;
+  active?: boolean;
 }
 
-const WebTerminal: React.FC<WebTerminalProps> = ({ height, isTerminalWidthChange, groupId, projectId }) => {
+const WebTerminal: React.FC<WebTerminalProps> = ({ height, isTerminalWidthChange, groupId, projectId, active }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const term = useRef<Terminal | null>(null);
   const fitAddon = useRef<FitAddon | null>(null);
@@ -98,20 +99,23 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ height, isTerminalWidthChange
     };
   }, []);
 
-  // 🔥 터미널 높이가 변경될 때 마다 fitAddon 적용
+  // 터미널 높이나 너비가 바뀌거나, active 상태가 true로 바뀔 때마다 fit() 호출
   useEffect(() => {
-    setTimeout(() => {
-      fitAddon.current?.fit();
-      if (stompClient.current?.connected) {
-        const cols = term.current?.cols;
-        const rows = term.current?.rows;
-        stompClient.current.publish({
-          destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
-          body: JSON.stringify({ cols, rows })
-        });
-      }
-    }, 100);
-  }, [height, isTerminalWidthChange]);
+    // active prop이 true일 때 fitAddon 재호출
+    if (active) {
+      setTimeout(() => {
+        fitAddon.current?.fit();
+        if (stompClient.current?.connected) {
+          const cols = term.current?.cols;
+          const rows = term.current?.rows;
+          stompClient.current.publish({
+            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
+            body: JSON.stringify({ cols, rows })
+          });
+        }
+      }, 100);
+    }
+  }, [height, isTerminalWidthChange, active]);
   
   return <div ref={terminalRef}
     style={{

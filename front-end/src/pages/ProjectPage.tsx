@@ -161,7 +161,7 @@ const deleteTerminal = (index: number) => {
               </div>
               {/* 코드 편집기 자리 */}
               <div className="flex-1 w-full bg-[#212426] overflow-hidden">
-                {ProjectEditor ? (
+                {false ? (
                   <ProjectEditor groupId={groupId} projectId={projectId} />
                 ) : (
                   <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
@@ -232,7 +232,7 @@ const deleteTerminal = (index: number) => {
                         <button
                           onClick={() => {
                             addNewTerminal();
-                            setActiveTerminal(terminals.length); // 새로 추가된 터미널로 포커싱
+                            setActiveTerminal(terminalIds.length); // 새로 추가된 터미널로 포커싱
                           
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
@@ -255,6 +255,7 @@ const deleteTerminal = (index: number) => {
                           }}
                         >
                           <ProjectTerminal
+                            active={activeTerminal === id}
                             height={terminalHeight - 30}
                             isTerminalWidthChange={isTerminalWidthChange}
                             groupId={groupId}
