@@ -150,7 +150,7 @@ const deleteTerminal = (index: number) => {
                 {/* 파일 탭 자리 */}
               </div>
               {/* 코드 편집기 자리 */}
-              <div className="flex-1 w-full bg-[#212426]">
+              <div className="flex-1 w-full bg-[#212426] overflow-hidden">
                 {ProjectEditor ? (
                   <ProjectEditor groupId={groupId} projectId={projectId} />
                 ) : (
@@ -223,7 +223,7 @@ const deleteTerminal = (index: number) => {
                           onClick={() => {
                             addNewTerminal();
                             setActiveTerminal(terminals.length); // 새로 추가된 터미널로 포커싱
-                            
+                          
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
                           title="Add new terminal"
@@ -235,7 +235,7 @@ const deleteTerminal = (index: number) => {
                     </div>
 
                     {/* 터미널 화면 */}
-                    <div className="flex-1 w-full h-[calc(100%-30px)] bg-[#141617] relative">
+                    <div className="flex-1 w-full h-[calc(100% - 30px)] bg-[#141617] relative">
                       {terminalIds.map((id, index) => (
                         <div
                           key={id}
