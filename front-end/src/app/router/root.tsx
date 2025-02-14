@@ -3,8 +3,6 @@ import { Suspense, lazy } from "react";
 
 import { createBrowserRouter, Outlet, RouteObject } from 'react-router-dom'
 
-import { UserProvider } from "../../context/userContext"; // 경로에 맞게 수정
-
 import ProjectSpinner from "../../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 const Loading = <div>로딩중입니다...</div>
@@ -26,9 +24,7 @@ const RoleChangePage = lazy(() => import("../../pages/RoleChangePage"))
 
 // UserProvider로 전체 앱을 감싸는 Layout 컴포넌트
 const AppLayout = () => (
-    <UserProvider>
       <Outlet />
-    </UserProvider>
   );
   
   const routes: RouteObject[] = [

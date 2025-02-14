@@ -2,7 +2,7 @@ import React, { useEffect, useState, ChangeEvent, FormEvent, useRef } from 'reac
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import paperPlane from '/src/assets/paper-plane 1.svg';
-import profileImage from "../assets/profile_image.png";
+import profileImage from "../../../../../assets/profile_image.png";
 import { getChatMessages } from '../../../../../shared/apis/chatApi';
 // import { useUser } from '../context/userContext';
 

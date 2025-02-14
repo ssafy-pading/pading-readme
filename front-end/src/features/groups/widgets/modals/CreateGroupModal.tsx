@@ -2,11 +2,10 @@
 import React, { useState } from "react";
 import Modal from "react-modal";
 import { RxCross2 } from "react-icons/rx";
-import useGroupAxios from "../shared/apis/useGroupAxios";
-import { useNavigate } from "react-router-dom";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import useGroupAxios from "../../../../shared/apis/useGroupAxios";
 
 Modal.setAppElement("#root");
 

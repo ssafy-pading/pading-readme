@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { AudioComponentProps } from "../type/VideoConferenceTypes";
+import { AudioComponentProps } from "../../type/VideoConferenceTypes";
 
 function AudioComponent({ audioTrack }: AudioComponentProps) {
     const audioRef = useRef<HTMLAudioElement | null>(null);

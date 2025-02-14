@@ -1,11 +1,10 @@
 // GroupUpdateModal.tsx
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
-import cross from "../assets/cross.svg";
-import useGroupAxios from "../shared/apis/useGroupAxios";
-
+import { RxCross2 } from "react-icons/rx";
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import useGroupAxios from "../../../../shared/apis/useGroupAxios";
 
 Modal.setAppElement("#root");
 
@@ -140,7 +139,8 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
           className="w-8 h-8 flex items-center justify-center hover:bg-gray-300 rounded-full"
           onClick={handleClose}
         >
-          <img src={cross} alt="close" className="w-4 h-4" />
+          <RxCross2 className="w-4 h-4"/>
+    
         </button>
       </div>
       <form onSubmit={handleSubmit} className="w-full mt-8 space-y-6">

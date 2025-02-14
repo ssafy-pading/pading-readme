@@ -2,16 +2,16 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Modal from 'react-modal';
-import GroupCreateModal from '../../widgets/CreateGroupModal';
-import GroupJoinModal from '../../widgets/JoinGroupModal';
 import useGroupAxios from '../../../shared/apis/useGroupAxios';
 import { GetGroupListResponse } from '../../../shared/types/groupApiResponse';
-import logo from '../assets/logo.png';
 import { FaPlus } from "react-icons/fa";
+import logo from "../../../assets/logo.png"
 
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserInfo } from '../../../app/redux/user';
 import type { RootState, AppDispatch } from '../../../app/redux/store'
+import GroupCreateModal from '../../groups/widgets/modals/CreateGroupModal';
+import GroupJoinModal from '../../groups/widgets/modals/JoinGroupModal';
 
 Modal.setAppElement('#root');
 

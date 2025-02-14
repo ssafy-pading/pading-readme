@@ -4,12 +4,12 @@ import Select, { SingleValue, MultiValue } from "react-select";
 import cpu from "/src/assets/cpu.svg";
 import memory from "/src/assets/memory.svg";
 import disk from "/src/assets/disk.svg";
-import { CreateProjectResponse } from "../shared/types/projectApiResponse";
-import useProjectAxios from "../shared/apis/useProjectAxios";
 import { RxCross2 } from "react-icons/rx";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import useProjectAxios from "../../../../shared/apis/useProjectAxios";
+import { CreateProjectResponse } from "../../../../shared/types/projectApiResponse";
 
 // 모달 루트 설정
 Modal.setAppElement("#root");

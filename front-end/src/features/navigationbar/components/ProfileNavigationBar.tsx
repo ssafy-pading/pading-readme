@@ -13,7 +13,7 @@ import {
   ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import profileImage from "../assets/profile_image.png";
+import profileImage from "../../../assets/profile_image.png"
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
@@ -26,12 +26,11 @@ import { fetchUserInfo } from "../../../app/redux/user";
 // --- 커스텀 훅 임포트 ---
 import useGroupAxios from "../../../shared/apis/useGroupAxios"; 
 import useProjectAxios from "../../../shared/apis/useProjectAxios";
-import MyPageModal from "../../users/widgets/modals/MypageModal";
 import useMypageAxios from "../../../shared/apis/useMypageAxios";
 import LeaveModal from "../../users/widgets/modals/UserLeaveModal";
 import PictureModal from "../../users/widgets/modals/PictureChangeModal";
-import GroupUpdateNameModal from "../../widgets/GroupUpdateNameModal";
 import { GetProjectListResponse } from "../../../shared/types/projectApiResponse";
+import GroupUpdateNameModal from "../../groups/widgets/modals/GroupUpdateNameModal";
 
 interface GroupUser {
   id: number;
@@ -438,14 +437,7 @@ const ProfileNavigationBar: React.FC = () => {
       )}
 
       {/* MyPageModal 렌더링 */}
-      {activeModal === 'mypage' && (
-        <MyPageModal
-          isOpen={true}
-          onClose={closeModal}
-          onSwitchToLeave={openDeleteModal}
-          onSwitchToPictureChange={openPictureModal}
-        />
-      )}
+
       {activeModal === 'delete' && (
         <LeaveModal
           isOpen={true}

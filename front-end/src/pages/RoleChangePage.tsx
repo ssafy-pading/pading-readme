@@ -5,7 +5,7 @@ import { NavigationProvider, useNavigation } from "../context/navigationContext"
 import GroupNavigationBar from "../features/navigationbar/components/GroupNavigationBar";
 import ProfileNavigationBar from "../features/navigationbar/components/ProfileNavigationBar";
 import CustomSelect, { Option } from "../features/groups/widgets/components/CustomSelect";
-import "../assets/css/CustomSelect.css";
+import "../features/groups/widgets/css/CustomSelect.css";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";
 
