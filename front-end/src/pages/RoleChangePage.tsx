@@ -72,7 +72,12 @@ const RoleChangePage: React.FC = () => {
     };
     fetchGroupUsers();
   }, [groupId, userProfile, getGroupMembers]);
-
+  
+  // 로그인한 유저의 역할(예: OWNER) 확인
+  const currentUserRole = userProfile
+    ? groupUsers.find((user) => user.id === userProfile.id)?.role || ""
+    : "";
+  
   // 드롭다운 선택값 변경 핸들러
   const handleRoleChange = (userId: number, newRole: string) => {
     setSelectedRoles((prev) => ({
@@ -80,12 +85,11 @@ const RoleChangePage: React.FC = () => {
       [userId]: newRole,
     }));
   };
-
   // 역할 업데이트
   const handleRoleUpdate = async (userId: number) => {
     const newRole = selectedRoles[userId];
     if (!groupId || !newRole) {
-      console.log("변경할 역할을 선택해 주세요");
+      toast.error("변경할 역할을 선택해 주세요");
       return;
     }
     if (newRole === "OWNER") {
@@ -98,19 +102,24 @@ const RoleChangePage: React.FC = () => {
       await updateMemberRole(groupId, userId, newRole);
       setGroupUsers((users) =>
         users.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
-      );
-      toast.success("권한 변경에 성공했습니다.");
-    } catch (error) {
-      console.error(`Error updating role for user ${userId}:`, error);
-      toast.error("권한 업데이트에 실패했습니다.");
+    );
+    toast.success("권한 변경에 성공했습니다.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 403) {
+      toast.error("권한이 부족합니다. 그룹 오너에게 문의하세요")};
+    if (error.response && error.response.status === 404) {
+      toast.error("대상 유저가 그룹에 속해있지 않습니다.");
+    } else {
+      toast.error("멤버 목록을 불러오는 중 오류가 발생했습니다.");
     }
-  };
+  }
+};
 
-  // 멤버 제외
-  const handleMemberExpel = async (userId: number) => {
-    if (!groupId) return;
-    const confirmDelete = window.confirm("정말 이 멤버를 제외하시겠습니까?");
-    if (!confirmDelete) return;
+// 멤버 제외
+const handleMemberExpel = async (userId: number) => {
+  if (!groupId) return;
+  const confirmDelete = window.confirm("정말 이 멤버를 제외하시겠습니까?");
+  if (!confirmDelete) return;
     try {
       const success = await expelMember(groupId, userId);
       if (success) {
@@ -122,10 +131,6 @@ const RoleChangePage: React.FC = () => {
     }
   };
 
-  // 로그인한 유저의 역할(예: OWNER) 확인
-  const currentUserRole = userProfile
-    ? groupUsers.find((user) => user.id === userProfile.id)?.role || ""
-    : "";
 
   return (
     <div className={`transition-all duration-700 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>

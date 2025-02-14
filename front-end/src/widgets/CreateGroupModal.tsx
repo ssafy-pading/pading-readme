@@ -17,63 +17,84 @@ interface GroupCreateModalProps {
   onGroupCreated: () => void;  // 그룹 생성 후 부모에 알리는 콜백
 }
 
-interface DuplicateCheckResponse {
-  duplicated: boolean;
-}
-
 const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
   isOpen,
   onClose,
   onSwitchToJoin,
   onGroupCreated,
 }) => {
-  const navigate = useNavigate();
   const [groupName, setGroupName] = useState<string>("");
   const [capacity, setCapacity] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [duplicateChecked, setDuplicateChecked] = useState<boolean>(false);
   const [isNameAvailable, setIsNameAvailable] = useState<boolean>(false);
+  const [validMessage, setValidMessage] = useState<string>("")
+  // 특수문자 정규식: 영어, 숫자, 한글, 공백 이외의 문자는 허용하지 않음
+  const specialCharRegex: RegExp = /[^a-zA-Z0-9가-힣\s]/;
   const { createGroup, checkGroupNameDuplicate } = useGroupAxios();
 
   const handleCheckDuplicate = async (): Promise<void> => {
     if (groupName.trim() === "") {
-      toast.error("먼저 그룹 이름을 입력해주세요.");
+      setValidMessage("그룹 이름을 입력하세요");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
+      return;
+    }
+    if (groupName.length < 3 || groupName.length > 15) {
+      setValidMessage("그룹 이름은 3~15 글자로 설정 할 수 있습니다");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
+      return;
+    }
+    if (specialCharRegex.test(groupName)) {
+      setValidMessage("특수문자는 허용되지 않습니다");
+      setIsNameAvailable(false);
+      setDuplicateChecked(true);
       return;
     }
     try {
-      const duplicateCheck: DuplicateCheckResponse = await checkGroupNameDuplicate(groupName);
-      setIsNameAvailable(!duplicateCheck.duplicated);
-      setDuplicateChecked(true);
+      const duplicateCheck = await checkGroupNameDuplicate(groupName);
+        if (duplicateCheck.duplicated) {
+          setIsNameAvailable(false);
+          setValidMessage("이미 사용 중인 그룹명입니다");
+        } else {
+          setIsNameAvailable(true);
+        }
+        setDuplicateChecked(true);
     } catch (error) {
       toast.error("그룹명 중복 확인 중 오류가 발생했습니다.");
-      console.error("중복 확인 에러:", error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
+    if (!duplicateChecked) {
+          toast.error("먼저 그룹명 중복 확인을 해주세요.");
+          return;
+        }
     if (groupName.trim() === "") {
-      toast.error("그룹 이름을 입력해주세요.");
+      toast.error("그룹 이름을 입력하세요.");
+      return;
+    }
+    if (groupName.length < 3 || groupName.length > 15) {
+      toast.error("그룹 이름은 3~15 글자로 설정 할 수 있습니다.");
+      return;
+    }
+    if (specialCharRegex.test(groupName)) {
+      toast.error("특수문자는 허용되지 않습니다")
       return;
     }
     if (capacity.trim() === "") {
-      toast.error("수용 인원을 입력해주세요.");
+      toast.error("인원 제한을 입력해주세요.");
       return;
     }
     const capNumber: number = Number(capacity);
-    if (isNaN(capNumber) || capNumber < 2) {
-      toast.error("유효한 수용 인원을 입력해주세요.");
+    if (isNaN(capNumber) || capNumber < 2 || capNumber > 100) {
+      toast.error("인원 제한은 2~100명까지 입니다.");
       return;
     }
-    if (!duplicateChecked) {
-      toast.error("먼저 그룹명 중복 확인을 해주세요.");
-      return;
-    }
-    if (!isNameAvailable) {
-      toast.error("이미 사용중인 그룹명입니다. 다른 이름을 입력해주세요.");
-      return;
-    }
+    
 
     setIsLoading(true);
     try {
@@ -157,7 +178,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
             </div>
             {duplicateChecked && (
               <span className="mt-2 ml-2 block text-xs text-gray-700">
-                {isNameAvailable ? "사용 가능한 그룹명입니다." : "이미 사용중인 그룹명입니다."}
+                {isNameAvailable ? "사용 가능한 그룹명입니다." : `${validMessage}.`}
               </span>
             )}
           </div>
@@ -170,7 +191,7 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
               type="number"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
-              placeholder="예: 50"
+              placeholder="인원 제한은 2~100명까지 입니다. 숫자만 입력해 주세요."
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C8290]"
               min="1"
             />
