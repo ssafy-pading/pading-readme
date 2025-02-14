@@ -285,7 +285,6 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
     };
 
     console.log("보낼 폼 데이터:", formData);
-    toast.success("프로젝트 생성 완료");
 
     // API 호출 로직 (createProject)
       try{
@@ -299,6 +298,7 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         setSelectedPerformance(null);
         setSelectedMembers([]);
 
+        toast.success("프로젝트 생성 완료");
         // 완료 후 모달 닫기
         onClose();
         
@@ -339,10 +339,12 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         <input
           type="text"
           placeholder="프로젝트 이름을 입력하세요"
-          className="w-full border border-gray-300 rounded px-2.5 py-2 text-gray-700 text-[12.8px] focus:outline-none focus:ring-2 focus:ring-[#5C8290] mb-4"
+          className="w-full border border-gray-300 rounded px-2.5 py-2 text-gray-700 text-[12.8px] focus:outline-none focus:ring-2 focus:ring-[#5C8290] mb-1"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
         />
+        <label className="block text-xs font-light text-gray-400 mb-4">
+        영어 소문자, 숫자, 특수문자 `-`만 사용 가능 (20자 이내)</label>
 
         {/* 언어 선택 */}
         <label className="block text-sm font-semibold text-gray-700 mb-2">언어 선택</label>
