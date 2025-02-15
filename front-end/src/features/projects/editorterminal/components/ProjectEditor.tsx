@@ -8,7 +8,7 @@ interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
   fileRouteAndName?: string;
-  userName?: string
+  userName?: string;
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({

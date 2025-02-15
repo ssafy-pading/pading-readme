@@ -27,6 +27,7 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
+import { FileTapType } from "../shared/types/projectApiResponse";
 
 function ProjectPage() {
   // Props
@@ -58,11 +59,14 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { activeFileIndex, setActiveFileIndex, fileTap, setFileTap, user } =
+  const { activeFileIndex, setActiveFileIndex, fileTap, setFileTap, user, defaultFileRoutes, setDefaultFileRoutes } =
     useProjectEditor();
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  const addNewFile = () => {
+  const addNewFile = (file: FileTapType) => {
+    // if (defaultFileRoutes.length > 0 && file.fileRouteAndName in defaultFileRoutes) {
+      // 에디터에 setvalue 해주고 리스트에서 해당 경로 삭제
+    // }
     const newFile = {
       fileName: `NewFile${fileTap.length + 1}.js`,
       fileRouteAndName: `/path/to/NewFile${fileTap.length + 1}.js`,

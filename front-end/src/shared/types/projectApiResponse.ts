@@ -148,3 +148,8 @@ export type AccessProjectResponse = {
   role: string;         // 사용자 역할 (예: MEMBER, OWNER, MANAGER)
 };
 
+// 파일 타입
+export type FileTapType = {
+  fileName: string;
+  fileRouteAndName: string
+}[]
