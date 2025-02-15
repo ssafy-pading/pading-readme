@@ -1,17 +1,27 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
+type FileTapType = {
+  fileName: string;
+  fileRouteAndName: string
+}[]
+
 interface ProjectEditorContextType {
-  value: string;
-  setValue: (value: string) => void;
+  fileRouteAndNameList: string[];
+  setfileRouteAndNameList: (fileRouteAndNameList: string[]) => void;
+  activeFileIndex: number | null;
+  setActiveFileIndex: (activeFileIndex: number | null) => void;
+  fileTap: FileTapType;
+  setFileTap: (fileTap: FileTapType) => void;
 }
 
 const ProjectEditorContext = createContext<ProjectEditorContextType | undefined>(undefined);
 
 export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
-  const [value, setValue] = useState("");
-
+  const [fileRouteAndNameList, setfileRouteAndNameList] = useState<string[]>([]);
+  const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null)
+  const [fileTap, setFileTap] = useState<FileTapType>([])
   return (
-    <ProjectEditorContext.Provider value={{ value, setValue }}>
+    <ProjectEditorContext.Provider value={{ fileRouteAndNameList, setfileRouteAndNameList, activeFileIndex, setActiveFileIndex, fileTap, setFileTap }}>
       {children}
     </ProjectEditorContext.Provider>
   );

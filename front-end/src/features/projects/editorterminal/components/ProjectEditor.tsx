@@ -3,19 +3,21 @@ import Editor from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
-import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
+  fileRouteAndName?: string;
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
   projectId,
+  fileRouteAndName
 }) => {
+  const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
-  const { value, setValue } = useProjectEditor();
+  const [value, setvalue] = useState("")
   const [language, setLanguage] = useState("javascript");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
@@ -35,7 +37,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         ws.current?.send(
           JSON.stringify({
             type: "subscribe",
-            topics: [`${groupId}-${projectId}`],
+            topics: [room],
           })
         );
       };
@@ -79,7 +81,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       ws.current.send(
         JSON.stringify({
           type: "yjs-update",
-          room: `${groupId}-${projectId}`,
+          room,
           content: {
             type: "Buffer",
             data: Array.from(update), // Uint8Array -> JSON 배열 변환
@@ -96,7 +98,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
 
     // Yjs와 Monaco 연결
     const provider = new WebrtcProvider(
-      `${groupId}-${projectId}`, // 방 이름
+      room, // 방 이름
       doc,
       {
         signaling: [signalingServer], // WebRTC 시그널링 서버
@@ -119,7 +121,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         language={language}
         onMount={handleEditorDidMount} // Editor 초기화
         value={value}
-        onChange={(value) => setValue(value || "")}
+        onChange={(value) => 
+          {
+            setvalue(value || "")  
+          }
+        }
         options={{
           mouseWheelZoom: true, // 마우스 휠로 줌
           smoothScrolling: true, // 부드러운 스크롤
