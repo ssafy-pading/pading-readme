@@ -8,12 +8,14 @@ interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
   fileRouteAndName?: string;
+  userName?: string
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
   projectId,
-  fileRouteAndName
+  fileRouteAndName,
+  userName
 }) => {
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
@@ -38,6 +40,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
           JSON.stringify({
             type: "subscribe",
             topics: [room],
+            userName
           })
         );
       };
@@ -86,6 +89,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             type: "Buffer",
             data: Array.from(update), // Uint8Array -> JSON 배열 변환
           },
+          userName
         })
       );
     }

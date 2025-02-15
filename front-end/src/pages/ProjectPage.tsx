@@ -58,7 +58,7 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { activeFileIndex, setActiveFileIndex, fileTap, setFileTap } =
+  const { activeFileIndex, setActiveFileIndex, fileTap, setFileTap, user } =
     useProjectEditor();
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
@@ -253,6 +253,7 @@ function ProjectPage() {
                       groupId={groupId}
                       projectId={projectId}
                       fileRouteAndName={file.fileRouteAndName}
+                      userName={user.name}
                     />
                   </div>
                 ))
