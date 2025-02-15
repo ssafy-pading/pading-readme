@@ -7,9 +7,11 @@ import { Toaster, toast } from 'react-hot-toast';
 
 // redux 초기 import 
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserInfo, resetUserState } from '../app/redux/user';
+import { fetchUserInfo } from '../app/redux/user';
 import type { RootState, AppDispatch } from '../app/redux/store';
 
+// import 
+import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 declare global {
     interface Window {
@@ -49,15 +51,6 @@ interface ParticlesOptions {
       remove: { particles_nb: number };
     };
   }
-  
-  // 유저리스트 하위 멤버
-  interface GroupUser {
-    id: number;
-    name: string;
-    image: string;
-    status: boolean;
-    role: string;
-  }
 
 const InvitePage = () => {
     const navigate = useNavigate();
@@ -69,10 +62,13 @@ const InvitePage = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { user, status } = useSelector((state: RootState) => state.user);
 
-
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-    const [isJoined, setIsJoined] = useState<boolean | null>(null);
     const [groupName, setGroupName] = useState<string | null>(null);
+
+    // 로딩 렌더링 보여주기
+    const [isLoading, setIsLoading] = useState(true);
+
+
     useEffect(() => {
         
         // Particles.js 로드
@@ -112,7 +108,7 @@ const InvitePage = () => {
           }
 
           particle();
-    },[])
+    },[isLoading])
     
     useEffect(() => {
       const checkAuthStatus = async () => {
@@ -126,9 +122,12 @@ const InvitePage = () => {
     // 유저가 로그인 상태인지 체크
     useEffect(() => {
       // user 상태에 따라 인증 여부를 설정하는 효과
-      if (user) {
+      const isLogin = !!localStorage.getItem("accessToken");
+      console.log(isLogin);
+      if (isLogin) {
         setIsAuthenticated(true);
       } else {
+        setIsLoading(false); // 화면 렌더링
         setIsAuthenticated(false);
       }
     }, [user]);
@@ -143,15 +142,17 @@ const InvitePage = () => {
                 const group:GetGroupDetailsResponse = await getGroupDetails(Number(groupId)); // 여기에 그룹 정보 가져오는 API 연결
 
                 setGroupName(group?.name || "Unknown Group");
+                setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
             }else{
               toast.error("잘못된 경로입니다.");
+              navigate('/');
             }
         } catch (error) {
             setGroupName(null);
-            console.error(error);
+            console.log(error);
         }
       };
-      // 유저 가입 정보
+
       const userJoined = async () => {
         try {
           const groupMembers:GetGroupMembersResponse = await getGroupMembers(Number(groupId));
@@ -162,15 +163,20 @@ const InvitePage = () => {
           })){
             toast.error("이미 가입한 그룹입니다.");
             navigate(`/projectlist/${groupId}`); // 성공 시 그룹 페이지로 이동
+            return true;
           }
-        }catch (error){
-          console.error(error)
+        }catch (err){
+          console.log(err)
+          return true;
         }
       }
-      if(isAuthenticated){
-        fetchGroupInfo();
-        userJoined();
+      const apiCheck = async() => {
+        if(isAuthenticated && await userJoined()){
+          // 그룹의 정보 불러오기
+          await fetchGroupInfo();
+        }
       }
+      apiCheck();
     }, [inviteCode, groupId, getGroupDetails, isAuthenticated, getGroupMembers, navigate, user]);
 
     // 그룹 참여하기
@@ -190,11 +196,31 @@ const InvitePage = () => {
     // 그룹 참여 
     const handleRedirectLogin = async () => {
       sessionStorage.setItem("redirectPath", window.location.pathname);
+      setIsLoading(true); // 오류 잠깐 숨기기
       navigate("/");
     }
+
+    if (isLoading) {
+      return (
+        <div>
+          <Toaster
+            toastOptions={{
+              style: {
+                zIndex: 9999,  // 최상위로 보이게 설정
+              },
+            }} />
+          <ProjectSpinner />;
+        </div>)
+    }
+
     return (
         <div className="flex min-h-screen h-full items-center justify-center bg-gray-900">
-            <Toaster />
+            <Toaster
+              toastOptions={{
+                style: {
+                  zIndex: 9999,  // 최상위로 보이게 설정
+                },
+              }} />
             <div id="particles-js" className="w-full h-full"></div>
             {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
             <div className="px-7 pb-2 h-1/4 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-md absolute">
@@ -215,6 +241,7 @@ const InvitePage = () => {
                         </button>
                     </>
                     ) : (
+                      
                         <>
                         <div className="text-lg break-all">그룹에 참여하시려면 로그인이 필요합니다.</div>
                         <button
