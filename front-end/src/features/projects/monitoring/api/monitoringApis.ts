@@ -38,7 +38,7 @@ export function fetchCpu(containerId: string): Promise<MonitoringData> {
   export function fetchMemoryPercent(
     containerId: string
   ): Promise<MonitoringData> {
-    return fetchMetric(`(container_memory_usage_bytes{container="zzz-nawh"}%20/%20container_spec_memory_limit_bytes{container="${containerId}"})%20*%20100`);
+    return fetchMetric(`(container_memory_usage_bytes{container="${containerId}"}%20/%20container_spec_memory_limit_bytes{container="${containerId}"})%20*%20100`);
   }
   
   /** Network 업로드양 데이터를 가져오는 함수 */
