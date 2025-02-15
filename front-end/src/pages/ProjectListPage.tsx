@@ -25,7 +25,6 @@ import InviteLink from '../features/groups/widgets/components/CreateLinkComponen
 
 // 반투명 로딩
 import TranslucentSpinner from '../features/projects/projectpage/widgets/spinners/TranslucentSpinner';
-import ProjectSpinner from '../features/projects/projectpage/widgets/spinners/ProjectSpinner';
 
 // 타입 정의
 export type Project = ProjectListItem['project'];
@@ -38,7 +37,6 @@ const ProjectListPage: React.FC = () => {
 
   // 로딩상태 관리
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
 
   // 유저 정보가 없으면 컴포넌트 마운트 시 fetchUserInfo 디스패치
@@ -68,13 +66,8 @@ const ProjectListPage: React.FC = () => {
         if (user) {
           setUserRole(user.role);
         }
-        setIsLoading(false);
       } catch (error:any) {
         console.error("그룹 멤버 조회 중 오류:", error);
-        if (error.response && error.response.status === 403) {
-          toast.error("접근 권한이 없습니다. 그룹에 참가해주세요.")
-          navigate('/');
-        };
       }
     };
     fetchAndSetUserRole();
@@ -180,16 +173,6 @@ const ProjectListPage: React.FC = () => {
   const handleProjectCreate = (newProjectItem: ProjectListItem) => {
     setProjectList((prev) => [newProjectItem, ...prev]);
   };
-
-  if(isLoading){
-    return (
-      <div>
-        <ProjectSpinner />
-        <Toaster />
-      </div>
-    )
-  }
-
 
   return (
     

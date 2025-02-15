@@ -15,8 +15,10 @@ import {
 } from "@heroicons/react/24/outline";
 import profileImage from "../../../assets/profile_image.png"
 
-// 토스트
+// 상태관리 및 토스트
+import ProjectSpinner from '../../projects/projectpage/widgets/spinners/ProjectSpinner';
 import { Toaster, toast } from 'react-hot-toast';
+
 
 // --- Redux 관련 임포트 ---
 import { useSelector, useDispatch } from "react-redux";
@@ -41,6 +43,9 @@ interface GroupUser {
 }
 
 const ProfileNavigationBar: React.FC = () => {
+  // 로딩 상태
+  const [isLoading, setIsLoading] = useState(true);
+
   // Redux를 통해 유저 정보 가져오기
   const dispatch = useDispatch<AppDispatch>();
   const userProfile = useSelector((state: RootState) => state.user.user);
@@ -191,9 +196,16 @@ const ProfileNavigationBar: React.FC = () => {
           return (rolePriority[a.role] || 999) - (rolePriority[b.role] || 999);
         });
 
+        // 로딩상태 해제
+        setIsLoading(false);
+
         setGroupUsers(updatedGroupUsers);
-      } catch (error) {
+      } catch (error:any) {
         console.error("그룹 멤버 조회 중 오류:", error);
+        if (error.response && error.response.status === 403) {
+          toast.error("접근 권한이 없습니다. 그룹에 참가해주세요.")
+          navigate('/');
+        };
       }
     };
     fetchMembers();
@@ -234,6 +246,17 @@ const ProfileNavigationBar: React.FC = () => {
       console.error("그룹 삭제 에러:", error);
     }
   };
+
+
+  // 상태 체크
+  if(isLoading){
+    return (
+      <div>
+        <ProjectSpinner />
+        <Toaster />
+      </div>
+    )
+  }
 
   return (
     <div className="relative">
