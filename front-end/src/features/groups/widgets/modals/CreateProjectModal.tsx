@@ -186,10 +186,8 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
             image: member.image,
           }))
         );
-        console.log(memberList)
       }catch(error){
-        console.log("프로젝트 생성 초기값 불러오기 에러");
-        console.log(error);
+        console.error("project create error", error);
       }
 
     }

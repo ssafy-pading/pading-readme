@@ -23,15 +23,12 @@ const InviteLink: React.FC<InviteLinkProps> = ({ groupId }) => {
   const fetchExistingLink = async () => {
     try {
       const data = await getInvitationLink(groupId);
-      console.log(data);
       const { code, expirationTime } = data;
-        console.log(expirationTime);
       setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
       setTimeLeftSec(expirationTime);
       setIsExpired(false);
     } catch (err: any) {
       if (err.status === 404) {
-        console.log('초대 링크 없음, 새로 생성 필요');
         handleCreateInvitationLink();
       } else {
         console.error('초대 링크 확인 오류:', err);
@@ -48,7 +45,6 @@ const InviteLink: React.FC<InviteLinkProps> = ({ groupId }) => {
     setIsLoading(true);
     try {
       const data = await createInvitationLink(groupId);
-      console.log(data);
       const { code, expirationTime } = data;
       setInviteLink(`${window.location.origin}/invite/${groupId}/${code}`);
       setTimeLeftSec(expirationTime);

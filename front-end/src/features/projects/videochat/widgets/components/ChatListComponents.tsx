@@ -72,15 +72,14 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
     const socket = new SockJS(`${import.meta.env.VITE_APP_API_BASE_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => {
-        console.log(str);
-      },
+      // debug: (str) => {
+      //   console.log(str);
+      // },
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
       reconnectDelay: 5000,
       onConnect: async () => {
-        console.log('STOMP 연결 성공');
         stompClient.subscribe(`/sub/chat/${params?.projectId}`, (messageData) => {
           const newChat: ChatMessage = JSON.parse(messageData.body);
           setChatList((prev) => {
@@ -90,7 +89,6 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
             );
           });
         });
-        console.log(`Connected to chat room ${params?.projectId}`);
 
         try {
           if(params){
@@ -130,7 +128,6 @@ const ChatRoom: React.FC<ChatRoom> = ({ isChatOpen, onOpenStateChange }) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    console.log('userProfile', user);
     const myNewChat = {
       userId: user?.id,
       username: user?.name,

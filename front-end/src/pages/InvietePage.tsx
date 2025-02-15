@@ -127,10 +127,8 @@ const InvitePage = () => {
     useEffect(() => {
       // user 상태에 따라 인증 여부를 설정하는 효과
       if (user) {
-        console.log("유저 있어요!");
         setIsAuthenticated(true);
       } else {
-        console.log("유저 없는듯?");
         setIsAuthenticated(false);
       }
     }, [user]);
@@ -150,9 +148,10 @@ const InvitePage = () => {
             }
         } catch (error) {
             setGroupName(null);
-            console.log(error);
+            console.error(error);
         }
       };
+      // 유저 가입 정보
       const userJoined = async () => {
         try {
           const groupMembers:GetGroupMembersResponse = await getGroupMembers(Number(groupId));
@@ -164,8 +163,8 @@ const InvitePage = () => {
             toast.error("이미 가입한 그룹입니다.");
             navigate(`/projectlist/${groupId}`); // 성공 시 그룹 페이지로 이동
           }
-        }catch (err){
-          console.log(err)
+        }catch (error){
+          console.error(error)
         }
       }
       if(isAuthenticated){
