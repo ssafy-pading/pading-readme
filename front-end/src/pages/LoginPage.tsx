@@ -4,8 +4,8 @@
 // 3. 1, 2번 처리 후 context에 프로필도 넣어줘야 함
 
 // src/pages/LoginPage.tsx
-import React, { useEffect } from 'react';
-import TxtRotate from '../widgets/TxtRotate';
+import React, { useEffect, useState } from 'react';
+import TxtRotate from '../app/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
 import { useNavigate } from 'react-router-dom';
 import useGroupAxios from '../shared/apis/useGroupAxios';
@@ -15,6 +15,11 @@ import { useDispatch } from 'react-redux';
 import { resetUserState } from '../app/redux/user';
 import type { AppDispatch } from '../app/redux/store';
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
+// 스피너
+import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 declare global {
   interface Window {
@@ -58,6 +63,10 @@ interface ParticlesOptions {
 const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuthAxios();
   const { getGroups } = useGroupAxios();
+
+  // 스피너 체크
+  const [isLoading, setIsLoading] = useState(true);
+  
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
 
@@ -70,6 +79,7 @@ const LoginPage: React.FC = () => {
   const refreshCheck = async ():Promise<void> => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
     if(localStorage.getItem("refreshToken")){
+      console.log("리프레시 토큰 이씀");
       
       // 기존 사용자 정보와 상태 초기화
       dispatch(resetUserState());
@@ -86,12 +96,15 @@ const LoginPage: React.FC = () => {
         }
       }catch(error){
         console.log(error);
+        setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
+    }else{
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
-  // 로그인 성공 시 컨텍스트에 프로필 정보를 담고 보내는 함수
-  const setProfile = async() => {
+  // 로그인 성공 시 디폴트 페이지(그룹을 순회하여 가장 낮은 id의 그룹의 프로젝트 리스트 페이지)로 이동하는 함수
+  const redirectDefault = async() => {
 
     // 기존 사용자 정보와 상태 초기화
     dispatch(resetUserState());
@@ -107,6 +120,7 @@ const LoginPage: React.FC = () => {
       }
     }catch(error){
       console.log(error);
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
@@ -161,24 +175,34 @@ const LoginPage: React.FC = () => {
       if(accessToken&&refreshToken){
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("refreshToken", refreshToken);
-        setProfile();
+        const redirectPath = sessionStorage.getItem("redirectPath");
+        if(redirectPath){
+          sessionStorage.removeItem("redirectPath");
+          navigate(redirectPath);
+        }else{
+          redirectDefault();
+        }
       }
-    } 
+    }
     tokenCheck();
     particle();
-  }, []);
+  }, [isLoading]);
 
   const googleLoginClick = async () => {
     try{
         await loginWithGoogle();
       }catch(error){
-      alert('로그인 실패')
+        toast.error('로그인 실패')
       console.log(error);
     }
   }
 
+  if (isLoading) {
+    return <ProjectSpinner />
+  }
   return (
     <div className="flex h-screen bg-gray-900">
+      <Toaster />
       {/* Left Section */}
       <div className="flex-[1.8] text-white flex flex-col items-center justify-center">
         <div id="particles-js" className="w-full h-full"></div>

@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useGroupAxios from "../shared/apis/useGroupAxios";
-import { GetGroupDetailsResponse, JoinGroupResponse } from "../shared/types/groupApiResponse";
+import { GetGroupDetailsResponse, GetGroupMembersResponse, JoinGroupResponse } from "../shared/types/groupApiResponse";
+import { Toaster, toast } from 'react-hot-toast';
+
+
+// redux 초기 import 
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchUserInfo, resetUserState } from '../app/redux/user';
+import type { RootState, AppDispatch } from '../app/redux/store';
+
 
 declare global {
     interface Window {
@@ -42,13 +50,28 @@ interface ParticlesOptions {
     };
   }
   
+  // 유저리스트 하위 멤버
+  interface GroupUser {
+    id: number;
+    name: string;
+    image: string;
+    status: boolean;
+    role: string;
+  }
+
 const InvitePage = () => {
     const navigate = useNavigate();
     // const { inviteCode } = useParams<{ inviteCode: string }>();
-    const { getGroupDetails, joinGroup } = useGroupAxios();
+    const { getGroupDetails, joinGroup, getGroupMembers } = useGroupAxios();
     const { groupId, inviteCode } = useParams<{ groupId:string, inviteCode:string }>();
 
+    // redux dispatch, 유저 객체 사용
+    const dispatch = useDispatch<AppDispatch>();
+    const { user, status } = useSelector((state: RootState) => state.user);
+
+
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+    const [isJoined, setIsJoined] = useState<boolean | null>(null);
     const [groupName, setGroupName] = useState<string | null>(null);
     useEffect(() => {
         
@@ -90,41 +113,74 @@ const InvitePage = () => {
 
           particle();
     },[])
+    
+    useEffect(() => {
+      const checkAuthStatus = async () => {
+        if (!user && status === 'idle') {
+          await dispatch(fetchUserInfo());
+        }
+      };
+      checkAuthStatus();
+    }, [user, status, dispatch]);
+
+    // 유저가 로그인 상태인지 체크
+    useEffect(() => {
+      // user 상태에 따라 인증 여부를 설정하는 효과
+      if (user) {
+        console.log("유저 있어요!");
+        setIsAuthenticated(true);
+      } else {
+        console.log("유저 없는듯?");
+        setIsAuthenticated(false);
+      }
+    }, [user]);
+
 
     useEffect(() => {
-        // 로그인 상태 확인 (사용자 인증 확인 함수)
-        const checkAuthStatus = () => {
-        const user = localStorage.getItem("accessToken"); // 여기에 사용자 상태 확인 로직 추가
-        setIsAuthenticated(!!user);
-        };
 
-        // 그룹 정보 가져오기
-        const fetchGroupInfo = async () => {
+      // 그룹 정보 가져오기
+      const fetchGroupInfo = async () => {
         try {
             if(groupId != undefined){
                 const group:GetGroupDetailsResponse = await getGroupDetails(Number(groupId)); // 여기에 그룹 정보 가져오는 API 연결
+
                 setGroupName(group?.name || "Unknown Group");
             }else{
-                alert("잘못된 경로입니다.");
+              toast.error("잘못된 경로입니다.");
             }
         } catch (error) {
             setGroupName(null);
             console.log(error);
         }
-        };
-
-        checkAuthStatus();
-        if(isAuthenticated){
-            fetchGroupInfo();
+      };
+      const userJoined = async () => {
+        try {
+          const groupMembers:GetGroupMembersResponse = await getGroupMembers(Number(groupId));
+          if(groupMembers.users.find((member) => {
+            if(member !== null){
+              return member.id == user?.id;
+            }
+          })){
+            toast.error("이미 가입한 그룹입니다.");
+            navigate(`/projectlist/${groupId}`); // 성공 시 그룹 페이지로 이동
+          }
+        }catch (err){
+          console.log(err)
         }
-    }, [inviteCode, groupId, getGroupDetails, isAuthenticated]);
+      }
+      if(isAuthenticated){
+        fetchGroupInfo();
+        userJoined();
+      }
+    }, [inviteCode, groupId, getGroupDetails, isAuthenticated, getGroupMembers, navigate, user]);
 
+    // 그룹 참여하기
     const handleJoinGroup = async () => {
         try {
             // 그룹 참여 API 호출
             if(groupId != undefined && inviteCode != undefined){
                 const groupDetails:JoinGroupResponse = await joinGroup(Number(groupId), inviteCode);
-
+                toast.success(`${groupName} 그룹 참가에 성공했습니다!`);
                 navigate(`/projectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
             }
         } catch (error) {
@@ -132,8 +188,14 @@ const InvitePage = () => {
         }
     };
 
+    // 그룹 참여 
+    const handleRedirectLogin = async () => {
+      sessionStorage.setItem("redirectPath", window.location.pathname);
+      navigate("/");
+    }
     return (
         <div className="flex min-h-screen h-full items-center justify-center bg-gray-900">
+            <Toaster />
             <div id="particles-js" className="w-full h-full"></div>
             {/* <p className="text-5xl font-bold mb-8">Pading</p> */}
             <div className="px-7 pb-2 h-1/4 bg-white rounded-2xl shadow-2xl text-black text-center w-full max-w-md absolute">
@@ -157,7 +219,7 @@ const InvitePage = () => {
                         <>
                         <div className="text-lg break-all">그룹에 참여하시려면 로그인이 필요합니다.</div>
                         <button
-                        onClick={() => navigate("/")}
+                        onClick={handleRedirectLogin}
                         className="bg-[#5C8290] hover:bg-[#3F6673] text-white font-bold py-2 px-4 rounded-lg mt-4 w-full absolute bottom-1 left-0"
                         >
                         로그인 페이지로 이동

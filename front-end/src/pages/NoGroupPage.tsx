@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { NavigationProvider, useNavigation } from "../context/navigationContext";
-import ProfileNavigationBar from "../widgets/ProfileNavigationBar";
-import GroupNavigationBar from "../widgets/GroupNavigationBar";
+import ProfileNavigationBar from "../features/navigationbar/components/ProfileNavigationBar";
+import GroupNavigationBar from "../features/navigationbar/components/GroupNavigationBar";
 import robot from "../assets/robot.png";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 
