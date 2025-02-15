@@ -1,5 +1,5 @@
 // React
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
@@ -15,7 +15,11 @@ import CamButton from "../features/projects/projectpage/widgets/buttons/ProjectC
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/videochat";
+import RightContentsContainer from "../features/projects/VideoChat";
+import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
+
+// Models
+import { getMonitoringResource } from "../features/projects/monitoring/model/resourceModel";
 
 // Css
 import "react-resizable/css/styles.css";
@@ -24,6 +28,8 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
+import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
+import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 
 function ProjectPage() {
   // Props
@@ -36,20 +42,20 @@ function ProjectPage() {
   const [deployedLink, setDeployedLink] = useState<string>("");
 
   // Project Information
-  const [projectDetail, setprojectDetail] = useState<object | null>(null);
+  const [projectDetail, setProjectDetail] = useState<GetProjectDetailsResponse | null>(null);
   useEffect(() => {
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
         setDeployedLink(`http://${response.project.containerId}.pading.site`);
-        setprojectDetail(response);
+        setProjectDetail(response);
       })
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
       });
   }, [groupId, projectId, getProjectDetails]);
 
-  // Chat
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  // // Chat
+  // const [isChatOpen, setIsChatOpen] = useState(true);
 
   // Resize
   const [isVerticalDragging, setIsVerticalDragging] = useState(false); // 드래그 상태 관리
@@ -91,6 +97,46 @@ function ProjectPage() {
 
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
+  }
+
+  {
+    /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
+  }
+    
+  const [monitoringDataList, setMonitoringDataList] = useState<ResourceData[]>([]);
+  const [triggerFetch, setTriggerFetch] = useState(false);
+
+  useEffect(() => {
+    if (!projectDetail?.project?.containerId) return;
+
+    const fetchMonitoringData = async () => {
+      try {
+        const monitoringData = await getMonitoringResource(projectDetail.project.containerId, projectDetail.project.performance.cpu);
+        // 이전 데이터 배열에 새 데이터를 추가 (불변성 유지)
+        setMonitoringDataList((prevList) => [...prevList, monitoringData]);
+      } catch (error) {
+        console.error("Failed to fetch monitoring data:", error);
+      }
+    };
+
+    fetchMonitoringData(); // 첫 호출
+    const intervalId = setInterval(fetchMonitoringData, 5000); // 5초마다 호출
+
+    return () => clearInterval(intervalId); // 언마운트 시 정리
+  }, [triggerFetch]);
+
+  // 예시: 특정 조건이 만족되면 triggerFetch 변경 (projectDetail.containerId가 변경될 때)
+  useEffect(() => {
+    if (projectDetail?.project?.containerId) {
+      setTriggerFetch((prev) => !prev);
+    }
+  }, [projectDetail?.project?.containerId]);
+
+    
+    
+    
+  {
+    /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
   return (
     <ProjectEditorProvider>
@@ -147,10 +193,16 @@ function ProjectPage() {
             }
             handleSize={[5, 5]}
           >
-            <div className="flex flex-col justify-start h-full bg-[#212426] select-none">
+            <div className="flex flex-col justify-between h-full bg-[#212426] select-none">
               <div className="w-full overflow-x-hidden">
                 {/* 파일 탐색기 */}
                 <FileExplorer />
+              </div>
+              <div className="w-full overflow-x-hidden">
+                {/* 리소스 모니터링 바 */}
+                <ResourceMonitorBar 
+                  monitoringDataList={monitoringDataList}
+                />
               </div>
             </div>
           </ResizableBox>
