@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GetProjectListResponse, ProjectListItem } from '../shared/types/projectApiResponse';
 import GroupNavigationBar from '../features/navigationbar/components/GroupNavigationBar';
 import ProfileNavigationBar from '../features/navigationbar/components/ProfileNavigationBar';
+import ProjectCreateModal from '../features/groups/widgets/modals/CreateProjectModal';
 import DeleteConfirmModal from '../features/groups/widgets/modals/DeleteConfirmModal';
 import { NavigationProvider, useNavigation } from '../context/navigationContext';
 import useGroupAxios from '../shared/apis/useGroupAxios';
@@ -21,7 +22,9 @@ import type { RootState, AppDispatch } from '../app/redux/store';
 import { fetchUserInfo } from '../app/redux/user';
 import ProjectCard from '../features/groups/widgets/components/ProjectCard';
 import InviteLink from '../features/groups/widgets/components/CreateLinkComponents';
-import ProjectCreateModal from '../features/groups/widgets/modals/CreateProjectModal';
+
+// 반투명 로딩
+import TranslucentSpinner from '../features/projects/projectpage/widgets/spinners/TranslucentSpinner';
 
 // 타입 정의
 export type Project = ProjectListItem['project'];
@@ -31,6 +34,10 @@ const ProjectListPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const userProfile = useSelector((state: RootState) => state.user.user);
   const userStatus = useSelector((state: RootState) => state.user.status);
+
+  // 로딩상태 관리
+  const [isDeleting, setIsLDeleting] = useState(false);
+
 
   // 유저 정보가 없으면 컴포넌트 마운트 시 fetchUserInfo 디스패치
   useEffect(() => {
@@ -137,7 +144,14 @@ const ProjectListPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    // 이미 로딩중이면 안되게 막기
+    if (isDeleting) return;
+
     if (!selectedDeleteProject || !groupId) return;
+
+    // 로딩동안 막기
+    setIsLDeleting(true);
+
     try {
       await deleteProject(groupId, selectedDeleteProject.project.id);
       setProjectList((prev) =>
@@ -149,10 +163,25 @@ const ProjectListPage: React.FC = () => {
       console.error('프로젝트 삭제 실패:', err);
       toast.error('프로젝트 삭제에 실패했습니다.');
     }
+    finally{
+      // 로딩후 로딩창 닫기
+      setIsLDeleting(false);
+    }
   };
 
+  // 모달에서 전달받은 새 프로젝트 정보를 기존 리스트에 추가
+  const handleProjectCreate = (newProjectItem: ProjectListItem) => {
+    setProjectList((prev) => [newProjectItem, ...prev]);
+  };
+
+
   return (
+    
     <div className={`transition-all duration-1000 ${isProfileNavOpen ? 'ml-64' : 'ml-0'}`}>
+      {/* 로딩 오버레이 (생성 중일 때) */}
+      {isDeleting && (
+        <TranslucentSpinner />
+      )}
       <Toaster />
       {/* 프로젝트 목록 영역 */}
       <div className="relative pl-8 pr-12 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
@@ -194,6 +223,7 @@ const ProjectListPage: React.FC = () => {
           groupId={groupId!}
           isOpen={modalState.create}
           onClose={() => closeModal('create')}
+          onProjectCreate={handleProjectCreate}
         />
       )}
 
