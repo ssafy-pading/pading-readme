@@ -27,8 +27,8 @@ import { fetchUserInfo } from "../../../app/redux/user";
 import useGroupAxios from "../../../shared/apis/useGroupAxios"; 
 import useProjectAxios from "../../../shared/apis/useProjectAxios";
 import useMypageAxios from "../../../shared/apis/useMypageAxios";
-import LeaveModal from "../../users/widgets/modals/UserLeaveModal";
-import PictureModal from "../../users/widgets/modals/PictureChangeModal";
+// import LeaveModal from "../../users/widgets/modals/UserLeaveModal";
+// import PictureModal from "../../users/widgets/modals/PictureChangeModal";
 import { GetProjectListResponse } from "../../../shared/types/projectApiResponse";
 import GroupUpdateNameModal from "../../groups/widgets/modals/GroupUpdateNameModal";
 
@@ -93,15 +93,15 @@ const ProfileNavigationBar: React.FC = () => {
     setIsDropdownOpen((prev) => !prev);
   };
     
-  const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
-  const openMypageModal = () => setActiveModal('mypage');
-  const openDeleteModal = () => setActiveModal('delete');
-  const openPictureModal = () => setActiveModal('picture');
-  const closeModal = () => setActiveModal(null);
-  const handleNavigateToMypage = () => {
-    setIsDropdownOpen(false);
-    setActiveModal('mypage');
-  };
+  // const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
+  // const openMypageModal = () => setActiveModal('mypage');
+  // const openDeleteModal = () => setActiveModal('delete');
+  // const openPictureModal = () => setActiveModal('picture');
+  // const closeModal = () => setActiveModal(null);
+  // const handleNavigateToMypage = () => {
+  //   setIsDropdownOpen(false);
+  //   setActiveModal('mypage');
+  // };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -180,6 +180,17 @@ const ProfileNavigationBar: React.FC = () => {
             : groupUser;
         });
 
+        // 정렬 적용: role 우선순위에 따라 정렬
+        const rolePriority: Record<string, number> = {
+          OWNER: 1,
+          MANAGER: 2,
+          MEMBER: 3,
+        };
+
+        updatedGroupUsers.sort((a, b) => {
+          return (rolePriority[a.role] || 999) - (rolePriority[b.role] || 999);
+        });
+
         setGroupUsers(updatedGroupUsers);
       } catch (error) {
         console.error("그룹 멤버 조회 중 오류:", error);
@@ -226,6 +237,7 @@ const ProfileNavigationBar: React.FC = () => {
 
   return (
     <div className="relative">
+      <Toaster />
       {/* 토글 버튼 (네비게이션 바가 닫힌 상태) */}
       {!isProfileNavOpen && (
         <button
@@ -295,13 +307,13 @@ const ProfileNavigationBar: React.FC = () => {
                   </button>
                   {isDropdownOpen && (
                     <div className="absolute right-0 top-full mt-2 w-28 bg-white text-xs rounded-lg shadow-md overflow-hidden z-10">
-                      <button
+                      {/* <button
                         onClick={handleNavigateToMypage}
                         className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
                       >
                         <UserIcon className="w-4 h-4 mr-2" />
                         마이페이지
-                      </button>
+                      </button> */}
                       <button
                         onClick={handleLogout}
                         className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
@@ -402,20 +414,34 @@ const ProfileNavigationBar: React.FC = () => {
               >
                 <ul>
                   {groupUsers.map((groupUser) => (
-                    <li key={groupUser.id} className="flex items-center my-2">
-                      <div className="relative w-[30px] h-[30px]">
-                        <img
-                          src={groupUser.image}
-                          alt={groupUser.name}
-                          className="w-full h-full rounded-full border-2 border-gray-300"
-                        />
-                        <span
-                          className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                            groupUser.status ? "bg-green-500" : "bg-gray-400"
-                          }`}
-                        />
+                    <li key={groupUser.id} className="flex items-center my-2 mr-2">
+                      <div className="flex items-center">
+                        <div className="relative w-[30px] h-[30px]">
+                          <img
+                            src={groupUser.image}
+                            alt={groupUser.name}
+                            className="w-full h-full rounded-full border-2 border-gray-300"
+                          />
+                          <span
+                            className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                              groupUser.status ? "bg-green-500" : "bg-gray-400"
+                            }`}
+                          />
+                        </div>
+                        <span className="ml-4 text-[#4D4650] whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
+                          {groupUser.name}
+                        </span>
                       </div>
-                      <span className="ml-4 text-[#4D4650]">{groupUser.name}</span>
+                      {groupUser.role === "OWNER" && (
+                        <span className="ml-2 px-2 py-0.5 text-[10px] font-medium text-white bg-blue-500 rounded-lg">
+                          OWNER
+                        </span>
+                      )}
+                      {groupUser.role === "MANAGER" && (
+                        <span className="ml-2 px-2 py-0.5 text-[10px] font-medium text-white bg-green-500 rounded-lg">
+                          MANAGER
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -438,7 +464,7 @@ const ProfileNavigationBar: React.FC = () => {
 
       {/* MyPageModal 렌더링 */}
 
-      {activeModal === 'delete' && (
+      {/* {activeModal === 'delete' && (
         <LeaveModal
           isOpen={true}
           onClose={closeModal}
@@ -451,7 +477,7 @@ const ProfileNavigationBar: React.FC = () => {
           onClose={closeModal}
           onSwitchToMypage={openMypageModal}
         />
-      )}
+      )} */}
     </div>
   );
 };
