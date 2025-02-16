@@ -378,24 +378,19 @@ function ProjectPage() {
                         } cursor-pointer`}
                         onClick={() => {
                           setActivePanel("run");
-                          
                         }}
                       >
                         Run
                       </button>
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
-      <button
-        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-          activePanel === "terminal"
-            ? "border-b-2 border-b-[#3B82F6] text-white"
-            : "text-[#858595] hover:text-white"
-        } cursor-pointer`}
-        onClick={() => setActivePanel("terminal")}
-      >
-        Terminal
-      </button>
-    )}
+                        <button
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-white cursor-pointer`}
+                          onClick={() => setActivePanel("terminal")}
+                        >
+                          Terminal
+                        </button>
+                      )}
                       {/* 터미널 탭 리스트 (항상 렌더링, 단지 CSS로 보이고 안보임 처리) */}
                       <div
                         className="flex space-x-2"
@@ -409,7 +404,7 @@ function ProjectPage() {
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                                 activePanel === "terminal" &&
                                 activeTerminal === index
-                                  ? "text-white"
+                                  ? "border-b-2 border-b-[#3B82F6] text-white"
                                   : "text-[#858595] hover:text-white"
                               } cursor-pointer`}
                               onClick={() => {
@@ -454,6 +449,25 @@ function ProjectPage() {
 
                   {/* 패널 영역: 두 패널 모두 항상 렌더링 */}
                   <div className="flex-1 w-full h-[calc(100% - 30px)] relative">
+                    {/* 런 패널 */}
+                    <div
+                      className="bg-[#141617] w-full h-full"
+                      style={{
+                        display: activePanel === "run" ? "block" : "none",
+                      }} /* 수정: CSS로 런 패널 보이기/숨기기 */
+                    >
+                      <ProjectRun
+                        active={true}
+                        height={terminalHeight - 30}
+                        isTerminalWidthChange={isTerminalWidthChange}
+                        groupId={groupId}
+                        projectId={projectId}
+                        runCommand={projectDetail?.project.runCommand}
+                        mode="run"
+                        executeRunCommand={executeRunCommand}
+                        onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                      />
+                    </div>
                     {/* 터미널 패널 */}
                     <div
                       className="bg-[#141617] w-full h-full"
@@ -478,26 +492,6 @@ function ProjectPage() {
                           />
                         </div>
                       ))}
-                    </div>
-
-                    {/* 런 패널 */}
-                    <div
-                      className="bg-[#141617] w-full h-full"
-                      style={{
-                        display: activePanel === "run" ? "block" : "none",
-                      }} /* 수정: CSS로 런 패널 보이기/숨기기 */
-                    >
-                      <ProjectRun
-                        active={true}
-                        height={terminalHeight - 30}
-                        isTerminalWidthChange={isTerminalWidthChange}
-                        groupId={groupId}
-                        projectId={projectId}
-                        runCommand={projectDetail?.project.runCommand}
-                        mode="run"
-                        executeRunCommand={executeRunCommand}
-                        onRunCommandExecuted={() => setExecuteRunCommand(false)}
-                      />
                     </div>
                   </div>
                 </div>
