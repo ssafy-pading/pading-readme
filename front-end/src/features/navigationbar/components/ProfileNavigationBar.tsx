@@ -126,6 +126,8 @@ const ProfileNavigationBar: React.FC = () => {
     const fetchGroupDetails = async () => {
       try {
         if (!groupId) {
+          // 로딩상태 해제
+          setIsLoading(false);
           navigate("/nogroup");
           return;
         }

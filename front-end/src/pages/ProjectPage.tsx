@@ -169,7 +169,7 @@ function ProjectPage() {
       try {
         const monitoringData = await getMonitoringResource(
           projectDetail.project.containerId,
-          projectDetail.project.performance.cpu
+          projectDetail.project.performance.cpuDescription
         );
         // 이전 데이터 배열에 새 데이터를 추가 (불변성 유지)
         setMonitoringDataList((prevList) => [...prevList, monitoringData]);
@@ -263,13 +263,13 @@ function ProjectPage() {
             <div className="h-full w-full top-0 left-0 right-0 bg-[#212426] flex flex-col justify-between text-[#141617]">
               {/* 파일 탭 자리 */}
               <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
-                <div className="flex flex-1 items-center space-x-2 overflow-x-auto">
+                <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
                   {fileTap.map((file, index) => (
                     <div key={index} className="flex flex-row items-center">
                       <div
                         className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                           activeFileIndex === index
-                            ? "border-t-4 border-b-[#3B82F6] text-white"
+                            ? "text-white"
                             : "text-[#858595] hover:text-white"
                         }`}
                         onClick={() => setActiveFileIndex(index)}
@@ -355,13 +355,13 @@ function ProjectPage() {
                     {/* 상단 탭과 + 버튼 */}
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
-                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none">
+                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
                         {terminalIds.map((id, index) => (
                           <div key={id} className="flex flex-row items-center">
                             <div
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                                 activeTerminal === index
-                                  ? "border-b-2 border-b-[#3B82F6] text-white"
+                                  ? " text-white"
                                   : "bg-[#141617] text-[#858595] hover:text-white"
                               }  cursor-pointer`}
                               onClick={() => setActiveTerminal(index)}
