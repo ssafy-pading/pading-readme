@@ -169,7 +169,7 @@ function ProjectPage() {
       try {
         const monitoringData = await getMonitoringResource(
           projectDetail.project.containerId,
-          projectDetail.project.performance.cpu
+          projectDetail.project.performance.cpuDescription
         );
         // 이전 데이터 배열에 새 데이터를 추가 (불변성 유지)
         setMonitoringDataList((prevList) => [...prevList, monitoringData]);
