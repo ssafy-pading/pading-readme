@@ -284,13 +284,12 @@ function ProjectPage() {
                   : "w-[2px] bg-[#666871] opacity-50"
               }
               hover:w-[2px] hover:bg-[#3B82F6] cursor-col-resize`}
-              style={{ zIndex: 10 }}
             />
           }
           handleSize={[5, 5]}
         >
           <div className="flex flex-col justify-between h-full bg-[#212426] select-none">
-            <div className="w-full overflow-x-hidden">
+            <div className="flex-1 min-h-0 w-full overflow-x-hidden">
               {/* 파일 탐색기 */}
               <FileExplorer />
             </div>
@@ -384,7 +383,6 @@ function ProjectPage() {
                         : "h-[2px] bg-[#666871] opacity-50"
                     }
                     cursor-row-resize hover:h-[2px] hover:bg-[#3B82F6]`}
-                    style={{ zIndex: 10 }}
                   />
                 }
                 onResizeStart={() => setIsVerticalDragging(true)}
