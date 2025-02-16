@@ -75,21 +75,8 @@ function ProjectPage() {
     defaultFileRoutes,
     setDefaultFileRoutes,
   } = useProjectEditor();
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  const addNewFile = (file: FileTapType) => {
-    // if (defaultFileRoutes.length > 0 && file.fileRouteAndName in defaultFileRoutes) {
-    // 에디터에 setvalue 해주고 리스트에서 해당 경로 삭제
-    // }
-    const newFile = {
-      fileName: `NewFile${fileTap.length + 1}.js`,
-      fileRouteAndName: `/path/to/NewFile${fileTap.length + 1}.js`,
-    };
-    setFileTap([...fileTap, newFile]);
-    setActiveFileIndex(fileTap.length); // 새 탭을 활성화
-  };
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
+
+  
 
   // 파일 탭 삭제 함수
   const deleteFile = (index: number) => {
@@ -289,15 +276,6 @@ function ProjectPage() {
                       )}
                     </div>
                   ))}
-                </div>
-                <div className="flex-none">
-                  <button
-                    onClick={addNewFile}
-                    className="px-2 py-1 text-white hover:bg-blue-600"
-                    title="Add new file"
-                  >
-                    <VscAdd />
-                  </button>
                 </div>
               </div>
               {/* 코드 편집기 자리 */}

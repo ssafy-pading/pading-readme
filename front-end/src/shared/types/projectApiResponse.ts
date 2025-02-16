@@ -111,3 +111,9 @@ export type FileTapType = {
   fileName: string;
   fileRouteAndName: string
 }[]
+
+// 기본 파일 타입
+export type DefaultFileRouteType = {
+  defaultFileRouteAndName: string;
+  content: string;
+}

@@ -3,6 +3,8 @@ import Editor from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
+import { useProjectEditor } from "../../../../context/ProjectEditorContext";
+import { DefaultFileRouteType } from "../../../../shared/types/projectApiResponse";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -17,6 +19,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   fileRouteAndName,
   userName
 }) => {
+
+  const {defaultFileRoutes, setDefaultFileRoutes} = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const [value, setvalue] = useState("")
@@ -67,6 +71,23 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       doc.on("update", (update) => {
         sendYjsUpdate(update);
       });
+      if (value === "" && defaultFileRoutes.length >= 1) {  // 수정: 기본 파일이 존재할 때만 검사
+        // 기본 파일 배열에서 fileRouteAndName과 일치하는 항목 찾기
+        const defaultFile = defaultFileRoutes.find(
+          (file) => file.defaultFileRouteAndName === fileRouteAndName
+        );
+        if (defaultFile) {
+          // 기본 파일의 content로 에디터 값을 설정
+          setvalue(defaultFile.content);
+          // 해당 기본 파일을 defaultFileRoutes 배열에서 제거
+          setDefaultFileRoutes((prevRoutes: DefaultFileRouteType[]) =>
+            prevRoutes.filter(
+              (file) => file.defaultFileRouteAndName !== fileRouteAndName
+            )
+          );
+        }
+      }
+      
     }
 
     // ✅ 컴포넌트가 언마운트될 때 기존 WebSocket 연결 해제
