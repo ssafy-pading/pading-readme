@@ -116,7 +116,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
     return () => {
       stompClient.deactivate();
     };
-  }, []);
+  }, [groupId, user]);
 
   // chatList 변경 시 스크롤 이동
   useEffect(() => {
