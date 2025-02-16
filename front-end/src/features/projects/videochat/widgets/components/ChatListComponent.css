@@ -1,0 +1,6 @@
+/* 스크롤바 기본 설정 */
+.custom-scrollbar {
+    scrollbar-width: thin; /* Firefox용: 얇은 스크롤바 */
+    scrollbar-color: #2F3336 #212426; /* Firefox용: thumb 색상과 track 색상 */
+}
+  

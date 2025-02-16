@@ -1,7 +1,7 @@
 // src/widgets/ProjectCard.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ProjectListItem } from '../shared/types/projectApiResponse';
+// import { useNavigate } from 'react-router-dom';
+import { ProjectListItem } from '../../../../shared/types/projectApiResponse';
 import { RxDotsHorizontal } from "react-icons/rx";
 import {
   PencilSquareIcon,
@@ -25,7 +25,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   // project prop에서 실제 프로젝트 데이터와 사용자 목록(users)을 분해합니다.
   const { project: projectData, users } = project;
   const { id, name, projectImage, performance } = projectData;
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // 드롭다운 관련 상태/로직
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -45,7 +45,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   }, []);
 
   const handleEnterProject = () => {
-    navigate(`/project/${groupId}/${id}`);
+    // navigate(`/project/${groupId}/${id}`);
+    window.location.href = `/project/${groupId}/${id}`;
   };
 
   return (

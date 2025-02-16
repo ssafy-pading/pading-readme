@@ -42,7 +42,6 @@ const useProjectAxios = () => {
    */
   const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
     if (!localStorage.getItem('refreshToken')) {
-      console.log('Handling 401, will navigate now.');
       navigate('/');
       return false;
     }
@@ -58,7 +57,6 @@ const useProjectAxios = () => {
         } else {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
-          console.log('Handling 401, will navigate now.');
           navigate('/');
           return false;
         }
@@ -66,7 +64,6 @@ const useProjectAxios = () => {
         console.error('Failed to refresh token:', error);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        console.log('Handling 401, will navigate now.');
         navigate('/');
         return false;
       } finally {
