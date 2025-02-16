@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
@@ -11,6 +11,10 @@ interface WebTerminalProps {
   groupId?: string;
   projectId?: string;
   active?: boolean;
+  runCommand?: string; // 실행 명령어
+  mode?: "terminal" | "run"  // 터미널 탭 상태
+  executeRunCommand?: boolean; // run 버튼 클릭 시에만 true로 설정
+  onRunCommandExecuted?: () => void; 
 }
 
 const WebTerminal: React.FC<WebTerminalProps> = ({
@@ -19,6 +23,10 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
   groupId,
   projectId,
   active,
+  runCommand,
+  mode,
+  executeRunCommand,
+  onRunCommandExecuted,
 }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
   const term = useRef<Terminal | null>(null);
@@ -26,7 +34,52 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
   const stompClient = useRef<Client | null>(null);
   const observer = useRef<MutationObserver | null>(null);
 
+  // Stomp 연결 상태관리
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+
   const terminalId = crypto.randomUUID();
+
+  // 프롬프트 준비 여부 (예: "app#"이 나타나면 준비됨)
+  const [isPromptReady, setIsPromptReady] = useState<boolean>(false);
+
+  // 프롬프트 문자열 확인 (예: "app#"이 포함되어 있으면 프롬프트 준비 완료)
+  const checkForPrompt = (text: string) => {
+    if (text.includes("app#")) { // 여기에 프롬프트 준비 상태를 확인할 문자열 입력
+      setIsPromptReady(true);
+    }
+  };
+
+  // STOMP를 통해 데이터를 전송하는 함수 
+  const handleInputData = useCallback((data: string) => {
+    console.log(`Sending message: ${data}`);
+    if (stompClient.current && stompClient.current.connected) {
+      stompClient.current.publish({
+        destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/input`,
+        body: data,
+      });
+    } else {
+      console.warn("STOMP connection not available.");
+    }
+  }, [groupId, projectId, terminalId]);
+
+  // clipboard 이벤트를 시뮬레이션하여 텍스트를 붙여넣는 방식 (키보드 입력 처리는 xterm.js의 내부 로직 때문에 오류 발생)
+  const simulatePasteEvent = (text: string) => {
+    const textarea = document.querySelector('.xterm-helper-textarea') as HTMLTextAreaElement | null;
+    if (!textarea) {
+      console.warn("xterm-helper-textarea not found");
+      return;
+    }
+    // DataTransfer 객체를 생성해 텍스트를 설정
+    const clipboardData = new DataTransfer();
+    clipboardData.setData('text/plain', text);
+    const pasteEvent = new ClipboardEvent('paste', {
+      bubbles: true,
+      cancelable: true,
+      clipboardData,
+    });
+    console.log("Dispatching paste event with text:", text);
+    textarea.dispatchEvent(pasteEvent);
+  };
 
   useEffect(() => {
     // -------------------------
@@ -68,6 +121,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
           `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
           (message: IMessage) => {
             term.current?.write(message.body);
+            checkForPrompt(message.body) // 메시지에서 #app이 포함되어있는지 확인 -> 마우스 포커싱을 위한 연결 확인
           }
         );
 
@@ -77,18 +131,19 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
           body: "",
         });
 
-        // 사용자 입력을 서버로 전송
-        term.current?.onData((data) => {
-          stompClient.current?.publish({
-            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/input`,
-            body: data,
-          });
-        });
+        // 사용자 입력을 서버로 전송 (Run모드일 때 runCommand를 보내기 위해 함수로 뺌)
+        term.current?.onData(handleInputData);
 
         // 연결 직후 한 번 사이즈 동기화
         handleResize();
+
+        setIsConnected(true);
       },
-      onDisconnect: () => console.log("Disconnected"),
+      onDisconnect: () => {
+        console.log("Disconnected");
+        setIsConnected(false);
+        setIsPromptReady(false);
+      },
     });
 
     stompClient.current.activate();
@@ -159,6 +214,37 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
       }, 100);
     }
   }, [height, isTerminalWidthChange, active]);
+
+  // -------------------------
+  // 7) runCommand 전송 (run 탭) - 붙여넣기 방식으로 해결
+  // -------------------------
+  useEffect(() => {
+    if (
+      mode === "run" &&
+      runCommand &&
+      executeRunCommand &&
+      isConnected &&
+      isPromptReady
+    ) {
+      console.log("Waiting 1s before sending runCommand via simulated paste event:", runCommand);
+      term.current?.focus();
+      setTimeout(() => {
+        // 전체 문자열을 붙여넣기 방식으로 전송 (엔터키 포함)
+        simulatePasteEvent(runCommand + "\n");
+        if (onRunCommandExecuted) onRunCommandExecuted();
+      }, 1000); // 딜레이가 필요
+    }
+  }, [
+    executeRunCommand,
+    isConnected,
+    isPromptReady,
+    mode,
+    runCommand,
+    groupId,
+    projectId,
+    terminalId,
+    onRunCommandExecuted,
+  ]);
 
   return (
     <div

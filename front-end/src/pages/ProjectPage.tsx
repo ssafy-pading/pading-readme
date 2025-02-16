@@ -13,6 +13,8 @@ import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons
 import ParticipantsButton from "../features/projects/projectpage/widgets/buttons/ProjectParticipants";
 import MuteButton from "../features/projects/projectpage/widgets/buttons/ProjectMuteButton";
 import CamButton from "../features/projects/projectpage/widgets/buttons/ProjectCameraButton";
+import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
+import RunButton from "../features/projects/editorterminal/widgets/buttons/RunButton";
 
 // Projects
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
@@ -30,7 +32,6 @@ import "../features/projects/projectpage/css/ProjectPage.css";
 
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
-import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
 import { FileTapType } from "../shared/types/projectApiResponse";
 import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
@@ -42,6 +43,9 @@ function ProjectPage() {
     projectId?: string;
   }>();
   const { getProjectDetails } = useProjectAxios();
+  
+  // 배포 링크 주소
+  const [deployedLink, setDeployedLink] = useState<string>("");
 
   // Project Information
   const [projectDetail, setProjectDetail] =
@@ -49,7 +53,7 @@ function ProjectPage() {
   useEffect(() => {
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
-        setDeployedLink(`http://${response.project.containerId}.pading.site`);
+        setDeployedLink(`https://${response.project.deploymentUrl}`);
         setProjectDetail(response);
       })
       .catch((error) => {
@@ -57,8 +61,6 @@ function ProjectPage() {
       });
   }, [groupId, projectId, getProjectDetails]);
 
-  // 배포 링크 주소
-  const [deployedLink, setDeployedLink] = useState<string>("");
 
   // // Chat
   // const [isChatOpen, setIsChatOpen] = useState(true);
@@ -149,6 +151,16 @@ function ProjectPage() {
     });
   };
 
+  // 터미널 Tab 상태 관리
+  const [activePanel, setActivePanel] = useState<"terminal" | "run">("terminal");
+  // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
+  const [executeRunCommand, setExecuteRunCommand] = useState<boolean>(false);
+  // 파일 실행 버튼 클릭시 호출 되는 함수
+  const handleFileExecution = async () => {
+    setActivePanel("run"); // 실행 결과 탭으로 전환
+    setExecuteRunCommand(true); // 버튼을 누른 상태로 전환
+  };
+
   {
     /*//////////////////////////////// Terminal State or Functions  ////////////////////////////////////////*/
   }
@@ -202,8 +214,9 @@ function ProjectPage() {
           <p className="font-semibold text-center">
             PROJECT : {projectDetail?.project?.name}
           </p>
+            <RunButton onExecute={handleFileExecution}/>
             <DeployedLinkButton link={deployedLink} />
-          </div>
+        </div>
           <div className="flex items-center justify-center gap-20">
             <div className="flex items-center justify-center text-[#d4d4d4]">
               <ParticipantsButton />
@@ -356,15 +369,30 @@ function ProjectPage() {
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
                       <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
+                        {/* Run 탭 */}
+                        <button
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                            activePanel === "run"
+                              ? "border-b-2 border-b-[#3B82F6] text-white"
+                              : "text-[#858595] hover:text-white"
+                          } cursor-pointer`}
+                          onClick={() => setActivePanel("run")}
+                        >
+                          Run
+                        </button>
+                        {/* Terminal 탭 */}
                         {terminalIds.map((id, index) => (
                           <div key={id} className="flex flex-row items-center">
                             <div
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                                activeTerminal === index
+                                activePanel === "terminal" && activeTerminal === index
                                   ? " text-white"
-                                  : "bg-[#141617] text-[#858595] hover:text-white"
+                                  : "text-[#858595] hover:text-white"
                               }  cursor-pointer`}
-                              onClick={() => setActiveTerminal(index)}
+                              onClick={() => {
+                                setActivePanel("terminal")
+                                setActiveTerminal(index)}
+                              }
                             >
                               Terminal ({id + 1})
                             </div>
@@ -388,6 +416,7 @@ function ProjectPage() {
                         <button
                           onClick={() => {
                             addNewTerminal();
+                            setActivePanel("terminal")
                             setActiveTerminal(terminalIds.length); // 새로 추가된 터미널로 포커싱
                           }}
                           className="px-4 py-2 text-white hover:bg-blue-600 transition shrink-0"
@@ -401,25 +430,44 @@ function ProjectPage() {
 
                     {/* 터미널 화면 */}
                     <div className="flex-1 w-full h-[calc(100% - 30px)] bg-[#141617] relative">
-                      {terminalIds.map((id, index) => (
-                        <div
-                          key={id}
-                          style={{
-                            display:
-                              activeTerminal === index ? "block" : "none",
-                          }}
-                        >
-                          <ProjectTerminal
-                            active={activeTerminal === index}
-                            height={terminalHeight - 30}
-                            isTerminalWidthChange={isTerminalWidthChange}
-                            groupId={groupId}
-                            projectId={projectId}
-                            // 필요하다면 각 터미널에 id 또는 기타 props 전달
-                          />
-                        </div>
-                      ))}
+                    {activePanel === "terminal" && (
+                        <>
+                          {terminalIds.map((id, index) => (
+                            <div
+                              key={id}
+                              style={{
+                                display:
+                                  activeTerminal === index ? "block" : "none",
+                              }}
+                            >
+                              <ProjectTerminal
+                                active={activeTerminal === index}
+                                height={terminalHeight - 30}
+                                isTerminalWidthChange={isTerminalWidthChange}
+                                groupId={groupId}
+                                projectId={projectId}
+                                mode="terminal"
+                              />
+                              </div>
+                            ))}
+                        </>
+                      )}
                     </div>
+                    {activePanel === "run" && (
+                      <>
+                        <ProjectTerminal
+                          active={true}
+                          height={terminalHeight - 30}
+                          isTerminalWidthChange={isTerminalWidthChange}
+                          groupId={groupId}
+                          projectId={projectId}
+                          runCommand={projectDetail?.project.runCommand}
+                          mode="run"
+                          executeRunCommand={executeRunCommand}
+                          onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                        />
+                      </>
+                    )}
                   </div>
                 </ResizableBox>
               </div>
