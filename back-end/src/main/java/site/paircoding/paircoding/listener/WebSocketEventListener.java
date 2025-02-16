@@ -48,7 +48,7 @@ public class WebSocketEventListener {
 
       // ✅ JSON 메시지 생성
       Map<String, String> message = new HashMap<>();
-      message.put("status", "connect");
+      message.put("status", "online");
       message.put("userId", userId);
 
       try {
@@ -121,7 +121,7 @@ public class WebSocketEventListener {
 
         // ✅ JSON 메시지 생성
         Map<String, String> message = new HashMap<>();
-        message.put("status", "disconnect");
+        message.put("status", "offline");
         message.put("userId", userId);
         message.put("projectId", projectId);
 
