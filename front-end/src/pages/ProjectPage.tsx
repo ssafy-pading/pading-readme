@@ -202,19 +202,7 @@ function ProjectPage() {
           <p className="font-semibold text-center">
             PROJECT : {projectDetail?.project?.name}
           </p>
-        </div>
-        <div className="flex">
-          <DeployedLinkButton link={deployedLink} />
-        </div>
-        <div className="flex items-center justify-center gap-20">
-          <div className="flex items-center justify-center text-[#d4d4d4]">
-            <ParticipantsButton />
-          </div>
-          {/* 버튼 */}
-          <div className="flex items-center justify-center gap-4 mr-16">
-            <MuteButton />
-            <CamButton />
-          </div>
+       
           <div className="flex">
             <DeployedLinkButton link={deployedLink} />
           </div>
