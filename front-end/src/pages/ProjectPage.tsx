@@ -202,8 +202,6 @@ function ProjectPage() {
           <p className="font-semibold text-center">
             PROJECT : {projectDetail?.project?.name}
           </p>
-       
-          <div className="flex">
             <DeployedLinkButton link={deployedLink} />
           </div>
           <div className="flex items-center justify-center gap-20">
@@ -434,7 +432,6 @@ function ProjectPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
