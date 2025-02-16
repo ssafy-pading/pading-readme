@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import site.paircoding.paircoding.entity.dto.DirectoryContentDto;
 import site.paircoding.paircoding.entity.dto.DirectoryCreateDto;
 import site.paircoding.paircoding.entity.dto.DirectoryDeleteDto;
+import site.paircoding.paircoding.entity.dto.DirectoryExceptionDto;
 import site.paircoding.paircoding.entity.dto.DirectoryListDto;
 import site.paircoding.paircoding.entity.dto.DirectoryRenameDto;
 import site.paircoding.paircoding.entity.dto.DirectorySaveDto;
@@ -66,21 +67,21 @@ public class DirectoryController {
 
   @MessageExceptionHandler(WebsocketException.class)
   @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
-  public String handleWebsocketException(Exception e) {
-    return "File system error: " + e.getMessage();
+  public DirectoryExceptionDto handleWebsocketException(Exception e) {
+    return new DirectoryExceptionDto("File system error: " + e.getMessage());
   }
 
   @MessageExceptionHandler(KubernetesClientException.class)
   @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
-  public String handleKubernetesClientException(Exception e) {
+  public DirectoryExceptionDto handleKubernetesClientException(Exception e) {
 //    e.printStackTrace();
-    return "Internal Server Error";
+    return new DirectoryExceptionDto("Internal Server Error");
   }
 
   @MessageExceptionHandler(Exception.class)
   @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
-  public String handleException(Exception e) {
+  public DirectoryExceptionDto handleException(Exception e) {
     e.printStackTrace();
-    return "Internal Server Error";
+    return new DirectoryExceptionDto("Internal Server Error");
   }
 }
