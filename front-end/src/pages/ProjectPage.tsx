@@ -215,15 +215,15 @@ function ProjectPage() {
           <p className="font-semibold text-center">
             PROJECT : {projectDetail?.project?.name}
           </p>
-          <RunButton onExecute={handleFileExecution} />
-          <DeployedLinkButton link={deployedLink} />
-        </div>
-        <div className="flex items-center justify-center gap-20">
-          <div className="flex items-center justify-center text-[#d4d4d4]">
+          <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
           </div>
+        </div>
+        <div className="flex items-center justify-center gap-20">
           {/* 버튼 */}
           <div className="flex items-center justify-center gap-4 mr-16">
+            <RunButton onExecute={handleFileExecution} />
+            <DeployedLinkButton link={deployedLink} />
             <MuteButton />
             <CamButton />
           </div>
