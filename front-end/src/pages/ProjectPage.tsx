@@ -263,13 +263,13 @@ function ProjectPage() {
             <div className="h-full w-full top-0 left-0 right-0 bg-[#212426] flex flex-col justify-between text-[#141617]">
               {/* 파일 탭 자리 */}
               <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
-                <div className="flex flex-1 items-center space-x-2 overflow-x-auto">
+                <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
                   {fileTap.map((file, index) => (
                     <div key={index} className="flex flex-row items-center">
                       <div
                         className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                           activeFileIndex === index
-                            ? "border-t-4 border-b-[#3B82F6] text-white"
+                            ? "text-white"
                             : "text-[#858595] hover:text-white"
                         }`}
                         onClick={() => setActiveFileIndex(index)}
