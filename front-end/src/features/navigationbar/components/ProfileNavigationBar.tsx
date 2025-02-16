@@ -17,6 +17,7 @@ import profileImage from "../../../assets/profile_image.png";
 // 상태관리 및 토스트
 import ProjectSpinner from '../../projects/projectpage/widgets/spinners/ProjectSpinner';
 import { Toaster, toast } from 'react-hot-toast';
+import { confirmToast } from "../../../shared/widgets/toastConfirm";
 
 // --- Redux 관련 임포트 ---
 import { useSelector, useDispatch } from "react-redux";
@@ -256,7 +257,7 @@ const ProfileNavigationBar: React.FC = () => {
   // 그룹 삭제 로직
   const handleDeleteGroup = async () => {
     if (!groupId) return;
-    if (!window.confirm("정말 그룹을 삭제하시겠습니까? 이 작업은 복구할 수 없습니다.")) return;
+    if (!await confirmToast("정말 그룹을 삭제하시겠습니까? 이 작업은 복구할 수 없습니다.")) return;
     try {
       const success = await deleteGroup(groupId);
       if (success) {

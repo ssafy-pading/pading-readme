@@ -11,6 +11,7 @@ import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import { confirmToast } from "../shared/widgets/toastConfirm";
 
 // Redux 관련 import
 import { useSelector, useDispatch } from "react-redux";
@@ -93,10 +94,10 @@ const RoleChangePage: React.FC = () => {
       return;
     }
     if (newRole === "OWNER") {
-      const confirmOwnerChange = window.confirm(
-        "상대방의 권한을 오너로 변경하면 당신의 권한은 매니저로 변경됩니다. 정말 변경하시겠습니까?"
+      const confirmOwnerChange = await confirmToast(
+        '상대방의 권한을 오너로 변경하면 당신의 권한은 매니저로 변경됩니다. 정말 변경하시겠습니까?'
       );
-      if (!confirmOwnerChange) return;
+      if (!confirmOwnerChange) return; // 취소 시 함수 종료
     }
     try {
       await updateMemberRole(groupId, userId, newRole);
