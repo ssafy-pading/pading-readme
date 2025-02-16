@@ -2,7 +2,7 @@
     height: 2px;
     width: 2px;
     scrollbar-width: none;
-  }
+}
   
 .custom-scrollbar::-webkit-scrollbar-thumb {
     height: 5px; /* 스크롤바 길이는 유지 */
@@ -14,6 +14,8 @@
     background: none;
 }
 
-.custom-scrollbar {
-    cursor: pointer;
-}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.8); /* hover 시 더 진한 색상 */
+    width: 4px; /* 사실상 가로 세로 크기를 시뮬레이션하는 효과 */
+  }
+  

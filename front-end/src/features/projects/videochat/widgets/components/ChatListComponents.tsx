@@ -235,7 +235,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
       </div>
 
       {/* 채팅 입력창 + 전송 버튼 */}
-      <div className="w-full h-[50px] bg-[#26292B]">
+      <div className={`${isChatOpen ? 'bg-[#212426]' : 'bg-[#2F3336]'} w-full h-[50px]`}>
         <form
           onSubmit={
             isChatOpen
@@ -254,7 +254,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
               value={message}
               onChange={handleMessageChange}
               placeholder="메시지 입력"
-              className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#273654] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
+              className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
           <div className={`${isChatOpen ? 'hidden' : ''} font-bold text-white text-md pl-1.5`}>Chat</div>
