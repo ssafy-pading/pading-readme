@@ -122,68 +122,61 @@ const LoginPage: React.FC = () => {
   }
 
   useEffect(() => {
-    
-
-    refreshCheck();
-
+    // URL 파라미터에서 토큰 확인
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+  
+    // 토큰 파라미터가 있으면 로그인 로직을 먼저 처리하고 refreshCheck는 호출하지 않음
+    if (accessToken && refreshToken) {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      const redirectPath = sessionStorage.getItem("redirectPath");
+      if (redirectPath) {
+        sessionStorage.removeItem("redirectPath");
+        navigate(redirectPath);
+      } else {
+        redirectDefault();
+      }
+    } else {
+      // URL에 토큰 파라미터가 없을 경우에만 refreshCheck 호출
+      refreshCheck();
+    }
+  
     // Particles.js 로드
-    const particle = ():void => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/particles.js';
+    const particle = (): void => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/particles.js";
       script.onload = () => {
-        // Particles.js 설정
-        (window).particlesJS('particles-js', {
+        window.particlesJS("particles-js", {
           particles: {
             number: { value: 100 },
-            color: { value: '#ffffff' },
-            shape: { type: 'edge' },
+            color: { value: "#ffffff" },
+            shape: { type: "edge" },
             opacity: { value: 0.8, random: true },
             size: { value: 2 },
-            move: { enable: true, speed: 1, direction: 'top', straight: true, random: true },
+            move: { enable: true, speed: 1, direction: "top", straight: true, random: true },
             line_linked: { enable: false },
           },
-          interactivity: { 
-            detect_on: 'canvas',
-            events:{
-              onhover: { enable: false }, 
-              onclick: { enable: false }, 
-            },
-            resize:true 
+          interactivity: {
+            detect_on: "canvas",
+            events: { onhover: { enable: false }, onclick: { enable: false } },
+            resize: true,
           },
           modes: {
-            grab: { "distance": 0 },
-            bubble: { "distance": 0 },
-            repulse: { "distance": 0 },
-            push: { "particles_nb": 0 },
-            remove: { "particles_nb": 0 }
-          }
+            grab: { distance: 0 },
+            bubble: { distance: 0 },
+            repulse: { distance: 0 },
+            push: { particles_nb: 0 },
+            remove: { particles_nb: 0 },
+          },
         });
       };
       document.body.appendChild(script);
-    }
-
-    // 파라미터 체크
-    const params = new URLSearchParams(location.search);
-    const accessToken:string|null = params.get("accessToken");
-    const refreshToken:string|null = params.get("refreshToken");
-
-    // 파라미터가 있을 경우, 컨텍스트와 로컬에 담아주기
-    const tokenCheck = () => {
-      if(accessToken&&refreshToken){
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        const redirectPath = sessionStorage.getItem("redirectPath");
-        if(redirectPath){
-          sessionStorage.removeItem("redirectPath");
-          navigate(redirectPath);
-        }else{
-          redirectDefault();
-        }
-      }
-    }
-    tokenCheck();
+    };
+  
     particle();
-  }, [isLoading]);
+  }, []);
 
   const googleLoginClick = async () => {
     try{

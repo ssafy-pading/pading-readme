@@ -123,7 +123,6 @@ const InvitePage = () => {
     useEffect(() => {
       // user 상태에 따라 인증 여부를 설정하는 효과
       const isLogin = !!localStorage.getItem("accessToken");
-      console.log(isLogin);
       if (isLogin) {
         setIsAuthenticated(true);
       } else {
