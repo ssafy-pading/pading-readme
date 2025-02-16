@@ -7,9 +7,13 @@ import disk from "/src/assets/disk.svg";
 import { RxCross2 } from "react-icons/rx";
 
 // 토스트
-import { Toaster, toast } from 'react-hot-toast';
+import { Toaster, toast } from "react-hot-toast";
+
 import useProjectAxios from "../../../../shared/apis/useProjectAxios";
-import { CreateProjectResponse } from "../../../../shared/types/projectApiResponse";
+import { CreateProjectResponse, ProjectListItem } from "../../../../shared/types/projectApiResponse";
+
+// 로딩 화면
+import TranslucentSpinner from "../../../projects/projectpage/widgets/spinners/TranslucentSpinner"
 
 // 모달 루트 설정
 Modal.setAppElement("#root");
@@ -44,64 +48,8 @@ interface ProjectCreateModalProps {
   groupId: number;
   isOpen: boolean;
   onClose: () => void;
+  onProjectCreate: (projectItem: ProjectListItem) => void;
 }
-
-// // 백엔드(혹은 외부)에서 가져올 데이터 예시 (실제 구현시 삭제바람)
-// const languageOptions = [
-//   { os_code: "java", os_name: "자바" },
-//   { os_code: "python", os_name: "파이썬" },
-//   { os_code: "javascript", os_name: "자바스크립트" },
-//   { os_code: "csharp", os_name: "C#" },
-// ];
-
-// const osOptions = [
-//   { os_code: "ubuntu_20_04_lts", os_name: "우분투 20.04 LTS" },
-//   { os_code: "ubuntu_18_04_lts", os_name: "우분투 18.04 LTS" },
-//   { os_code: "ubuntu_16_04_lts", os_name: "우분투 16.04 LTS" },
-// ];
-
-// const performanceOptions = [
-//   { code: "micro", cpu_core: 0.5, ram: "1GB", disk: "1GB" },
-//   { code: "small", cpu_core: 2, ram: "2GB", disk: "2GB" },
-//   { code: "medium", cpu_core: 4, ram: "4GB", disk: "4GB" },
-//   { code: "large", cpu_core: 8, ram: "8GB", disk: "8GB" },
-// ];
-
-// // 구성원 검색/추가용 데이터
-// // api에서는 4개의 정보만 보냄, ProjectListPage에서 멤버 정보와 속성명이나 개수가 차이가 있으니 체크 바람
-// interface MemberData {
-//   name: string;
-//   image: string;
-//   email: string;
-//   role: string;
-// }
-
-// const memberData: MemberData[] = [
-//   {
-//     name: "강싸피",
-//     image: "https://lh3.googleusercontent.com/a/ACg8ocKyyZu4cMoD66g_cvM3uoxDqWQQunckuUMW1-x4zKbF=s96-c",
-//     email: "kangssafy@example.com",
-//     role: "Member",
-//   },
-//   {
-//     name: "박싸피",
-//     image: "https://img.freepik.com/premium-vector/black-silhouette-default-profile-avatar_664995-354.jpg",
-//     email: "ssafypark@example.com",
-//     role: "Member",
-//   },
-//   {
-//     name: "이싸피",
-//     image: "https://secure.gravatar.com/avatar/adb423cb0bee73bb6033eabf7deb7b164b187a53f20a043768a5345de2eaa37a?s=80&d=identicon",
-//     email: "leeeeeessafy@example.com",
-//     role: "Member",
-//   },
-//   {
-//     name: "신싸피",
-//     image: "https://secure.gravatar.com/avatar/1a08e265bcf0ba7e141433e38be1aa16e7bcb4934a8273e49a9d65425332518d?s=80&d=identicon",
-//     email: "godssafy@example.com",
-//     role: "Member",
-//   },
-// ];
 
 // react-select 에 사용할 Option 타입
 type LanguageOption = {
@@ -122,13 +70,16 @@ type PerformanceOption = {
 type MemberOption = {
   value: number; // id
   label: string; // 이름 + (email) 등의 표현
-  image: string; // 프로필 사진
+  name: string;  // 이름
+  email: string; // 이메일
+  image: string; // 프로필 이미지 URL
 };
 
 const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   groupId,
   isOpen,
   onClose,
+  onProjectCreate,
 }) => {
   const { getLanguages, getOSList, getPerformanceList, getProjectsMemberList, createProject } = useProjectAxios();
 
@@ -148,12 +99,11 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   const [memberSelectOptions, setMemberOptions] = useState<MemberOption[]>([]);
 
   // 로딩상태
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   // 1. api 호출하여 각 options에 담아주기
   useEffect(() => {
     const loadData = async () => {
-      // setIsLoading(true);
       // 여기에 api로 데이터 불러오기를 합니다 
       try{
         const memberList = await getProjectsMemberList(groupId);
@@ -183,13 +133,13 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           memberList.map((member) => ({
             value: member.id,
             label: `${member.name} (${member.email})`,
+            name: member.name,
+            email: member.email,
             image: member.image,
           }))
         );
-        console.log(memberList)
       }catch(error){
-        console.log("프로젝트 생성 초기값 불러오기 에러");
-        console.log(error);
+        console.error("project create error", error);
       }
 
     }
@@ -271,9 +221,15 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   // api 사용시 async 붙여주세요!
   const handleSubmit = async() => {
   // const handleSubmit = () => {
-    if (!validateForm()) {
-      return;
-    }
+
+    // 만약 이미 제출 중이면 추가 동작하지 않음
+    if (isCreating) return;
+
+    // 폼 유효성 실패시 return
+    if (!validateForm()) return;
+
+    // 제출 전 로딩로직 시작
+    setIsCreating(true);
 
     // 전송할 데이터(백엔드 API Body 예시)
     const formData = {
@@ -284,12 +240,9 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       userIds: selectedMembers.map((member) => member.value),
     };
 
-    console.log("보낼 폼 데이터:", formData);
-
     // API 호출 로직 (createProject)
       try{
         const newProject:CreateProjectResponse = await createProject(groupId, formData);
-        console.log(newProject);
 
         // 기존 작성된 폼 초기화
         setProjectName("");
@@ -298,14 +251,39 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
         setSelectedPerformance(null);
         setSelectedMembers([]);
 
-        toast.success("프로젝트 생성 완료");
-        // 완료 후 모달 닫기
-        onClose();
+        if(newProject){
+          toast.success("프로젝트 생성 완료");
+
+          // 선택한 멤버를 변환
+          const transformedUsers = selectedMembers.map((member) => ({
+            id: member.value,
+            name: member.name,
+            image: member.image,
+            email: member.email,
+            status: false,
+          }));
+
+
+          // 상위 컴포넌트에 전달할 최종 객체
+          const projectListItem: ProjectListItem = {
+            project: newProject,
+            users: transformedUsers,
+          };
+
+          // 상위 컴포넌트에 새로운 프로젝트 정보를 전달합니다.
+          onProjectCreate(projectListItem);
+
+          // 완료 후 모달 닫기
+          onClose();
+        }
         
       }catch(error){
         console.error(error);
         toast.error("작업 중 오류가 발생했습니다.");
-      };
+      } finally {
+        setIsCreating(false);
+      }
+
 
   };
 
@@ -320,6 +298,11 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
       shouldCloseOnOverlayClick={true}
       shouldReturnFocusAfterClose={false}
     >
+      {/* 로딩 오버레이 (생성 중일 때) */}
+      {isCreating && (
+        <TranslucentSpinner />
+      )}
+
       {/* 헤더 */}
       <div className="flex justify-between items-center mb-5">
         <Toaster />

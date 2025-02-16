@@ -79,7 +79,6 @@ const LoginPage: React.FC = () => {
   const refreshCheck = async ():Promise<void> => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
     if(localStorage.getItem("refreshToken")){
-      console.log("리프레시 토큰 이씀");
       
       // 기존 사용자 정보와 상태 초기화
       dispatch(resetUserState());
@@ -87,7 +86,6 @@ const LoginPage: React.FC = () => {
       try{
         // 그룹 정보 가져오기
         const groupData = await getGroups();
-        console.log(groupData);
         if (groupData.groups.length > 0) {
           const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
           navigate(`/projectlist/${groupId}`);
@@ -95,7 +93,7 @@ const LoginPage: React.FC = () => {
           navigate(`/nogroup`);
         }
       }catch(error){
-        console.log(error);
+        console.error(error);
         setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
     }else{
@@ -111,7 +109,6 @@ const LoginPage: React.FC = () => {
     try{
       // 그룹 정보 가져오기
       const groupData = await getGroups();
-      console.log(groupData);
       if (groupData.groups.length > 0) {
         const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
         navigate(`/projectlist/${groupId}`);
@@ -119,7 +116,7 @@ const LoginPage: React.FC = () => {
         navigate(`/nogroup`);
       }
     }catch(error){
-      console.log(error);
+      console.error(error);
       setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
@@ -193,7 +190,7 @@ const LoginPage: React.FC = () => {
         await loginWithGoogle();
       }catch(error){
         toast.error('로그인 실패')
-      console.log(error);
+      console.error(error);
     }
   }
 
