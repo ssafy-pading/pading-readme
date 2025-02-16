@@ -8,12 +8,15 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.dto.DirectoryChildren;
+import site.paircoding.paircoding.entity.dto.DirectoryContentDto;
 import site.paircoding.paircoding.entity.dto.DirectoryCreateDto;
 import site.paircoding.paircoding.entity.dto.DirectoryDeleteDto;
 import site.paircoding.paircoding.entity.dto.DirectoryListDto;
 import site.paircoding.paircoding.entity.dto.DirectoryRenameDto;
+import site.paircoding.paircoding.entity.dto.DirectorySaveDto;
 import site.paircoding.paircoding.entity.enums.DirectoryAction;
 import site.paircoding.paircoding.entity.enums.DirectoryType;
+import site.paircoding.paircoding.global.exception.WebsocketException;
 import site.paircoding.paircoding.util.KubernetesUtil;
 
 @Service
@@ -25,11 +28,12 @@ public class DirectoryService {
   private final ProjectService projectService;
 
   // todo pod 확인
+  // todo list 조회 시 디렉토리 우선 정렬
+
 
   public DirectoryListDto get(Integer groupId, Integer projectId, DirectoryListDto dto) {
-    // action 확인
     if (DirectoryAction.LIST != dto.getAction()) {
-      throw new RuntimeException("Invalid action");
+      throw new WebsocketException("Invalid action");
     }
 
     Project project = projectService.getProject(groupId, projectId);
@@ -71,15 +75,13 @@ public class DirectoryService {
 
   public DirectoryCreateDto create(Integer groupId, Integer projectId, DirectoryCreateDto dto) {
     if (DirectoryAction.CREATE != dto.getAction()) {
-      throw new RuntimeException("Invalid action");
+      throw new WebsocketException("Invalid action");
     }
 
     Project project = projectService.getProject(groupId, projectId);
 
     String podName = project.getContainerId();
     String command = "ls -al /app" + dto.getPath() + " | grep " + dto.getName();
-
-    // todo 경로 존재 x / ㅍ
 
     String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
 
@@ -92,7 +94,7 @@ public class DirectoryService {
       String name = parts[8];
 
       if (name.equals(dto.getName())) {
-        throw new RuntimeException("Duplicate name");
+        throw new WebsocketException("Duplicate name");
       }
     }
 
@@ -106,7 +108,7 @@ public class DirectoryService {
 
   public DirectoryDeleteDto delete(Integer groupId, Integer projectId, DirectoryDeleteDto dto) {
     if (DirectoryAction.DELETE != dto.getAction()) {
-      throw new RuntimeException("Invalid action");
+      throw new WebsocketException("Invalid action");
     }
 
     Project project = projectService.getProject(groupId, projectId);
@@ -122,32 +124,35 @@ public class DirectoryService {
         continue;
       }
 
+      DirectoryType type = parts[0].startsWith("d") ? DirectoryType.DIRECTORY : DirectoryType.FILE;
       String name = parts[8];
 
       if (name.equals(dto.getName())) {
-        // todo type 체크
+        if (type != dto.getType()) {
+          throw new WebsocketException("Invalid type");
+        }
 
         String path = "/app" + dto.getPath() + "/" + dto.getName();
         String command = "rm -rf " + path;
 
         kubernetesUtil.executeCommand(podName, command);
-        break;
+
+        return dto;
       }
     }
-
-    return dto;
+    throw new WebsocketException("Path does not exist");
   }
 
   public DirectoryRenameDto rename(Integer groupId, Integer projectId, DirectoryRenameDto dto) {
     if (DirectoryAction.RENAME != dto.getAction()) {
-      throw new RuntimeException("Invalid action");
+      throw new WebsocketException("Invalid action");
     }
 
     Project project = projectService.getProject(groupId, projectId);
 
     String podName = project.getContainerId();
-    String command = "ls -al /app" + dto.getPath() + " | grep " + dto.getOldName();
 
+    String command = "ls -al /app" + dto.getPath() + " | grep " + dto.getNewName();
     String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
 
     for (String line : lines) {
@@ -158,8 +163,27 @@ public class DirectoryService {
 
       String name = parts[8];
 
+      if (name.equals(dto.getNewName())) {
+        throw new WebsocketException("Duplicate name");
+      }
+    }
+
+    command = "ls -al /app" + dto.getPath() + " | grep " + dto.getOldName();
+    lines = kubernetesUtil.executeCommand(podName, command).split("\n");
+
+    for (String line : lines) {
+      String[] parts = line.split("\\s+");
+      if (parts.length < 9) {
+        continue;
+      }
+
+      DirectoryType type = parts[0].startsWith("d") ? DirectoryType.DIRECTORY : DirectoryType.FILE;
+      String name = parts[8];
+
       if (name.equals(dto.getOldName())) {
-        // todo type 체크
+        if (type != dto.getType()) {
+          throw new WebsocketException("Invalid type");
+        }
 
         String oldPath = "/app" + dto.getPath() + "/" + dto.getOldName();
         String newPath = "/app" + dto.getPath() + "/" + dto.getNewName();
@@ -169,6 +193,46 @@ public class DirectoryService {
         break;
       }
     }
+
+    return dto;
+  }
+
+  public DirectoryContentDto content(Integer groupId, Integer projectId, DirectoryContentDto dto) {
+    if (DirectoryAction.CONTENT != dto.getAction()) {
+      throw new WebsocketException("Invalid action");
+    }
+
+    if (DirectoryType.FILE != dto.getType()) {
+      throw new WebsocketException("Invalid type");
+    }
+
+    Project project = projectService.getProject(groupId, projectId);
+
+    String podName = project.getContainerId();
+    String command = "cat /app" + dto.getPath() + "/" + dto.getName();
+
+    dto.setContent(kubernetesUtil.executeCommand(podName, command));
+
+    return dto;
+  }
+
+
+  public DirectorySaveDto save(Integer groupId, Integer projectId, DirectorySaveDto dto) {
+    if (DirectoryAction.SAVE != dto.getAction()) {
+      throw new WebsocketException("Invalid action");
+    }
+
+    if (DirectoryType.FILE != dto.getType()) {
+      throw new WebsocketException("Invalid type");
+    }
+
+    Project project = projectService.getProject(groupId, projectId);
+
+    String podName = project.getContainerId();
+    String path = "/app" + dto.getPath() + "/" + dto.getName();
+    String command = String.format("echo '%s' > %s", dto.getContent().replace("'", "'\\''"), path);
+
+    kubernetesUtil.executeCommand(podName, command);
 
     return dto;
   }

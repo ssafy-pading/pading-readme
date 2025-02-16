@@ -5,11 +5,12 @@ import site.paircoding.paircoding.entity.enums.DirectoryAction;
 import site.paircoding.paircoding.entity.enums.DirectoryType;
 
 @Getter
-public class DirectoryDeleteDto {
+public class DirectorySaveDto {
 
   private DirectoryAction action;
   private DirectoryType type;
   private String path;
   private String name;
+  private String content;
 
 }
