@@ -7,7 +7,7 @@ const useTraverseTree = () => {
     name: string,
     type: FileType
   ) {
-    if (tree.id === id && tree.type == "FOLDER") {
+    if (tree.id === id && tree.type == "DIRECTORY") {
       const newNode: FileNode = {
         id: new Date().getTime(),
         name: name,
@@ -55,7 +55,7 @@ const useTraverseTree = () => {
       if (a.type === b.type) {
         return a.name.localeCompare(b.name);
       }
-      return a.type === "FOLDER" ? -1 : 1;
+      return a.type === "DIRECTORY" ? -1 : 1;
     });
 
     return {
