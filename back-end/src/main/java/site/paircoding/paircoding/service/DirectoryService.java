@@ -3,6 +3,8 @@ package site.paircoding.paircoding.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,8 @@ public class DirectoryService {
     String command = "ls -al /app" + dto.getPath();
 
     String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
-    List<DirectoryChildren> children = new ArrayList<>();
+    List<DirectoryChildren> directoryList = new ArrayList<>();
+    List<DirectoryChildren> fileList = new ArrayList<>();
 
     int cnt = 0;
     for (String line : lines) {
@@ -65,10 +68,14 @@ public class DirectoryService {
         continue;
       }
 
-      children.add(new DirectoryChildren(++cnt, type, name));
+      if (type == DirectoryType.DIRECTORY) {
+        directoryList.add(new DirectoryChildren(++cnt, type, name));
+      } else {
+        fileList.add(new DirectoryChildren(++cnt, type, name));
+      }
     }
-
-    dto.setChildren(children);
+    dto.setChildren(Stream.concat(directoryList.stream(), fileList.stream())
+        .collect(Collectors.toList()));
 
     return dto;
   }
