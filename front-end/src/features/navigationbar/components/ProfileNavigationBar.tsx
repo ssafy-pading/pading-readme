@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useNavigation } from "../../../context/navigationContext";
-// heroicons 아이콘 임포트
 import { 
   ChevronUpIcon, 
   ChevronDownIcon, 
@@ -12,12 +11,12 @@ import {
   ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import profileImage from "../../../assets/profile_image.png"
+import { HiBadgeCheck } from "react-icons/hi";
+import profileImage from "../../../assets/profile_image.png";
 
 // 상태관리 및 토스트
 import ProjectSpinner from '../../projects/projectpage/widgets/spinners/ProjectSpinner';
 import { Toaster, toast } from 'react-hot-toast';
-
 
 // --- Redux 관련 임포트 ---
 import { useSelector, useDispatch } from "react-redux";
@@ -35,7 +34,7 @@ interface GroupUser {
   id: number;
   name: string;
   image: string;
-  status: string;
+  status: string; // "online" | "offline" 등 문자열 형태
   role: string;
 }
 
@@ -139,9 +138,11 @@ const ProfileNavigationBar: React.FC = () => {
     fetchGroupDetails();
   }, [groupId, navigate, getGroupDetails]);
 
-  // 그룹 멤버 관리
+  // 그룹 멤버 관리: 멤버를 불러온 후 역할에 따라 정렬 및 관리자(OWNER/ MANAGER)와 일반 멤버로 분리
   const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
-  const activeMemberCount = groupUsers.filter(user => user.status==="online").length;
+  const [adminMembers, setAdminMembers] = useState<GroupUser[]>([]);
+  const [normalMembers, setNormalMembers] = useState<GroupUser[]>([]);
+  const activeMemberCount = groupUsers.filter(user => user.status === "online").length;
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -165,15 +166,23 @@ const ProfileNavigationBar: React.FC = () => {
           MANAGER: 2,
           MEMBER: 3,
         };
-  
+
         groupUsers.sort((a, b) => {
           return (rolePriority[a.role] || 999) - (rolePriority[b.role] || 999);
         });
   
-        // 로딩 상태 해제 후 그룹 멤버 상태 업데이트
-        setIsLoading(false);
+        // 관리자와 일반 멤버 분리
+        const admins = groupUsers.filter(
+          (user) => user.role === "OWNER" || user.role === "MANAGER"
+        );
+        const normals = groupUsers.filter(
+          (user) => user.role === "MEMBER"
+        );
+  
         setGroupUsers(groupUsers);
-        console.log(groupUsers)
+        setAdminMembers(admins);
+        setNormalMembers(normals);
+        setIsLoading(false);
       } catch (error: any) {
         console.error("그룹 멤버 조회 중 오류:", error);
         if (error.response && error.response.status === 403) {
@@ -184,8 +193,9 @@ const ProfileNavigationBar: React.FC = () => {
     };
   
     fetchMembers();
-  }, [groupId, getGroupMembers]);
-  
+  }, [groupId, getGroupMembers, navigate]);
+
+  // 웹소켓 연결: 멤버의 status 업데이트 처리
   useEffect(() => {
     if (!groupId || !userProfile?.id) return;
   
@@ -201,24 +211,34 @@ const ProfileNavigationBar: React.FC = () => {
       onConnect: () => {
         stompClient.subscribe(`/sub/status/groups/${groupId}`, (messageData) => {
           const data = JSON.parse(messageData.body);
-          setGroupUsers((prevUsers) =>
-            prevUsers.map((user) =>
+          setGroupUsers((prevUsers) => {
+            const updated = prevUsers.map((user) =>
               user.id == data.userId ? { ...user, status: data.status } : user
-            )
-          );
+            );
+            console.log("업데이트된 groupUsers:", updated);
+            return updated;
+          });
         });
       },
       onStompError: (frame) => {
         console.error("STOMP Error:", frame);
       },
     });
-  
+
     stompClient.activate();
     return () => {
       stompClient.deactivate();
     };
   }, [groupId, userProfile?.id]);
-  
+
+  useEffect(() => {
+    const admins = groupUsers.filter(
+      (user) => user.role === "OWNER" || user.role === "MANAGER"
+    );
+    const normals = groupUsers.filter((user) => user.role === "MEMBER");
+    setAdminMembers(admins);
+    setNormalMembers(normals);
+  }, [groupUsers]);
   
 
   // 로그인한 유저의 그룹 내 역할 확인
@@ -233,22 +253,19 @@ const ProfileNavigationBar: React.FC = () => {
     }
   };
 
-  // ★ 그룹 삭제 로직
+  // 그룹 삭제 로직
   const handleDeleteGroup = async () => {
     if (!groupId) return;
     if (!window.confirm("정말 그룹을 삭제하시겠습니까? 이 작업은 복구할 수 없습니다.")) return;
     try {
       const success = await deleteGroup(groupId);
-      console.log("deleteGroup 결과:", success);
       if (success) {
         toast.success("그룹이 삭제되었습니다.");
-        // 삭제 후 최신 그룹 목록을 가져와 첫 번째 그룹으로 리다이렉트, 없으면 /nogroup
         const groupsResponse = await getGroups();
         if (groupsResponse.groups && groupsResponse.groups.length > 0) {
           window.location.href = `/projectlist/${groupsResponse.groups[0].id}`;
         } else {
           window.location.href = `/nogroup`;
-
         }
       }
     } catch (error) {
@@ -257,21 +274,19 @@ const ProfileNavigationBar: React.FC = () => {
     }
   };
 
-
-  // 상태 체크
-  if(isLoading){
+  if (isLoading) {
     return (
       <div>
         <ProjectSpinner />
         <Toaster />
       </div>
-    )
+    );
   }
 
   return (
     <div className="relative">
       <Toaster />
-      {/* 토글 버튼 (네비게이션 바가 닫힌 상태) */}
+      {/* 네비게이션 바 토글 버튼 (닫힌 상태) */}
       {!isProfileNavOpen && (
         <button
           onMouseEnter={handleButtonMouseEnter}
@@ -340,13 +355,6 @@ const ProfileNavigationBar: React.FC = () => {
                   </button>
                   {isDropdownOpen && (
                     <div className="absolute right-0 top-full mt-2 w-28 bg-white text-xs rounded-lg shadow-md overflow-hidden z-10">
-                      {/* <button
-                        onClick={handleNavigateToMypage}
-                        className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
-                      >
-                        <UserIcon className="w-4 h-4 mr-2" />
-                        마이페이지
-                      </button> */}
                       <button
                         onClick={handleLogout}
                         className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
@@ -442,43 +450,74 @@ const ProfileNavigationBar: React.FC = () => {
               <div
                 className="ml-10 mb-2 overflow-y-auto"
                 style={{
-                  height: isProfileNavOpen ? "calc(100vh - 250px)" : "calc(100vh - 450px)",
+                  height: isProfileNavOpen ? "calc(100vh - 200px)" : "calc(100vh - 350px)",
                 }}
               >
                 <ul>
-                  {groupUsers.map((groupUser) => (
-                    <li key={groupUser.id} className="flex items-center my-2 mr-2">
-                      <div className="flex items-center">
-                        <div className="relative w-[30px] h-[30px]">
-                          <img
-                            src={groupUser.image}
-                            alt={groupUser.name}
-                            className="w-full h-full rounded-full border-2 border-gray-300"
-                          />
-                          <span
-                            className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                              groupUser.id === userProfile?.id || groupUser.status === "online"
+                  {adminMembers.length > 0 && (
+                    <>
+                      {/* 관리자 섹션 */}
+                      <li className="flex items-center my-2">
+                        <span className="text-sm font-bold text-[#4D4650]">관리자</span>
+                        <hr className="ml-2 w-[50%] border-t border-gray-300" />
+                      </li>
+                      {adminMembers.map((user) => (
+                        <li key={user.id} className="flex items-center my-2 mr-2">
+                          <div className="relative w-[30px] h-[30px] flex-shrink-0">
+                            <img
+                              src={user.image}
+                              alt={user.name}
+                              className="w-full h-full rounded-full border-2 border-gray-300"
+                            />
+                            <span
+                              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                                user.id === userProfile?.id || user.status === "online"
                                 ? "bg-green-500"
                                 : "bg-gray-400"
-                            }`}
-                          />
-                        </div>
-                        <span className="ml-4 text-[#4D4650] whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
-                          {groupUser.name}
-                        </span>
-                      </div>
-                      {groupUser.role === "OWNER" && (
-                        <span className="ml-2 px-2 py-0.5 text-[10px] font-medium text-white bg-blue-500 rounded-lg">
-                          OWNER
-                        </span>
-                      )}
-                      {groupUser.role === "MANAGER" && (
-                        <span className="ml-2 px-2 py-0.5 text-[10px] font-medium text-white bg-green-500 rounded-lg">
-                          MANAGER
-                        </span>
-                      )}
-                    </li>
-                  ))}
+                              }`}
+                            />
+                          </div>
+                          <div className="ml-4 flex items-center flex-1 overflow-hidden">
+                            <span className="truncate text-[#4D4650]">{user.name}</span>
+                            {user.role === "OWNER" && (
+                              <HiBadgeCheck className="w-5 h-5 text-blue-500 ml-2" />
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </>
+                  )}
+
+                  {normalMembers.length > 0 && (
+                    <>
+                      {/* 일반 멤버 섹션 */}
+                      <li className="flex items-center my-2 mt-4">
+                        <span className="text-sm font-bold text-[#4D4650]">일반 멤버</span>
+                        <hr className="ml-2 w-[50%] border-t border-gray-300" />
+                      </li>
+                      {normalMembers.map((user) => (
+                        <li key={user.id} className="flex items-center my-2 mr-2">
+                          <div className="relative w-[30px] h-[30px] flex-shrink-0">
+                            <img
+                              src={user.image}
+                              alt={user.name}
+                              className="w-full h-full rounded-full border-2 border-gray-300"
+                            />
+                            <span
+                              className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                                user.id === userProfile?.id || user.status === "online"
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                              }`}
+                            />
+                          </div>
+                          <div className="ml-4 flex items-center justify-between flex-1 overflow-hidden">
+                            <span className="truncate text-[#4D4650]">{user.name}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </>
+                  )}
                 </ul>
               </div>
             )}
@@ -486,7 +525,7 @@ const ProfileNavigationBar: React.FC = () => {
         )}
       </div>
 
-      {/* 그룹 이름 수정 모달 렌더링 */}
+      {/* 그룹 이름 수정 모달 */}
       {groupId && (
         <GroupUpdateNameModal
           isOpen={isGroupUpdateModalOpen}
@@ -496,23 +535,6 @@ const ProfileNavigationBar: React.FC = () => {
           onUpdate={handleGroupNameUpdate}
         />
       )}
-
-      {/* MyPageModal 렌더링 */}
-
-      {/* {activeModal === 'delete' && (
-        <LeaveModal
-          isOpen={true}
-          onClose={closeModal}
-          onSwitchToMypage={openMypageModal}
-        />
-      )}
-      {activeModal === 'picture' && (
-        <PictureModal
-          isOpen={true}
-          onClose={closeModal}
-          onSwitchToMypage={openMypageModal}
-        />
-      )} */}
     </div>
   );
 };
