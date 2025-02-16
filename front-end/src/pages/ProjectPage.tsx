@@ -66,7 +66,7 @@ function ProjectPage() {
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
         if (error.response && (error.response.status === 400 || error.response.status === 403 )) {
-          toast.error("접근 권한이 없습니다. 관리자에게 문의하세요.")
+          toast.error("접근 권한이 없습니다. 그룹 오너(매니저)에게 문의하세요.")
           navigate(`/projectlist/${groupId}`);
         };
       });
