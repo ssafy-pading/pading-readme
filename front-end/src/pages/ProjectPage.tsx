@@ -1,6 +1,6 @@
 // React
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
 import {
@@ -28,14 +28,24 @@ import { getMonitoringResource } from "../features/projects/monitoring/model/res
 import "react-resizable/css/styles.css";
 import "../features/projects/projectpage/css/ProjectPage.css";
 
+// toast
+import { Toaster, toast } from "react-hot-toast";
+
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
 import { FileTapType } from "../shared/types/projectApiResponse";
 import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
+import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 function ProjectPage() {
+  // 로딩 상태 체크
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // 네이게이션
+  const navigate = useNavigate();
+
   // Props
   const { groupId, projectId } = useParams<{
     groupId?: string;
@@ -49,11 +59,16 @@ function ProjectPage() {
   useEffect(() => {
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
+        setIsLoading(false);
         setDeployedLink(`http://${response.project.containerId}.pading.site`);
         setProjectDetail(response);
       })
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
+        if (error.response && (error.response.status === 400 || error.response.status === 403 )) {
+          toast.error("접근 권한이 없습니다. 관리자에게 문의하세요.")
+          navigate(`/projectlist/${groupId}`);
+        };
       });
   }, [groupId, projectId, getProjectDetails]);
 
@@ -194,6 +209,20 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
+  if(isLoading){
+    return (
+      <div>
+        <Toaster
+              toastOptions={{
+                style: {
+                  zIndex: 9999,  // 최상위로 보이게 설정
+                },
+              }} />
+        <ProjectSpinner />
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col h-screen">
       {/* 네비게이션 바 */}
