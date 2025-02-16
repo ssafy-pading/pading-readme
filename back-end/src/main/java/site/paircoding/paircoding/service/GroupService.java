@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.Group;
 import site.paircoding.paircoding.entity.GroupUser;
+import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupDto;
 import site.paircoding.paircoding.entity.dto.GroupInvitationDto;
@@ -20,6 +21,8 @@ import site.paircoding.paircoding.global.exception.NotFoundException;
 import site.paircoding.paircoding.global.exception.UnauthorizedException;
 import site.paircoding.paircoding.repository.GroupRepository;
 import site.paircoding.paircoding.repository.GroupUserRepository;
+import site.paircoding.paircoding.repository.ProjectRepository;
+import site.paircoding.paircoding.repository.ProjectUserRepository;
 import site.paircoding.paircoding.util.RandomUtil;
 import site.paircoding.paircoding.util.RedisUtil;
 
@@ -30,8 +33,12 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
   private final GroupUserRepository groupUserRepository;
+  private final ProjectRepository projectRepository;
+  private final ProjectService projectService;
   private final RedisUtil redisUtil;
   private static final String INVITATION_PREFIX = "groupId=%d";
+  private static final String STATUS_PREFIX = "statusId=%d";
+  private final ProjectUserRepository projectUserRepository;
 
   @Value("${link.expire-time}")
   private long LINK_EXPIRE_TIME;
@@ -107,6 +114,12 @@ public class GroupService {
   //그룹 삭제
   @Transactional
   public void deleteGroup(Integer groupId) {
+    List<Project> projects = projectRepository.findAllByGroupId(groupId);
+
+    for (Project project : projects) {
+      projectService.deleteProject(groupId, project.getId());
+    }
+
     groupUserRepository.deleteAllByGroupId(groupId);
     groupRepository.deleteById(groupId);
   }
@@ -137,13 +150,18 @@ public class GroupService {
 
     for (GroupUser groupUser : groupUsers) {
       User searchedUser = groupUser.getUser();
-
+      String status = (String) redisUtil.get(STATUS_PREFIX.formatted(searchedUser.getId()));
+      if (status == null) {
+        redisUtil.set(STATUS_PREFIX.formatted(searchedUser.getId()), "offline");
+        status = "offline";
+      }
       list.add(GroupUserResponse.builder()
           .id(searchedUser.getId())
           .name(searchedUser.getName())
           .image(searchedUser.getImage())
           .email(searchedUser.getEmail())
           .role(groupUser.getRole())
+          .status(status)
           .build());
     }
     return list;
@@ -210,6 +228,7 @@ public class GroupService {
   }
 
   //그룹 멤버 Role 수정
+  @Transactional
   public GroupUserResponse updateGroupUserRole(User user, Integer groupId, Integer userId,
       Role role) {
     if (user.getId().equals(userId)) {
@@ -232,7 +251,13 @@ public class GroupService {
         //그룹장의 권한을 매니저로 변경
         currentUser.setRole(Role.MANAGER);
       }
-
+      //타겟 유저가 멤버인 경우 프로젝트 유저에서 제외
+      if (targetUser.getRole().equals(Role.MEMBER)) {
+        List<Project> projects = projectRepository.findAllByGroupId(groupId);
+        for (Project project : projects) {
+          projectUserRepository.deleteByProjectIdAndUserId(project.getId(), userId);
+        }
+      }
       //대상 유저의 권한 변경
       targetUser.setRole(role);
 
@@ -243,6 +268,12 @@ public class GroupService {
         throw new UnauthorizedException(
             "Access denied. You do not have permission to update this role.");
       }
+      //타겟 유저가 멤버인 경우 프로젝트 유저에서 제외
+      List<Project> projects = projectRepository.findAllByGroupId(groupId);
+      for (Project project : projects) {
+        projectUserRepository.deleteByProjectIdAndUserId(project.getId(), userId);
+      }
+
       targetUser.setRole(Role.MANAGER);
     }
 

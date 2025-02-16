@@ -54,4 +54,9 @@ public class RedisUtil {
   public long getExpire(String key) {
     return redisTemplate.getExpire(key, TimeUnit.SECONDS);
   }
+
+  public boolean hasKey(String key) {
+    return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+  }
+
 }
