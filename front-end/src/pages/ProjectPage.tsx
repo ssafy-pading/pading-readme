@@ -214,15 +214,15 @@ function ProjectPage() {
           <p className="font-semibold text-center">
             PROJECT : {projectDetail?.project?.name}
           </p>
-            <RunButton onExecute={handleFileExecution}/>
-            <DeployedLinkButton link={deployedLink} />
+          <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
+            <ParticipantsButton />
+          </div>
         </div>
-          <div className="flex items-center justify-center gap-20">
-            <div className="flex items-center justify-center text-[#d4d4d4]">
-              <ParticipantsButton />
-            </div>
+          <div className="flex items-center justify-center gap-16">
             {/* 버튼 */}
             <div className="flex items-center justify-center gap-4 mr-16">
+              <RunButton onExecute={handleFileExecution}/>
+              <DeployedLinkButton link={deployedLink} />
               <MuteButton />
               <CamButton />
             </div>
@@ -373,7 +373,7 @@ function ProjectPage() {
                         <button
                           className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                             activePanel === "run"
-                              ? "border-b-2 border-b-[#3B82F6] text-white"
+                              ? "text-white"
                               : "text-[#858595] hover:text-white"
                           } cursor-pointer`}
                           onClick={() => setActivePanel("run")}
