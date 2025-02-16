@@ -35,6 +35,7 @@ import site.paircoding.paircoding.repository.UserRepository;
 import site.paircoding.paircoding.util.KubernetesUtil;
 import site.paircoding.paircoding.util.NginxConfigUtil;
 import site.paircoding.paircoding.util.RandomUtil;
+import site.paircoding.paircoding.util.RedisUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +51,8 @@ public class ProjectService {
   private final ProjectRepository projectRepository;
   private final GroupUserRepository groupUserRepository;
   private final ProjectUserRepository projectUserRepository;
+  private final RedisUtil redisUtil;
+  private static final String PROJECT_USER_KEY = "project:%s:user:%s"; // Redis 저장 키 형식
 
   public List<ProjectLanguageDto> getLanguage() {
     return projectImageRepository.findDistinctLanguage();
@@ -168,14 +171,23 @@ public class ProjectService {
         .map(project -> {
           List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
           List<ProjectUserDto> userDtos = projectUsers.stream()
-              .map(projectUser -> ProjectUserDto.builder()
-                  .id(projectUser.getUser().getId())
-                  .name(projectUser.getUser().getName())
-                  .image(projectUser.getUser().getImage())
-                  .email(projectUser.getUser().getEmail())
-                  .status(projectUser.getStatus())
-                  .build())
+              .map(projectUser -> {
+                String userId = String.valueOf(projectUser.getUser().getId());
+                String projectId = String.valueOf(project.getId()); // 현재 프로젝트 ID 가져오기
+                String redisKey = "project:%s:user:%s".formatted(projectId, userId);
+
+                boolean status = redisUtil.hasKey(redisKey); // ✅ Redis에서 접속 여부 확인
+
+                return ProjectUserDto.builder()
+                    .id(projectUser.getUser().getId())
+                    .name(projectUser.getUser().getName())
+                    .image(projectUser.getUser().getImage())
+                    .email(projectUser.getUser().getEmail())
+                    .status(status) // ✅ Redis 상태 반영
+                    .build();
+              })
               .toList();
+
           return ProjectWithUsersResponse.builder()
               .project(project)
               .users(userDtos)
@@ -184,19 +196,32 @@ public class ProjectService {
         .toList();
   }
 
+
   public ProjectWithUsersResponse getDetailProject(User user, Integer groupId, Integer projectId) {
     Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
         .orElseThrow(() -> new BadRequestException("Project not found"));
-
+    GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, user.getId())
+        .orElseThrow(() -> new BadRequestException("Group user not found"));
+    if (groupUser.getRole() == Role.MEMBER) {
+      projectUserRepository.findProjectUserByProjectIdAndUser(projectId, user)
+          .orElseThrow(() -> new BadRequestException("Project user not found"));
+    }
     List<ProjectUser> projectUsers = projectUserRepository.findByProject(project);
     List<ProjectUserDto> userDtos = projectUsers.stream()
-        .map(projectUser -> ProjectUserDto.builder()
-            .id(projectUser.getUser().getId())
-            .name(projectUser.getUser().getName())
-            .image(projectUser.getUser().getImage())
-            .email(projectUser.getUser().getEmail())
-            .status(projectUser.getStatus())
-            .build())
+        .map(projectUser -> {
+          String userId = String.valueOf(projectUser.getUser().getId());
+          String redisKey = "project:%s:user:%s".formatted(projectId, userId);
+
+          boolean status = redisUtil.hasKey(redisKey); // ✅ Redis에서 접속 여부 확인
+
+          return ProjectUserDto.builder()
+              .id(projectUser.getUser().getId())
+              .name(projectUser.getUser().getName())
+              .image(projectUser.getUser().getImage())
+              .email(projectUser.getUser().getEmail())
+              .status(status) // ✅ Redis 상태 반영
+              .build();
+        })
         .toList();
 
     return ProjectWithUsersResponse.builder()
