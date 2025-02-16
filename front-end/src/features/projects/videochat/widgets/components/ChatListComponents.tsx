@@ -11,6 +11,7 @@ import { getChatMessages } from '../../../../../shared/apis/chatApi';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserInfo } from '../../../../../app/redux/user';
 import type { RootState, AppDispatch } from '../../../../../app/redux/store';
+import { useParams } from 'react-router-dom';
 
 interface ChatMessage {
   id: string;
@@ -26,15 +27,18 @@ interface ChatRoomProps {
 }
 
 const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) => {
-  const [chatList, setChatList] = useState<ChatMessage[]>([]);
-  const [message, setMessage] = useState<string>('');
-  const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const stompClientRef = useRef<Client | null>(null);
-
-  const extractParams = (): { groupId: number; projectId: number } | null => {
-    const path = window.location.pathname; // e.g., "/project/8/1"
-    const match = path.match(/\/project\/(\d+)\/(\d+)/);
-
+    const [chatList, setChatList] = useState<ChatMessage[]>([]);
+    const [message, setMessage] = useState<string>('');
+    const chatContainerRef = useRef<HTMLDivElement | null>(null);
+    const stompClientRef = useRef<Client | null>(null);
+    // URL 파라미터에서 groupId 추출 (nogroup 페이지에서는 undefined)
+    const groupIdParams = useParams<{ groupId?: string }>().groupId;
+    const groupId: number | undefined = groupIdParams ? Number(groupIdParams) : undefined;
+    
+    const extractParams = (): { groupId: number; projectId: number } | null => {
+      const path = window.location.pathname; // e.g., "/project/8/1"
+      const match = path.match(/\/project\/(\d+)\/(\d+)/);
+      
     if (match) {
       const groupId = parseInt(match[1], 10);
       const projectId = parseInt(match[2], 10);
@@ -66,6 +70,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
 
   // STOMP 클라이언트 연결 설정 (컴포넌트 마운트 시 실행)
   useEffect(() => {
+    if (!user || !groupId) return
     const socket = new SockJS(`${import.meta.env.VITE_APP_API_BASE_URL}/ws`);
     const stompClient = new Client({
       webSocketFactory: () => socket,
@@ -74,6 +79,8 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
       // },
       connectHeaders: {
         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        userId: user.id.toString(),
+        groupId: groupId.toString()
       },
       reconnectDelay: 5000,
       onConnect: async () => {

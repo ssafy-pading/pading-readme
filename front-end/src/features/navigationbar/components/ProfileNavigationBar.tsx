@@ -9,7 +9,6 @@ import {
   Bars3Icon, 
   ChevronDoubleLeftIcon, 
   ChevronDoubleRightIcon,
-  UserIcon,
   ArrowLeftOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
@@ -27,16 +26,16 @@ import { fetchUserInfo } from "../../../app/redux/user";
 
 // --- 커스텀 훅 임포트 ---
 import useGroupAxios from "../../../shared/apis/useGroupAxios"; 
-import useProjectAxios from "../../../shared/apis/useProjectAxios";
 import useMypageAxios from "../../../shared/apis/useMypageAxios";
-import { GetProjectListResponse } from "../../../shared/types/projectApiResponse";
 import GroupUpdateNameModal from "../../groups/widgets/modals/GroupUpdateNameModal";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 interface GroupUser {
   id: number;
   name: string;
   image: string;
-  status: boolean;
+  status: string;
   role: string;
 }
 
@@ -59,7 +58,6 @@ const ProfileNavigationBar: React.FC = () => {
   const navigate = useNavigate();
   // useGroupAxios에서 그룹 상세, 멤버 조회, 그리고 그룹 삭제 함수 추출
   const { getGroups, getGroupDetails, getGroupMembers, deleteGroup } = useGroupAxios();
-  const { getProjects } = useProjectAxios();
   const { logout } = useMypageAxios();
 
   // 네비게이션 관련 커스텀 훅
@@ -143,63 +141,85 @@ const ProfileNavigationBar: React.FC = () => {
 
   // 그룹 멤버 관리
   const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
-  const activeMemberCount = groupUsers.filter(user => user.status).length;
+  const activeMemberCount = groupUsers.filter(user => user.status==="online").length;
 
   useEffect(() => {
     const fetchMembers = async () => {
       if (!groupId) return;
       try {
+        // 그룹 멤버 조회
         const groupData = await getGroupMembers(groupId);
-        let updatedGroupUsers: GroupUser[] = groupData.users.map((user) => ({
+  
+        // 그룹 멤버 데이터를 GroupUser 타입 배열로 매핑
+        const groupUsers: GroupUser[] = groupData.users.map((user) => ({
           id: user.id,
           name: user.name,
           image: user.image || profileImage,
-          status: false,
-          role: user.role
+          status: user.status, // 초기 상태 (필요시 프로젝트 데이터를 이용해 업데이트 가능)
+          role: user.role,
         }));
-
-        let projectData: GetProjectListResponse;
-        try {
-          projectData = await getProjects(groupId);
-        } catch (error) {
-          console.log(error);
-          projectData = [];
-        }
-
-        updatedGroupUsers = updatedGroupUsers.map((groupUser) => {
-          const projectUser = projectData
-            .flatMap((projectItem) => projectItem.users)
-            .find((user) => user.id === groupUser.id);
-          return projectUser
-            ? { ...groupUser, status: projectUser.status }
-            : groupUser;
-        });
-
-        // 정렬 적용: role 우선순위에 따라 정렬
+  
+        // 정렬: 역할에 따른 우선순위 (OWNER: 1, MANAGER: 2, MEMBER: 3)
         const rolePriority: Record<string, number> = {
           OWNER: 1,
           MANAGER: 2,
           MEMBER: 3,
         };
-
-        updatedGroupUsers.sort((a, b) => {
+  
+        groupUsers.sort((a, b) => {
           return (rolePriority[a.role] || 999) - (rolePriority[b.role] || 999);
         });
-
-        // 로딩상태 해제
+  
+        // 로딩 상태 해제 후 그룹 멤버 상태 업데이트
         setIsLoading(false);
-
-        setGroupUsers(updatedGroupUsers);
-      } catch (error:any) {
+        setGroupUsers(groupUsers);
+        console.log(groupUsers)
+      } catch (error: any) {
         console.error("그룹 멤버 조회 중 오류:", error);
         if (error.response && error.response.status === 403) {
-          toast.error("접근 권한이 없습니다. 그룹에 참가해주세요.")
-          navigate('/');
-        };
+          toast.error("접근 권한이 없습니다. 그룹에 참가해주세요.");
+          navigate("/");
+        }
       }
     };
+  
     fetchMembers();
-  }, [groupId, getGroupMembers, getProjects]);
+  }, [groupId, getGroupMembers]);
+  
+  useEffect(() => {
+    if (!groupId || !userProfile?.id) return;
+  
+    const socket = new SockJS(`${import.meta.env.VITE_APP_API_BASE_URL}/ws`);
+    const stompClient = new Client({
+      webSocketFactory: () => socket,
+      connectHeaders: {
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        userId: userProfile.id.toString(),
+        groupId: groupId.toString(),
+      },
+      reconnectDelay: 5000,
+      onConnect: () => {
+        stompClient.subscribe(`/sub/status/groups/${groupId}`, (messageData) => {
+          const data = JSON.parse(messageData.body);
+          setGroupUsers((prevUsers) =>
+            prevUsers.map((user) =>
+              user.id == data.userId ? { ...user, status: data.status } : user
+            )
+          );
+        });
+      },
+      onStompError: (frame) => {
+        console.error("STOMP Error:", frame);
+      },
+    });
+  
+    stompClient.activate();
+    return () => {
+      stompClient.deactivate();
+    };
+  }, [groupId, userProfile?.id]);
+  
+  
 
   // 로그인한 유저의 그룹 내 역할 확인
   const userRole = groupUsers.find(user => user.id === userProfile?.id)?.role;
@@ -437,7 +457,9 @@ const ProfileNavigationBar: React.FC = () => {
                           />
                           <span
                             className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                              groupUser.status ? "bg-green-500" : "bg-gray-400"
+                              groupUser.id === userProfile?.id || groupUser.status === "online"
+                                ? "bg-green-500"
+                                : "bg-gray-400"
                             }`}
                           />
                         </div>
