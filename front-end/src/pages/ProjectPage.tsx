@@ -328,6 +328,7 @@ function ProjectPage() {
                     <ProjectEditor
                       groupId={groupId}
                       projectId={projectId}
+                      framework={projectDetail?.project.projectImage.language}
                       fileRouteAndName={file.fileRouteAndName}
                       userName={user.name}
                     />
