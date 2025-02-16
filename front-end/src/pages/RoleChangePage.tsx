@@ -135,7 +135,7 @@ const handleMemberExpel = async (userId: number) => {
   return (
     <div className={`transition-all duration-700 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>
       <Toaster />
-      <div className="pl-8 pr-12 pb-6 h-screen overflow-y-hidden max-h-screen transition-all duration-1000 ml-32 mt-20 z-0">
+      <div className="pl-8 pr-12 pb-6 transition-all duration-1000 ml-32 mt-20 z-0">
         <h1 className="text-[#4D4650] text-xl font-bold mb-3">멤버 설정</h1>
         <hr className="mb-5" />
         <table className="w-full table-auto border-collapse border-spacing-0 text-sm">
