@@ -29,8 +29,6 @@ import { fetchUserInfo } from "../../../app/redux/user";
 import useGroupAxios from "../../../shared/apis/useGroupAxios"; 
 import useProjectAxios from "../../../shared/apis/useProjectAxios";
 import useMypageAxios from "../../../shared/apis/useMypageAxios";
-// import LeaveModal from "../../users/widgets/modals/UserLeaveModal";
-// import PictureModal from "../../users/widgets/modals/PictureChangeModal";
 import { GetProjectListResponse } from "../../../shared/types/projectApiResponse";
 import GroupUpdateNameModal from "../../groups/widgets/modals/GroupUpdateNameModal";
 
@@ -97,16 +95,6 @@ const ProfileNavigationBar: React.FC = () => {
   const handleDropdownToggle = () => {
     setIsDropdownOpen((prev) => !prev);
   };
-    
-  // const [activeModal, setActiveModal] = useState<'mypage' | 'delete' | 'picture' | null>(null);
-  // const openMypageModal = () => setActiveModal('mypage');
-  // const openDeleteModal = () => setActiveModal('delete');
-  // const openPictureModal = () => setActiveModal('picture');
-  // const closeModal = () => setActiveModal(null);
-  // const handleNavigateToMypage = () => {
-  //   setIsDropdownOpen(false);
-  //   setActiveModal('mypage');
-  // };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -138,6 +126,8 @@ const ProfileNavigationBar: React.FC = () => {
     const fetchGroupDetails = async () => {
       try {
         if (!groupId) {
+          // 로딩상태 해제
+          setIsLoading(false);
           navigate("/nogroup");
           return;
         }
