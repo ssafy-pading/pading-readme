@@ -241,7 +241,6 @@ function ProjectPage() {
                     : "w-[2px] bg-[#666871] opacity-50"
                 }
               hover:w-[2px] hover:bg-[#3B82F6] cursor-col-resize`}
-                style={{ zIndex: 10 }}
               />
             }
             handleSize={[5, 5]}
@@ -341,7 +340,6 @@ function ProjectPage() {
                           : "h-[2px] bg-[#666871] opacity-50"
                       }
                     cursor-row-resize hover:h-[2px] hover:bg-[#3B82F6]`}
-                      style={{ zIndex: 10 }}
                     />
                   }
                   onResizeStart={() => setIsVerticalDragging(true)}
