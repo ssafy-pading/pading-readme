@@ -355,13 +355,13 @@ function ProjectPage() {
                     {/* 상단 탭과 + 버튼 */}
                     <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                       {/* 터미널 탭들 */}
-                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none">
+                      <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
                         {terminalIds.map((id, index) => (
                           <div key={id} className="flex flex-row items-center">
                             <div
                               className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
                                 activeTerminal === index
-                                  ? "border-b-2 border-b-[#3B82F6] text-white"
+                                  ? " text-white"
                                   : "bg-[#141617] text-[#858595] hover:text-white"
                               }  cursor-pointer`}
                               onClick={() => setActiveTerminal(index)}
