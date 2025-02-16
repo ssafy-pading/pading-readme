@@ -275,7 +275,7 @@ function ProjectPage() {
             handleSize={[5, 5]}
           >
             <div className="flex flex-col justify-between h-full bg-[#212426] select-none">
-              <div className="w-full overflow-x-hidden">
+              <div className="flex-1 min-h-0 w-full overflow-x-hidden">
                 {/* 파일 탐색기 */}
                 <FileExplorer />
               </div>
