@@ -103,6 +103,7 @@ function ProjectPage() {
     };
     setFileTap([...fileTap, newFile]);
     setActiveFileIndex(fileTap.length); // 새 탭을 활성화
+    console.log("project fileTap: ", fileTap);
   };
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
   // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
