@@ -4,7 +4,6 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { DefaultFileRouteType } from "../../../../shared/types/projectApiResponse";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -12,7 +11,7 @@ interface ProjectEditorProps {
   framework?: string;
   fileRouteAndName?: string;
   userName?: string;
-  content?: string
+  content?: any
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
@@ -23,7 +22,6 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   userName,
   content
 }) => {
-  const {defaultFileRoutes, setDefaultFileRoutes} = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가

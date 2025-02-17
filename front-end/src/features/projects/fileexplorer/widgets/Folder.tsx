@@ -39,27 +39,7 @@ const Folder: React.FC<FolderProps> = ({
   handleNodeSelect,
   checkDuplicateName,
 }) => {
-  const {
-    setActiveFileIndex,
-    fileTap,
-    setFileTap,
-  } = useProjectEditor();
-  
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-    // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-    const addNewFile = (file: FileTapType) => {
-      
-      
-      const newFile = {
-        fileName: `NewFile${fileTap.length + 1}.js`,
-        fileRouteAndName: `/path/to/NewFile${fileTap.length + 1}.js`,
-      };
-      // 더블클릭시 파일탭에 newFile 추가하고 해당파일 활성화화
-      setFileTap([...fileTap, newFile]);
-      setActiveFileIndex(fileTap.length); // 새 탭을 활성화
-    };
-    // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-    // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
+
   const [expand, setExpand] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(explorerData.name);

@@ -9,7 +9,7 @@ interface ProjectEditorContextType {
   activeFile: string | null; // fileRouteAndName 으로 관리
   setActiveFile: (activeFile: string | null) => void;
   fileTap: FileTapType[];
-  setFileTap: (fileTap: FileTapType[]) => void;
+  setFileTap: React.Dispatch<React.SetStateAction<FileTapType[]>>;
   user: any; // 추후에 수정 예정정
 }
 
