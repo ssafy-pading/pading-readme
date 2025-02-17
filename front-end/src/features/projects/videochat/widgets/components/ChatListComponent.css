@@ -17,5 +17,17 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.8); /* hover 시 더 진한 색상 */
     width: 4px; /* 사실상 가로 세로 크기를 시뮬레이션하는 효과 */
-  }
+}
   
+input:-webkit-autofill {
+    background-color: transparent !important; /* 자동완성 시 배경색을 투명하게 */
+    color: white !important; /* 글자색을 흰색으로 설정 */
+    -webkit-box-shadow: 0 0 0px 1000px #2F3336 inset !important; /* 배경색 덮어쓰기 */
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-webkit-autofill::first-line {
+    color: white !important; /* 자동완성 첫 줄 색상 */
+}
+  
+

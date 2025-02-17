@@ -153,10 +153,18 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
   // 시간 변환 함수
   const formatTime = (dateString: string): string => {
     const date = new Date(dateString);
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+  
+    // 강제로 UTC 시간에서 9시간 추가 (KST 변환)
+    date.setUTCHours(date.getUTCHours() + 9);
+  
+    // 시간과 분을 2자리 문자열로 변환
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+  
     return `${hours}:${minutes}`;
   };
+  
+
 
   // 날짜 포맷 함수 (예: 2025. 2. 15.)
   const formatDate = (dateString: string): string => {
@@ -261,6 +269,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
               value={message}
               onChange={handleMessageChange}
               placeholder="메시지 입력"
+              autoComplete="off"
               className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
