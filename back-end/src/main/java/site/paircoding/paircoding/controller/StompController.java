@@ -1,6 +1,7 @@
 package site.paircoding.paircoding.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -12,6 +13,7 @@ import site.paircoding.paircoding.service.ChatService;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j  // Lombok을 활용한 Logger 선언
 public class StompController {
 
   private final ChatService chatService;
@@ -29,6 +31,6 @@ public class StompController {
 
   @MessageExceptionHandler
   public void handleException(RuntimeException e) {
-    System.out.println(e.getMessage());
+    log.error("WebSocket 메시지 처리 중 오류 발생: {}", e.getMessage(), e);
   }
 }

@@ -7,12 +7,14 @@ import io.livekit.server.WebhookReceiver;
 import java.util.Map;
 import livekit.LivekitWebhook.WebhookEvent;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.User;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j  // Lombok을 활용한 Logger 선언
 public class OpenviduService {
 
   @Value("${livekit.api.key}")
@@ -26,6 +28,9 @@ public class OpenviduService {
     token.setName(user.getName());
     token.setIdentity(user.getId() + "");
     token.addGrants(new RoomJoin(true), new RoomName(projectId));
+
+    log.info("LiveKit Access Token 생성: userId={}, projectId={}", user.getId(), projectId);
+
     return Map.of("token", token.toJwt());
   }
 
@@ -33,9 +38,9 @@ public class OpenviduService {
     WebhookReceiver webhookReceiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
     try {
       WebhookEvent event = webhookReceiver.receive(body, authHeader);
-      System.out.println("LiveKit Webhook: " + event.toString());
+      log.info("LiveKit Webhook 이벤트 수신: {}", event);
     } catch (Exception e) {
-      System.out.println("Error validating webhook event: " + e.getMessage());
+      log.error("LiveKit Webhook 이벤트 검증 실패: {}", e.getMessage(), e);
     }
     return "ok";
   }
