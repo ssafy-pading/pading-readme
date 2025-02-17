@@ -20,7 +20,7 @@ import RunButton from "../features/projects/editorterminal/widgets/buttons/RunBu
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/videochat";
+import RightContentsContainer from "../features/projects/VideoChat";
 import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
 import ProjectRun from "../features/projects/editorterminal/components/ProjectRun";
 // Models
