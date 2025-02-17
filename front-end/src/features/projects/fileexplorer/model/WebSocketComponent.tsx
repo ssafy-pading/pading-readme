@@ -24,7 +24,7 @@ const WebSocketComponent: React.FC = () => {
 
   const { groupId } = useParams();
   const { projectId } = useParams();
-  const url = "https://api-dev.pair-coding.site";
+  const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
 
   const {

@@ -18,7 +18,7 @@ import { FiInfo } from "react-icons/fi";
 import { PulseLoader } from "react-spinners";
 import { Participant, RemoteParticipant } from "../../type/VideoConferenceTypes"
 
-const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
+const APPLICATION_SERVER_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
 type TrackInfo = {
