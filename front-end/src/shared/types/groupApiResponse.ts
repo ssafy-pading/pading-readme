@@ -28,6 +28,7 @@ export type GetGroupMembersResponse = {
       image: string;   // 멤버 프로필 이미지 URL
       email: string;   // 멤버 이메일
       role: string;    // 멤버 역할 (예: Owner, Member, Manager)
+      status: string;
   }[]; // 멤버 목록
 };
 // 그룹 초대 링크 생성

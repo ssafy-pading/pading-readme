@@ -4,8 +4,8 @@
 // 3. 1, 2번 처리 후 context에 프로필도 넣어줘야 함
 
 // src/pages/LoginPage.tsx
-import React, { useEffect } from 'react';
-import TxtRotate from '../widgets/TxtRotate';
+import React, { useEffect, useState } from 'react';
+import TxtRotate from '../app/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
 import { useNavigate } from 'react-router-dom';
 import useGroupAxios from '../shared/apis/useGroupAxios';
@@ -15,6 +15,11 @@ import { useDispatch } from 'react-redux';
 import { resetUserState } from '../app/redux/user';
 import type { AppDispatch } from '../app/redux/store';
 
+// 토스트
+import { Toaster, toast } from 'react-hot-toast';
+
+// 스피너
+import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 
 declare global {
   interface Window {
@@ -58,6 +63,10 @@ interface ParticlesOptions {
 const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuthAxios();
   const { getGroups } = useGroupAxios();
+
+  // 스피너 체크
+  const [isLoading, setIsLoading] = useState(true);
+  
   // useNavigate 훅 사용하여 페이지 이동
   const navigate = useNavigate();
 
@@ -77,7 +86,6 @@ const LoginPage: React.FC = () => {
       try{
         // 그룹 정보 가져오기
         const groupData = await getGroups();
-        console.log(groupData);
         if (groupData.groups.length > 0) {
           const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
           navigate(`/projectlist/${groupId}`);
@@ -85,20 +93,22 @@ const LoginPage: React.FC = () => {
           navigate(`/nogroup`);
         }
       }catch(error){
-        console.log(error);
+        console.error(error);
+        setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
+    }else{
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
-  // 로그인 성공 시 컨텍스트에 프로필 정보를 담고 보내는 함수
-  const setProfile = async() => {
+  // 로그인 성공 시 디폴트 페이지(그룹을 순회하여 가장 낮은 id의 그룹의 프로젝트 리스트 페이지)로 이동하는 함수
+  const redirectDefault = async() => {
 
     // 기존 사용자 정보와 상태 초기화
     dispatch(resetUserState());
     try{
       // 그룹 정보 가져오기
       const groupData = await getGroups();
-      console.log(groupData);
       if (groupData.groups.length > 0) {
         const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
         navigate(`/projectlist/${groupId}`);
@@ -106,65 +116,65 @@ const LoginPage: React.FC = () => {
         navigate(`/nogroup`);
       }
     }catch(error){
-      console.log(error);
+      console.error(error);
+      setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
   useEffect(() => {
-    
-
-    refreshCheck();
-
+    // URL 파라미터에서 토큰 확인
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+  
+    // 토큰 파라미터가 있으면 로그인 로직을 먼저 처리하고 refreshCheck는 호출하지 않음
+    if (accessToken && refreshToken) {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      const redirectPath = sessionStorage.getItem("redirectPath");
+      if (redirectPath) {
+        sessionStorage.removeItem("redirectPath");
+        navigate(redirectPath);
+      } else {
+        redirectDefault();
+      }
+    } else {
+      // URL에 토큰 파라미터가 없을 경우에만 refreshCheck 호출
+      refreshCheck();
+    }
+  
     // Particles.js 로드
-    const particle = ():void => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/particles.js';
+    const particle = (): void => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/particles.js";
       script.onload = () => {
-        // Particles.js 설정
-        (window).particlesJS('particles-js', {
+        window.particlesJS("particles-js", {
           particles: {
             number: { value: 100 },
-            color: { value: '#ffffff' },
-            shape: { type: 'edge' },
+            color: { value: "#ffffff" },
+            shape: { type: "edge" },
             opacity: { value: 0.8, random: true },
             size: { value: 2 },
-            move: { enable: true, speed: 1, direction: 'top', straight: true, random: true },
+            move: { enable: true, speed: 1, direction: "top", straight: true, random: true },
             line_linked: { enable: false },
           },
-          interactivity: { 
-            detect_on: 'canvas',
-            events:{
-              onhover: { enable: false }, 
-              onclick: { enable: false }, 
-            },
-            resize:true 
+          interactivity: {
+            detect_on: "canvas",
+            events: { onhover: { enable: false }, onclick: { enable: false } },
+            resize: true,
           },
           modes: {
-            grab: { "distance": 0 },
-            bubble: { "distance": 0 },
-            repulse: { "distance": 0 },
-            push: { "particles_nb": 0 },
-            remove: { "particles_nb": 0 }
-          }
+            grab: { distance: 0 },
+            bubble: { distance: 0 },
+            repulse: { distance: 0 },
+            push: { particles_nb: 0 },
+            remove: { particles_nb: 0 },
+          },
         });
       };
       document.body.appendChild(script);
-    }
-
-    // 파라미터 체크
-    const params = new URLSearchParams(location.search);
-    const accessToken:string|null = params.get("accessToken");
-    const refreshToken:string|null = params.get("refreshToken");
-
-    // 파라미터가 있을 경우, 컨텍스트와 로컬에 담아주기
-    const tokenCheck = () => {
-      if(accessToken&&refreshToken){
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        setProfile();
-      }
-    } 
-    tokenCheck();
+    };
+  
     particle();
   }, []);
 
@@ -172,13 +182,17 @@ const LoginPage: React.FC = () => {
     try{
         await loginWithGoogle();
       }catch(error){
-      alert('로그인 실패')
-      console.log(error);
+        toast.error('로그인 실패')
+      console.error(error);
     }
   }
 
+  if (isLoading) {
+    return <ProjectSpinner />
+  }
   return (
     <div className="flex h-screen bg-gray-900">
+      <Toaster />
       {/* Left Section */}
       <div className="flex-[1.8] text-white flex flex-col items-center justify-center">
         <div id="particles-js" className="w-full h-full"></div>
