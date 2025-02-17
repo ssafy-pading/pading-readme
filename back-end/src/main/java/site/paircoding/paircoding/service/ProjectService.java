@@ -2,6 +2,7 @@ package site.paircoding.paircoding.service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -247,5 +248,16 @@ public class ProjectService {
     // nginx config 삭제
     nginxConfigUtil.deleteSubdomain(project.getContainerId());
 
+  }
+
+  public List<Integer> getProjectUserIds(Integer groupId, Integer projectId) {
+    projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new NotFoundException("Project not found"));
+    
+    String pattern = "project:" + projectId + ":user:*";
+    Set<String> keys = redisUtil.keys(pattern);
+    return keys.stream()
+        .map(key -> Integer.parseInt(key.split(":")[3]))
+        .collect(Collectors.toList());
   }
 }

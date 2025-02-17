@@ -70,4 +70,9 @@ public class ProjectController {
     return ApiResponse.success();
   }
 
+  @GetMapping("/{projectId}/status")
+  public ApiResponse<?> getProjectUserStatus(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
+    return ApiResponse.success(projectService.getProjectUserIds(groupId, projectId));
+  }
 }
