@@ -11,6 +11,7 @@ import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";
 
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
+import { confirmToast } from "../shared/widgets/toastConfirm";
 
 // Redux 관련 import
 import { useSelector, useDispatch } from "react-redux";
@@ -93,10 +94,10 @@ const RoleChangePage: React.FC = () => {
       return;
     }
     if (newRole === "OWNER") {
-      const confirmOwnerChange = window.confirm(
-        "상대방의 권한을 오너로 변경하면 당신의 권한은 매니저로 변경됩니다. 정말 변경하시겠습니까?"
+      const confirmOwnerChange = await confirmToast(
+        '상대방의 권한을 오너로 변경하면 당신의 권한은 매니저로 변경됩니다. 정말 변경하시겠습니까?'
       );
-      if (!confirmOwnerChange) return;
+      if (!confirmOwnerChange) return; // 취소 시 함수 종료
     }
     try {
       await updateMemberRole(groupId, userId, newRole);
@@ -135,7 +136,7 @@ const handleMemberExpel = async (userId: number) => {
   return (
     <div className={`transition-all duration-700 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>
       <Toaster />
-      <div className="pl-8 pr-12 pb-6 h-screen overflow-y-hidden max-h-screen transition-all duration-1000 ml-32 mt-20 z-0">
+      <div className="pl-8 pr-12 pb-6 transition-all duration-1000 ml-32 mt-20 z-0">
         <h1 className="text-[#4D4650] text-xl font-bold mb-3">멤버 설정</h1>
         <hr className="mb-5" />
         <table className="w-full table-auto border-collapse border-spacing-0 text-sm">

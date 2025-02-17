@@ -9,6 +9,7 @@ import { DefaultFileRouteType } from "../../../../shared/types/projectApiRespons
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
+  framework?: string;
   fileRouteAndName?: string;
   userName?: string;
 }
@@ -16,6 +17,7 @@ interface ProjectEditorProps {
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
   projectId,
+  framework,
   fileRouteAndName,
   userName
 }) => {
@@ -24,7 +26,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const [value, setvalue] = useState("")
-  const [language, setLanguage] = useState("javascript");
+  const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
   const signalingServer: string | null = isLocal
@@ -35,6 +37,16 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const type = doc.getText("monaco");
 
   useEffect(() => {
+    switch (framework) {
+      case "NodeJS":
+        setLanguage("javascript");
+        break;
+      case "SpringBoot":
+        setLanguage("java");
+        break;
+
+    }
+
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);

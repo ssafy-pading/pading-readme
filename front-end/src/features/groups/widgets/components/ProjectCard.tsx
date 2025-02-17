@@ -1,6 +1,5 @@
 // src/widgets/ProjectCard.tsx
 import React from 'react';
-// import { useNavigate } from 'react-router-dom';
 import { ProjectListItem } from '../../../../shared/types/projectApiResponse';
 import { RxDotsHorizontal } from "react-icons/rx";
 import {
@@ -45,7 +44,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   }, []);
 
   const handleEnterProject = () => {
-    // navigate(`/project/${groupId}/${id}`);
     window.location.href = `/project/${groupId}/${id}`;
   };
 

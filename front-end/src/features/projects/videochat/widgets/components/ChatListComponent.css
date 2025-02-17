@@ -1,6 +1,21 @@
-/* 스크롤바 기본 설정 */
-.custom-scrollbar {
-    scrollbar-width: thin; /* Firefox용: 얇은 스크롤바 */
-    scrollbar-color: #2F3336 #212426; /* Firefox용: thumb 색상과 track 색상 */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 2px;
+    width: 2px;
+    scrollbar-width: none;
 }
+  
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    height: 5px; /* 스크롤바 길이는 유지 */
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px; /* 너비가 줄어든 만큼 radius도 줄임 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.8); /* hover 시 더 진한 색상 */
+    width: 4px; /* 사실상 가로 세로 크기를 시뮬레이션하는 효과 */
+  }
   

@@ -10,6 +10,10 @@ import {
   VscTrash,
 } from "react-icons/vsc";
 import { FileNode, FileType } from "../type/directoryTypes";
+import toast, { Toaster } from 'react-hot-toast';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 // useContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
@@ -21,7 +25,7 @@ interface FolderProps {
   explorerData: FileNode;
   selectedId: number | null;
   sendActionRequest: (
-    action: "LIST" | "CREATE" | "DELETE" | "RENAME",
+    action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE",
     payload: any
   ) => void;
   handleNodeSelect: (nodeId: number) => void;
@@ -62,27 +66,8 @@ const Folder: React.FC<FolderProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [createType, setCreateType] = useState<FileType | null>(null);
   const [createValue, setCreateValue] = useState("");
-  const [globalContextMenu, setGlobalContextMenu] = useState<{
-    visible: boolean;
-    x: number;
-    y: number;
-    nodeId: number | null;
-  }>({
-    visible: false,
-    x: 0,
-    y: 0,
-    nodeId: null
-  });
-
-  useEffect(() => {
-    const handleClickOutside = () => {
-      if (globalContextMenu.visible) {
-        setGlobalContextMenu(prev => ({ ...prev, visible: false }));
-      }
-    };
-    window.addEventListener("click", handleClickOutside);
-    return () => window.removeEventListener("click", handleClickOutside);
-  }, [globalContextMenu.visible]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
 
   const getFullPath = (): string => {
     if (explorerData.parent === "" || explorerData.parent === "/") {
@@ -101,31 +86,30 @@ const Folder: React.FC<FolderProps> = ({
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
+    setModalIsOpen(false);
     e.preventDefault();
-    e.stopPropagation();
-    setGlobalContextMenu({
-      visible: true,
-      x: e.pageX,
-      y: e.pageY,
-      nodeId: explorerData.id
-    });
     handleNodeSelect(explorerData.id);
+    setModalPosition({ top: e.clientY, left: e.clientX });
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
   };
 
   const handleCreate = (type: FileType) => {
     setIsCreating(true);
     setCreateType(type);
     setCreateValue("");
-    setGlobalContextMenu(prev => ({ ...prev, visible: false }));
   };
 
   const handleCreateKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && createValue.trim()) {
       if (checkDuplicateName(getFullPath(), createValue.trim())) {
-        alert("같은 이름이 이미 존재합니다.");
+        toast.error("해당 이름의 파일 혹은 폴더가 이미 존재합니다.");
         return;
       }
-  
+
       const payload = {
         action: "CREATE",
         type: createType,
@@ -140,16 +124,15 @@ const Folder: React.FC<FolderProps> = ({
 
   const handleRenameStart = () => {
     setIsRenaming(true);
-    setGlobalContextMenu(prev => ({ ...prev, visible: false }));
   };
 
   const handleRenameKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && renameValue.trim()) {
       if (checkDuplicateName(explorerData.parent, renameValue.trim())) {
-        alert("같은 이름이 이미 존재합니다.");
+        toast.error("해당 이름의 파일 혹은 폴더가 이미 존재합니다.");
         return;
       }
-  
+
       const payload = {
         action: "RENAME",
         type: explorerData.type,
@@ -170,16 +153,38 @@ const Folder: React.FC<FolderProps> = ({
       name: explorerData.name,
     };
     sendActionRequest("DELETE", payload);
-    setGlobalContextMenu(prev => ({ ...prev, visible: false }));
   };
+
+  const getFileContent = () => {
+    if(explorerData.type==="DIRECTORY") return;
+    const payload = {
+      action: "CONTENT",
+      type: explorerData.type,
+      path: explorerData.parent,
+      name: explorerData.name,
+    }
+    sendActionRequest("CONTENT", payload);
+  }
 
   return (
     <div>
-      <div className="flex items-center hover:bg-gray-800 cursor-pointer select-none" onClick={toggleExpand} onContextMenu={handleContextMenu}>
+      <Toaster />
+      <div
+        className={`flex items-center hover:bg-gray-800 ${selectedId === explorerData.id ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6]" : ""
+          } ${explorerData.type==="FILE"?'ml-4':null}`}
+        onClick={toggleExpand}
+        onDoubleClick={getFileContent}
+        onContextMenu={handleContextMenu}
+      >
         {explorerData.type === "DIRECTORY" && (
-          <span>{expand ? <VscChevronDown /> : <VscChevronRight />}</span>
+          <span className="flex items-center">
+            {expand ? <VscChevronDown /> : <VscChevronRight />}
+          </span>
         )}
-        <span>{explorerData.type === "DIRECTORY" ? <VscFolder /> : <VscFile />}</span>
+        <span className="flex items-center text-white ml-[3px]">
+          {explorerData.type === "DIRECTORY" ? <VscFolder /> : <VscFile />}
+        </span>
+
         {isRenaming ? (
           <input
             type="text"
@@ -188,15 +193,18 @@ const Folder: React.FC<FolderProps> = ({
             onKeyDown={handleRenameKeyDown}
             onBlur={() => setIsRenaming(false)}
             autoFocus
-            className="ml-2 text-xs bg-[#212426] border border-[#3B82F6] rounded-none"
+            className="h-6 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         ) : (
-          <span className="ml-2 text-xs">{explorerData.name}</span>
+          <span className="select-none ml-[6px]">{explorerData.name}</span>
         )}
       </div>
 
       {isCreating && (
-        <div className="ml-8">
+        <div className="flex items-center gap-2 my-1 ml-4">
+          <span className="flex items-center text-white">
+            {createType === 'DIRECTORY' ? <VscFolder /> : <VscFile />}
+          </span>
           <input
             type="text"
             value={createValue}
@@ -208,42 +216,60 @@ const Folder: React.FC<FolderProps> = ({
             }}
             autoFocus
             placeholder={`Enter ${createType === 'DIRECTORY' ? 'folder' : 'file'} name`}
-            className="ml-2 text-xs bg-[#212426] border border-[#3B82F6] rounded-none"
+            className="h-6 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         </div>
       )}
 
-      {globalContextMenu.visible && globalContextMenu.nodeId === explorerData.id && (
-        <div
-          className="absolute bg-[#212426] border border-gray-700 py-2"
-          style={{ top: globalContextMenu.y, left: globalContextMenu.x }}
-          onClick={(e) => e.stopPropagation()}
-        >
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        style={{
+          content: {
+            top: modalPosition.top,
+            left: modalPosition.left,
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(0, 0)',
+            backgroundColor: '#212426',
+            border: '1px solid #2F3336',
+            borderRadius: '4px',
+            padding: '4px 0',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+            fontSize: '14px',
+          },
+          overlay: {
+            backgroundColor: 'transparent'
+          }
+        }}
+      >
+        <div className="py-2">
           {explorerData.type === "DIRECTORY" && (
             <>
-              <div className="px-4 py-1 hover:bg-gray-700 flex items-center gap-2" onClick={() => handleCreate("DIRECTORY")}>
-                <VscNewFolder />
+              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
+                <VscNewFolder className="w-4 h-4 text-white" />
                 <span>New Folder</span>
               </div>
-              <div className="px-4 py-1 hover:bg-gray-700 flex items-center gap-2" onClick={() => handleCreate("FILE")}>
-                <VscNewFile />
+              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
+                <VscNewFile className="w-4 h-4 text-white" />
                 <span>New File</span>
               </div>
             </>
           )}
-          <div className="px-4 py-1 hover:bg-gray-700 flex items-center gap-2" onClick={handleRenameStart}>
-            <VscEdit />
+          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
+            <VscEdit className="w-4 h-4 text-white" />
             <span>Rename</span>
           </div>
-          <div className="px-4 py-1 hover:bg-gray-700 flex items-center gap-2" onClick={handleDelete}>
-            <VscTrash />
+          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
+            <VscTrash className="w-4 h-4 text-white" />
             <span>Delete</span>
           </div>
         </div>
-      )}
+      </Modal>
 
       {expand && explorerData.children && (
-        <div className="ml-8">
+        <div className='ml-4'>
           {explorerData.children.map((child) => (
             <Folder
               key={child.id}

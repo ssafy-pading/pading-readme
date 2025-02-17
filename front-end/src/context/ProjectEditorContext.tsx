@@ -9,8 +9,8 @@ import {
 interface ProjectEditorContextType {
   activeFileIndex: number | null;
   setActiveFileIndex: (activeFileIndex: number | null) => void;
-  fileTap: FileTapType;
-  setFileTap: (fileTap: FileTapType) => void;
+  fileTap: FileTapType[];
+  setFileTap: (fileTap: FileTapType[]) => void;
   user: any; // 추후에 수정 예정정
   defaultFileRoutes: DefaultFileRouteType[];
   setDefaultFileRoutes: (defaultFileRoutes: DefaultFileRouteType[]) => void;
@@ -20,13 +20,9 @@ const ProjectEditorContext = createContext<
   ProjectEditorContextType | undefined
 >(undefined);
 
-export const ProjectEditorProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
-  const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
-  const [fileTap, setFileTap] = useState<FileTapType>([]);
+export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
+  const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null)
+  const [fileTap, setFileTap] = useState<FileTapType[]>([])
   const { user } = useSelector((state: RootState) => state.user);
   const [defaultFileRoutes, setDefaultFileRoutes] = useState<
     DefaultFileRouteType[]
