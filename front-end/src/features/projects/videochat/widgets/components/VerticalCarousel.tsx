@@ -4,7 +4,7 @@ import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 import "./VerticalCarousel.css";
-import { VerticalCarouselProps } from "../../type/VideoConferenceTypes";
+import { VerticalCarouselProps, RemoteParticipant } from "../../type/VideoConferenceTypes";
 import { useSelector } from 'react-redux';
 import { RootState } from "../../../../../app/redux/store";
 
@@ -74,7 +74,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
               </div>
             )}
 
-            {remoteParticipants.map((participant) =>
+            {remoteParticipants.map((participant: RemoteParticipant) =>
               participant.videoTrack ? (
                 <div key={participant.id} className="relative p-2 pt-1 pb-0">
                   {participant.videoTrack && (
