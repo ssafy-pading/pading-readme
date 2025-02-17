@@ -15,4 +15,5 @@ public class GroupUserResponse {
   private String image;
   private String email;
   private Role role;
+  private String status;
 }

@@ -7,9 +7,9 @@ import site.paircoding.paircoding.entity.enums.DirectoryType;
 @Getter
 public class DirectoryDeleteDto {
 
-  private DirectoryType type;
   private DirectoryAction action;
+  private DirectoryType type;
   private String path;
   private String name;
-  
+
 }

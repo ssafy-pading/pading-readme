@@ -22,7 +22,7 @@ public class Group extends BaseEntity {
   private Integer id;
 
   @Setter
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true, length = 50)
   private String name;
 
   @Column(nullable = false)

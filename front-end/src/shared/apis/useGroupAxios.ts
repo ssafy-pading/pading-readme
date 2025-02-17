@@ -20,21 +20,32 @@ const useGroupAxios = () => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_APP_API_BASE_URL;
 
-  // 원래 반환 객체에 포함된 Axios 인스턴스를 그대로 생성 (참조용)
+  // Axios 인스턴스 생성
   const groupAxios: AxiosInstance = axios.create({
     baseURL,
     headers: { 'Content-Type': 'application/json' },
   });
 
-  // 매 요청에 Authorization 헤더를 추가하는 함수
-  const withAuthHeader = useCallback(() => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    },
-  }), []);
+  /**
+   * Access Token을 Authorization 헤더에 추가하는 함수
+   * @returns Authorization 헤더가 포함된 객체
+   */
+  const withAuthHeader = useCallback(() => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }, []);
 
-  // 401 에러 발생 시 토큰 갱신 및 대기중인 요청 재시도 처리
-  const handle401Error = useCallback(async (originalRequest: () => Promise<any>) => {
+  /**
+   * 401 에러 발생 시 Access Token 갱신을 시도하는 함수
+   * @param originalRequest - 재시도할 요청 함수
+   * @returns 토큰 갱신 성공 여부
+   */
+  const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
+    if (!localStorage.getItem('refreshToken')) {
+      navigate('/');
+      return false;
+    }
+
     if (!isRefreshing) {
       isRefreshing = true;
       try {
@@ -42,367 +53,232 @@ const useGroupAxios = () => {
         if (newAccessToken) {
           failedQueue.forEach((retry) => retry());
           failedQueue = [];
+          return true;
         } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           navigate('/');
+          return false;
         }
       } catch (error) {
         console.error('Failed to refresh token:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         navigate('/');
+        return false;
       } finally {
         isRefreshing = false;
       }
     } else {
       return new Promise((resolve) => {
-        failedQueue.push(() => resolve(originalRequest()));
+        failedQueue.push(() => resolve(originalRequest().then(() => true).catch(() => false)));
       });
     }
   }, [navigate]);
 
   /**
-   * 그룹 목록 조회
+   * API 요청을 처리하고 401 에러 발생 시 토큰 갱신 후 재시도하는 함수
+   * @param request - 원래의 요청 함수
+   * @param retryCallback - 토큰 갱신 후 재시도할 함수
+   * @returns 요청 결과 또는 에러
    */
-  const getGroups = useCallback(async (): Promise<GetGroupListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups`, withAuthHeader());
-      return response.data.data;
-    };
+  const apiRequest = useCallback(async (request: () => Promise<any>, retryCallback: () => Promise<any>) => {
     try {
       return await request();
     } catch (error: any) {
       if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getGroups();
+        const refreshed = await handle401Error(request);
+        if (refreshed) {
+          return retryCallback();
+        }
+        throw new Error('Token refresh failed, redirected to login');
       }
       throw error;
     }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  }, [handle401Error]);
 
   /**
-   * 그룹 상세 조회
+   * 그룹 목록 조회 요청 함수
+   * @returns 그룹 목록 데이터
    */
-  const getGroupDetails = useCallback(async (groupId: number): Promise<GetGroupDetailsResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getGroupDetails(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getGroups = useCallback((): Promise<GetGroupListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups`, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, getGroups);
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹명 중복 확인
+   * 그룹 상세 정보 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 그룹 상세 정보 데이터
    */
-  const checkGroupNameDuplicate = useCallback(async (name: string): Promise<CheckGroupNameDuplicateResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/check-duplicate`, {
-        ...withAuthHeader(),
-        params: { name },
-      });
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return checkGroupNameDuplicate(name);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getGroupDetails = useCallback((groupId: number): Promise<GetGroupDetailsResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}`, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => getGroupDetails(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 생성
+   * 그룹 이름 중복 확인 요청 함수
+   * @param name - 확인할 그룹 이름
+   * @returns 중복 여부 데이터
    */
-  const createGroup = useCallback(async (data: Record<string, unknown>): Promise<GroupCreateResponse> => {
-    const request = async () => {
-      const response = await axios.post(`${baseURL}/v1/groups`, data, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return createGroup(data);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const checkGroupNameDuplicate = useCallback((name: string): Promise<CheckGroupNameDuplicateResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/check-duplicate`, { ...withAuthHeader(), params: { name } }).then(res => res.data.data);
+    return apiRequest(request, () => checkGroupNameDuplicate(name));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹명 변경
+   * 그룹 생성 요청 함수
+   * @param data - 생성할 그룹 정보
+   * @returns 생성된 그룹 데이터
    */
-  const updateGroupName = useCallback(async (groupId: number, name: string): Promise<boolean> => {
-    const request = async () => {
-      await axios.patch(`${baseURL}/v1/groups/${groupId}`, { name }, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateGroupName(groupId, name);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const createGroup = useCallback((data: Record<string, unknown>): Promise<GroupCreateResponse> => {
+    const request = () => axios.post(`${baseURL}/v1/groups`, data, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => createGroup(data));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 삭제
+   * 그룹 이름 수정 요청 함수
+   * @param groupId - 그룹 ID
+   * @param name - 새로운 그룹 이름
+   * @returns 수정 성공 여부
    */
-  const deleteGroup = useCallback(async (groupId: number): Promise<boolean> => {
-    const request = async () => {
-      await axios.delete(`${baseURL}/v1/groups/${groupId}`, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return deleteGroup(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const updateGroupName = useCallback((groupId: number, name: string): Promise<boolean> => {
+    const request = () => axios.patch(`${baseURL}/v1/groups/${groupId}`, { name }, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => updateGroupName(groupId, name));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 멤버 목록 조회
+   * 그룹 삭제 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 삭제 성공 여부
    */
-  const getGroupMembers = useCallback(async (groupId: number): Promise<GetGroupMembersResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}/users`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getGroupMembers(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const deleteGroup = useCallback((groupId: number): Promise<boolean> => {
+    const request = () => axios.delete(`${baseURL}/v1/groups/${groupId}`, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => deleteGroup(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 초대 링크 조회
+   * 그룹 멤버 목록 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 그룹 멤버 목록 데이터
    */
-  const getInvitationLink = useCallback(async (groupId: number): Promise<GroupInviteLinkResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}/invitation`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getInvitationLink(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getGroupMembers = useCallback((groupId: number): Promise<GetGroupMembersResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/users`, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => getGroupMembers(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 초대 링크 생성
+   * 그룹 초대 링크 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 초대 링크 데이터
    */
-  const createInvitationLink = useCallback(async (groupId: number): Promise<GroupInviteLinkResponse> => {
-    const request = async () => {
-      // POST의 경우 body가 없으므로 null을 전달
-      const response = await axios.post(`${baseURL}/v1/groups/${groupId}/invitation`, null, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return createInvitationLink(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getInvitationLink = useCallback((groupId: number): Promise<GroupInviteLinkResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/invitation`, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => getInvitationLink(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 참가
+   * 그룹 초대 링크 생성 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 생성된 초대 링크 데이터
    */
-  const joinGroup = useCallback(async (groupId: number, code: string): Promise<JoinGroupResponse> => {
-    const request = async () => {
-      const response = await axios.post(`${baseURL}/v1/groups/${groupId}/join`, { code }, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return joinGroup(groupId, code);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const createInvitationLink = useCallback((groupId: number): Promise<GroupInviteLinkResponse> => {
+    const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/invitation`, null, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => createInvitationLink(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 그룹 나가기
+   * 그룹 참여 요청 함수
+   * @param groupId - 그룹 ID
+   * @param code - 초대 코드
+   * @returns 그룹 참여 결과 데이터
    */
-  const leaveGroup = useCallback(async (groupId: number): Promise<boolean> => {
-    const request = async () => {
-      await axios.delete(`${baseURL}/v1/groups/${groupId}/quit`, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return leaveGroup(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const joinGroup = useCallback((groupId: number, code: string): Promise<JoinGroupResponse> => {
+    const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/join`, { code }, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => joinGroup(groupId, code));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 멤버 권한 변경
+   * 그룹 탈퇴 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 탈퇴 성공 여부
    */
-  const updateMemberRole = useCallback(async (
-    groupId: number,
-    userId: number,
-    role: string
-  ): Promise<UpdateMemberRoleResponse> => {
-    const request = async () => {
-      const response = await axios.patch(
-        `${baseURL}/v1/groups/${groupId}/users/${userId}`,
-        { role },
-        withAuthHeader()
-      );
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateMemberRole(groupId, userId, role);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const leaveGroup = useCallback((groupId: number): Promise<boolean> => {
+    const request = () => axios.delete(`${baseURL}/v1/groups/${groupId}/quit`, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => leaveGroup(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 멤버 추방
+   * 그룹 멤버 역할 수정 요청 함수
+   * @param groupId - 그룹 ID
+   * @param userId - 사용자 ID
+   * @param role - 수정할 역할 (e.g., 'admin', 'member')
+   * @returns 수정된 역할 데이터
    */
-  const expelMember = useCallback(async (groupId: number, userId: number): Promise<boolean> => {
-    const request = async () => {
-      await axios.delete(`${baseURL}/v1/groups/${groupId}/users/${userId}`, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return expelMember(groupId, userId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const updateMemberRole = useCallback((groupId: number, userId: number, role: string): Promise<UpdateMemberRoleResponse> => {
+    const request = () => axios.patch(`${baseURL}/v1/groups/${groupId}/users/${userId}`, { role }, withAuthHeader()).then(res => res.data.data);
+    return apiRequest(request, () => updateMemberRole(groupId, userId, role));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 오너 위임
+   * 그룹 멤버 추방 요청 함수
+   * @param groupId - 그룹 ID
+   * @param userId - 사용자 ID
+   * @returns 추방 성공 여부
    */
-  const delegateOwner = useCallback(async (groupId: number, newOwnerId: number): Promise<boolean> => {
-    const request = async () => {
-      await axios.patch(
-        `${baseURL}/v1/groups/${groupId}/users/delegation`,
-        { newOwnerId },
-        withAuthHeader()
-      );
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return delegateOwner(groupId, newOwnerId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const expelMember = useCallback((groupId: number, userId: number): Promise<boolean> => {
+    const request = () => axios.delete(`${baseURL}/v1/groups/${groupId}/users/${userId}`, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => expelMember(groupId, userId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 명세서 추가
+   * 그룹 소유권 위임 요청 함수
+   * @param groupId - 그룹 ID
+   * @param newOwnerId - 새로운 소유자 ID
+   * @returns 위임 성공 여부
    */
-  const addSpec = useCallback(async (groupId: number, specData: Record<string, unknown>): Promise<boolean> => {
-    const request = async () => {
-      await axios.post(`${baseURL}/v1/groups/${groupId}/spec`, specData, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return addSpec(groupId, specData);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const delegateOwner = useCallback((groupId: number, newOwnerId: number): Promise<boolean> => {
+    const request = () => axios.patch(`${baseURL}/v1/groups/${groupId}/users/delegation`, { newOwnerId }, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => delegateOwner(groupId, newOwnerId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 명세서 수정
+   * 그룹 사양 추가 요청 함수
+   * @param groupId - 그룹 ID
+   * @param specData - 추가할 사양 데이터
+   * @returns 추가 성공 여부
    */
-  const updateSpec = useCallback(async (
-    groupId: number,
-    specId: number,
-    specData: Record<string, unknown>
-  ): Promise<boolean> => {
-    const request = async () => {
-      await axios.patch(`${baseURL}/v1/groups/${groupId}/spec/${specId}`, specData, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateSpec(groupId, specId, specData);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const addSpec = useCallback((groupId: number, specData: Record<string, unknown>): Promise<boolean> => {
+    const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/spec`, specData, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => addSpec(groupId, specData));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 명세서 삭제
+   * 그룹 사양 수정 요청 함수
+   * @param groupId - 그룹 ID
+   * @param specId - 수정할 사양 ID
+   * @param specData - 수정할 사양 데이터
+   * @returns 수정 성공 여부
    */
-  const deleteSpec = useCallback(async (groupId: number, specId: number): Promise<boolean> => {
-    const request = async () => {
-      await axios.delete(`${baseURL}/v1/groups/${groupId}/spec/${specId}`, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return deleteSpec(groupId, specId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const updateSpec = useCallback((groupId: number, specId: number, specData: Record<string, unknown>): Promise<boolean> => {
+    const request = () => axios.patch(`${baseURL}/v1/groups/${groupId}/spec/${specId}`, specData, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => updateSpec(groupId, specId, specData));
+  }, [baseURL, withAuthHeader, apiRequest]);
+
+  /**
+   * 그룹 사양 삭제 요청 함수
+   * @param groupId - 그룹 ID
+   * @param specId - 삭제할 사양 ID
+   * @returns 삭제 성공 여부
+   */
+  const deleteSpec = useCallback((groupId: number, specId: number): Promise<boolean> => {
+    const request = () => axios.delete(`${baseURL}/v1/groups/${groupId}/spec/${specId}`, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => deleteSpec(groupId, specId));
+  }, [baseURL, withAuthHeader, apiRequest]);
+
 
   return {
-    groupAxios, // 기존과 동일한 Axios 인스턴스
+    groupAxios,
     getGroups,
     getGroupDetails,
     checkGroupNameDuplicate,

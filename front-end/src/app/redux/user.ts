@@ -47,10 +47,10 @@ export const fetchUserInfo = createAsyncThunk('user/fetchUserInfo', async (_, { 
         "Content-Type": "application/json",
       },
     });
-    console.log("response", response);
+    // console.log("response", response);
     return response.data.data;
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
     return rejectWithValue(error.message);
   }
 });

@@ -18,4 +18,11 @@ public class ProjectImage {
 
   @Column(nullable = false, length = 20)
   private String os;
+
+  @Column(nullable = false)
+  private Integer port;
+
+  @Column(nullable = false)
+  private String defaultRunCommand;
+
 }
