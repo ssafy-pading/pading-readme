@@ -28,8 +28,7 @@ const WebSocketComponent: React.FC = () => {
   const access = localStorage.getItem("accessToken");
 
   const {
-    setActiveFileIndex,
-    fileTap,
+    setActiveFile,
     setFileTap,
   } = useProjectEditor();
 
@@ -37,16 +36,17 @@ const WebSocketComponent: React.FC = () => {
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
+      content: file.content
     };
-    
+  
     setFileTap((prevFileTap) => {
       const updatedFileTap = [...prevFileTap, newFile];
-      setActiveFileIndex(updatedFileTap.length - 1); // 새 파일의 인덱스는 마지막 인덱스
+      setActiveFile(newFile.fileRouteAndName); // 새 파일을 활성 파일로 설정
+      
       return updatedFileTap;
     });
-    
   };
-
+  
   const idCounter = useRef(1);
   const generateUniqueId = () => {
     idCounter.current += 1;
@@ -173,7 +173,8 @@ const WebSocketComponent: React.FC = () => {
               });
               const openFile: FileTapType = {
                 fileName:data.name,
-                fileRouteAndName:`${data.path}/${data.name}`
+                fileRouteAndName:`${data.path}/${data.name}`,
+                content: data.content
               }
               addNewFile(openFile);
             } else if(data.action === "SAVE"){

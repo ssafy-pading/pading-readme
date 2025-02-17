@@ -109,11 +109,6 @@ export type AccessProjectResponse = {
 // 파일 타입
 export type FileTapType = {
   fileName: string;
-  fileRouteAndName: string
-}
-
-// 기본 파일 타입
-export type DefaultFileRouteType = {
-  defaultFileRouteAndName: string;
+  fileRouteAndName: string;
   content: string;
 }
