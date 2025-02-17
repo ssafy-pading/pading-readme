@@ -143,7 +143,7 @@ const ProfileNavigationBar: React.FC = () => {
   const [groupUsers, setGroupUsers] = useState<GroupUser[]>([]);
   const [adminMembers, setAdminMembers] = useState<GroupUser[]>([]);
   const [normalMembers, setNormalMembers] = useState<GroupUser[]>([]);
-  const activeMemberCount = groupUsers.filter(user => user.status === "online").length;
+  const [activeMemberCount, setActiveMemberCount] = useState<number>(groupUsers.filter(user => user.status === "online").length);
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -239,7 +239,9 @@ const ProfileNavigationBar: React.FC = () => {
     const normals = groupUsers.filter((user) => user.role === "MEMBER");
     setAdminMembers(admins);
     setNormalMembers(normals);
-  }, [groupUsers]);
+    const activeCount = groupUsers.filter(user => (user.status === "online" || user.id == userProfile?.id)).length;
+    setActiveMemberCount(activeCount);
+  }, [groupUsers, userProfile]);
   
 
   // 로그인한 유저의 그룹 내 역할 확인
