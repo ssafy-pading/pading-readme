@@ -269,6 +269,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
               value={message}
               onChange={handleMessageChange}
               placeholder="메시지 입력"
+              autoComplete="off"
               className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
