@@ -4,6 +4,9 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { FileNode, FileType } from "../type/directoryTypes";
 import Folder from "../widgets/Folder";
+// userContext
+import { useProjectEditor } from "../../../../context/ProjectEditorContext";
+import { FileTapType } from "../../../../shared/types/projectApiResponse";
 
 interface TreeNode {
   id: number;
@@ -14,18 +17,32 @@ interface TreeNode {
 }
 
 const WebSocketComponent: React.FC = () => {
-  const [stompClient, setStompClient] = useState<Client | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [treeData, setTreeData] = useState<FileNode | null>(null);
   const nodesMapRef = useRef(new Map<number, TreeNode>());
   const clientRef = useRef<Client | null>(null);
 
-  const [inputPath, setInputPath] = useState("");
-
   const { groupId } = useParams();
   const { projectId } = useParams();
   const url = "https://api-dev.pair-coding.site";
   const access = localStorage.getItem("accessToken");
+
+  const {
+    setActiveFileIndex,
+    fileTap,
+    setFileTap,
+  } = useProjectEditor();
+
+  const addNewFile = (file: FileTapType) => {
+    const newFile = {
+      fileName: file.fileName,
+      fileRouteAndName: file.fileRouteAndName,
+    };
+    // 더블클릭시 파일탭에 newFile 추가하고 해당파일 활성화화
+    setFileTap([...fileTap, newFile]);
+    setActiveFileIndex(fileTap.length); // 새 탭을 활성화
+    console.log("fileTap2: ", fileTap);
+  };
 
   const idCounter = useRef(1);
   const generateUniqueId = () => {
@@ -67,9 +84,12 @@ const WebSocketComponent: React.FC = () => {
       path: string;
       children: { type: string; name: string }[];
     }) => {
+      if (data.action !== 'LIST') { // create, delete, rename 요청 완료 후 재렌더링
+        sendActionRequest('LIST', { path: data.path });
+        return;
+      }
       console.log("Updating nodes map with data:", data);
-      const parentPath = data.path.startsWith("/") ? data.path : `/${data.path}`;
-      const parentNode = getNodeByPath(parentPath);
+      const parentNode = getNodeByPath(data.path);
       if (!parentNode) {
         console.error("Parent node not found for path:", data.path);
         return;
@@ -95,7 +115,7 @@ const WebSocketComponent: React.FC = () => {
   );
 
   const sendActionRequest = useCallback(
-    (action: "LIST" | "CREATE" | "DELETE" | "RENAME", payload: any) => {
+    (action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE", payload: any) => {
       if (!clientRef.current || !clientRef.current.connected) {
         console.error("STOMP client is not connected");
         return;
@@ -136,17 +156,35 @@ const WebSocketComponent: React.FC = () => {
       onConnect: () => {
         console.log("WebSocket connected");
         clientRef.current = client;
-        setStompClient(client);
         const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
             console.log("Received message:", data);
-            if (data.action === "LIST") {
+            if (data.action === "CONTENT") {
+              console.log(`Received ${data.action} message:`, {
+                action: data.action,
+                fileName: data.name,
+                content: data.content,
+                path: data.path
+              });
+              const openFile: FileTapType = {
+                fileName:data.name,
+                fileRouteAndName:`${data.path}/${data.name}`
+              }
+              addNewFile(openFile);
+            } else if(data.action === "SAVE"){
+              console.log(`Received ${data.action} message:`, {
+                action: data.action,
+                fileName: data.name,
+                contentLength: data.content,
+                path: data.path
+              });
+            } else {
               updateNodesMapWithList(data);
             }
           } catch (error) {
-            console.error("Message parsing error:", error);
+            console.error("Error processing message:", error);
           }
         });
         setTimeout(() => {
@@ -187,7 +225,7 @@ const WebSocketComponent: React.FC = () => {
   }, [getNodeByPath]);
 
   return (
-    <div>
+    <div className="w-full">
       <div>
         {/* <button onClick={handleRefresh}>새로고침</button> 새로고침 후 3번째 depth 부터 데이터 렌더링이 안 됨*/}
       </div>
