@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ResourceData } from "../types/monitoringTypes";
 import ResourceBar from "./ResourceBar";
-import SlidePanel from "./SlidePanel";
 import cpu from "../../../../assets/cpu.svg";
 import memory from "../../../../assets/memory.svg";
 
@@ -56,9 +55,6 @@ const ResourceMonitorBar = ({ monitoringDataList }: MonitoringDataProps) => {
       <div className={`${isCompact ? "w-[40px]" : "w-[90px] mr-2"} flex mr-2`}>
         <img src={memory} alt="memory" />
         <ResourceBar name="Mem" percent={monitoringData?.memoryPercentage} isCompact={isCompact} />
-      </div>
-      <div>
-        <SlidePanel data={monitoringDataList} />
       </div>
     </div>
   );
