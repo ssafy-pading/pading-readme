@@ -46,7 +46,7 @@ const GroupNavigationBar: React.FC = () => {
   // 현재 URL에서 선택된 그룹 ID 추출 (예: /projectlist/2)
   let nowGroupId: number | null = null;
   const pathParts = location.pathname.split('/');
-  if (pathParts[1] === 'projectlist' && pathParts[2]) {
+  if ((pathParts[1] === 'projectlist' || pathParts[1] === 'rolechange') && pathParts[2]) {
     nowGroupId = parseInt(pathParts[2], 10);
   }
 
