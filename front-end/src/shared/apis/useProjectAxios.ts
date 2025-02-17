@@ -11,6 +11,7 @@ import {
   GetPerformanceListResponse,
   GetProjectDetailsResponse,
   GetProjectListResponse,
+  GetProjectMemberStatusResponse,
 } from '../types/projectApiResponse';
 
 let isRefreshing = false; // 토큰 갱신 플래그
@@ -205,6 +206,21 @@ const useProjectAxios = () => {
     return apiRequest(request, () => deleteProject(groupId, projectId));
   }, [baseURL, withAuthHeader, apiRequest]);
 
+  /**
+   * 프로젝트 멤버 상태 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 멤버 상태 데이터
+   */
+  const getProjectMemberStatus = useCallback((groupId: string, projectId: string): Promise<GetProjectMemberStatusResponse> => {
+      console.log("요청시:", typeof groupId, groupId, projectId);
+      const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/status`, withAuthHeader()).then((res) => res.data.data);
+
+      return apiRequest(request, () => getProjectMemberStatus(groupId, projectId));
+    },
+    [baseURL, withAuthHeader, apiRequest]
+  );
+
   return {
     projectAxios,
     getLanguages,
@@ -217,6 +233,7 @@ const useProjectAxios = () => {
     joinProject,
     updateProject,
     deleteProject,
+    getProjectMemberStatus,
   };
 };
 
