@@ -433,7 +433,7 @@ const ProfileNavigationBar: React.FC = () => {
                 )}
                 <div className="flex items-center justify-between flex-1 text-[#4D4650]">
                   <span className="text-base font-semibold">
-                    멤버 ({activeMemberCount}/{groupUsers.length})
+                    유저 ({activeMemberCount}/{groupUsers.length})
                   </span>
                   {(userRole === "OWNER" || userRole === "MANAGER") && (
                     <Cog6ToothIcon
@@ -461,7 +461,7 @@ const ProfileNavigationBar: React.FC = () => {
                     <>
                       {/* 관리자 섹션 */}
                       <li className="flex items-center my-2">
-                        <span className="text-sm font-bold text-[#4D4650]">관리자</span>
+                        <span className="text-sm font-bold text-[#4D4650]">매니저</span>
                         <hr className="ml-2 w-[50%] border-t border-gray-300" />
                       </li>
                       {adminMembers.map((user) => (
@@ -495,7 +495,7 @@ const ProfileNavigationBar: React.FC = () => {
                     <>
                       {/* 일반 멤버 섹션 */}
                       <li className="flex items-center my-2 mt-4">
-                        <span className="text-sm font-bold text-[#4D4650]">일반 멤버</span>
+                        <span className="text-sm font-bold text-[#4D4650]">멤버</span>
                         <hr className="ml-2 w-[50%] border-t border-gray-300" />
                       </li>
                       {normalMembers.map((user) => (
