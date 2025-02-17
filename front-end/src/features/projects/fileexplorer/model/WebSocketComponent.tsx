@@ -38,10 +38,13 @@ const WebSocketComponent: React.FC = () => {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
     };
-    // 더블클릭시 파일탭에 newFile 추가하고 해당파일 활성화화
-    setFileTap([...fileTap, newFile]);
-    setActiveFileIndex(fileTap.length); // 새 탭을 활성화
-    console.log("fileTap2: ", fileTap);
+    
+    setFileTap((prevFileTap) => {
+      const updatedFileTap = [...prevFileTap, newFile];
+      setActiveFileIndex(updatedFileTap.length - 1); // 새 파일의 인덱스는 마지막 인덱스
+      return updatedFileTap;
+    });
+    
   };
 
   const idCounter = useRef(1);
