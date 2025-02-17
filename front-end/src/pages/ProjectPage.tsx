@@ -39,6 +39,7 @@ import { FileTapType } from "../shared/types/projectApiResponse";
 import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
+import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
 
 function ProjectPage() {
   // 로딩 상태 체크
@@ -167,7 +168,7 @@ function ProjectPage() {
   };
 
   // 터미널 Tab 상태 관리
-  const [activePanel, setActivePanel] = useState<"terminal" | "run">(
+  const [activePanel, setActivePanel] = useState<"terminal" | "run" | "resource">(
     "terminal"
   );
   // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
@@ -411,6 +412,18 @@ function ProjectPage() {
                       >
                         Run
                       </button>
+
+                      {/* Resource 탭 */}
+                      <button
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                          activePanel === "resource"
+                            ? "border-b-2 border-b-[#3B82F6] text-white"
+                            : "text-[#858595] hover:text-white"
+                        } cursor-pointer`}
+                        onClick={() => setActivePanel("resource")}
+                      >
+                        Resource
+                      </button>
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button
@@ -495,6 +508,19 @@ function ProjectPage() {
                         mode="run"
                         executeRunCommand={executeRunCommand}
                         onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                      />
+                    </div>
+
+                    {/* Resource 패널 */}
+                    <div
+                      className="bg-[#141617] w-full h-full overflow-hidden"
+                      style={{
+                        display: activePanel === "resource" ? "block" : "none",
+                      }}
+                    >
+                      <MonitoringDashboard 
+                        data={monitoringDataList} 
+                        height={terminalHeight - 30}
                       />
                     </div>
                     {/* 터미널 패널 */}
