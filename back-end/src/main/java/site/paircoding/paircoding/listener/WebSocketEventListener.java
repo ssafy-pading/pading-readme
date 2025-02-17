@@ -69,6 +69,7 @@ public class WebSocketEventListener {
     String destination = headerAccessor.getDestination(); // 구독한 경로
     String sessionId = headerAccessor.getSessionId();
     String userId = userSessionMap.get(sessionId);
+    String groupId = sessionGroupMap.get(sessionId);
 
     // ✅ /chat/{projectId} 패턴 확인
     if (destination != null && destination.startsWith("/sub/chat/")) {
@@ -82,15 +83,14 @@ public class WebSocketEventListener {
       String redisKey = PROJECT_USER_KEY.formatted(projectId, userId);
       redisUtil.set(redisKey, "online");
 
-      // ✅ JSON 메시지 생성
-      Map<String, String> message = new HashMap<>();
-      message.put("status", "subscribe");
-      message.put("userId", userId);
-      message.put("projectId", projectId);
+      Map<String, String> projectStatusMessage = new HashMap<>();
+      projectStatusMessage.put("status", "member");
+      projectStatusMessage.put("projectId", projectId);
 
       try {
-        String jsonMessage = objectMapper.writeValueAsString(message);
-        messagingTemplate.convertAndSend("/chat/" + projectId, jsonMessage);
+        String jsonProejctStatusMessage = objectMapper.writeValueAsString(projectStatusMessage);
+        messagingTemplate.convertAndSend("/sub/project-status/groups/" + groupId,
+            jsonProejctStatusMessage);
       } catch (Exception e) {
         log.error("Error converting subscribe message to JSON", e);
       }
@@ -119,15 +119,14 @@ public class WebSocketEventListener {
         String redisKey = PROJECT_USER_KEY.formatted(projectId, userId);
         redisUtil.delete(redisKey); // Redis에서 삭제
 
-        // ✅ JSON 메시지 생성
-        Map<String, String> message = new HashMap<>();
-        message.put("status", "offline");
-        message.put("userId", userId);
-        message.put("projectId", projectId);
+        Map<String, String> projectStatusMessage = new HashMap<>();
+        projectStatusMessage.put("status", "member");
+        projectStatusMessage.put("projectId", projectId);
 
         try {
-          messagingTemplate.convertAndSend("/chat/" + projectId,
-              objectMapper.writeValueAsString(message));
+          String jsonProejctStatusMessage = objectMapper.writeValueAsString(projectStatusMessage);
+          messagingTemplate.convertAndSend("/sub/project-status/groups/" + groupId,
+              jsonProejctStatusMessage);
         } catch (Exception e) {
           log.error("Error converting disconnect message to JSON", e);
         }
