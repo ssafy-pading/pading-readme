@@ -123,7 +123,6 @@ const InvitePage = () => {
     useEffect(() => {
       // user 상태에 따라 인증 여부를 설정하는 효과
       const isLogin = !!localStorage.getItem("accessToken");
-      console.log(isLogin);
       if (isLogin) {
         setIsAuthenticated(true);
       } else {
@@ -188,8 +187,11 @@ const InvitePage = () => {
                 toast.success(`${groupName} 그룹 참가에 성공했습니다!`);
                 navigate(`/projectlist/${groupDetails.id}`); // 성공 시 그룹 페이지로 이동
             }
-        } catch (error) {
+        } catch (error:any) {
             console.error(error);
+            if (error.response && error.response.status === 400) {
+              toast.error("그룹 정원이 가득 찼습니다. 그룹 오너(매니저)에게 문의하세요.");
+            };
         }
     };
 
