@@ -70,6 +70,7 @@ public class ProjectController {
     return ApiResponse.success();
   }
 
+  @GroupRoleCheck(Role.MEMBER)
   @GetMapping("/{projectId}/status")
   public ApiResponse<?> getProjectUserStatus(@LoginUser User user,
       @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
