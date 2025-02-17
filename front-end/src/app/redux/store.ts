@@ -1,10 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "./user";
+import videoConferenceReducer from './videoConferenceSlice';
 
 const store =  configureStore({
     reducer: {
-        user: userReducer
+        user: userReducer,
         // 여기에 리듀서 추가
+        videoConference: videoConferenceReducer,
     }
 })
 

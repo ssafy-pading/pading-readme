@@ -12,7 +12,7 @@ import {
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
 import ParticipantsButton from "../features/projects/projectpage/widgets/buttons/ProjectParticipants";
 import MuteButton from "../features/projects/projectpage/widgets/buttons/ProjectMuteButton";
-import CamButton from "../features/projects/projectpage/widgets/buttons/ProjectCameraButton";
+import VideoButton from "../features/projects/projectpage/widgets/buttons/ProjectVideoButton";
 import DeployedLinkButton from "../features/projects/editorterminal/widgets/buttons/DeployedLinkButton";
 import RunButton from "../features/projects/editorterminal/widgets/buttons/RunButton";
 
@@ -20,7 +20,7 @@ import RunButton from "../features/projects/editorterminal/widgets/buttons/RunBu
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/VideoChat";
+import RightContentsContainer from "../features/projects/videochat";
 import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
 import ProjectRun from "../features/projects/editorterminal/components/ProjectRun";
 // Models
@@ -256,7 +256,7 @@ function ProjectPage() {
             <RunButton onExecute={handleFileExecution} />
             <DeployedLinkButton link={deployedLink} />
             <MuteButton />
-            <CamButton />
+            <VideoButton />
           </div>
           <div className="flex">
             <ProjectLeaveButton />
