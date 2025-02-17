@@ -28,8 +28,7 @@ const WebSocketComponent: React.FC = () => {
   const access = localStorage.getItem("accessToken");
 
   const {
-    setActiveFileIndex,
-    fileTap,
+    setActiveFile,
     setFileTap,
   } = useProjectEditor();
 
@@ -37,13 +36,17 @@ const WebSocketComponent: React.FC = () => {
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
+      content: file.content
     };
-    // 더블클릭시 파일탭에 newFile 추가하고 해당파일 활성화화
-    setFileTap([...fileTap, newFile]);
-    setActiveFileIndex(fileTap.length); // 새 탭을 활성화
-    console.log("fileTap2: ", fileTap);
+  
+    setFileTap((prevFileTap) => {
+      const updatedFileTap = [...prevFileTap, newFile];
+      setActiveFile(newFile.fileRouteAndName); // 새 파일을 활성 파일로 설정
+      
+      return updatedFileTap;
+    });
   };
-
+  
   const idCounter = useRef(1);
   const generateUniqueId = () => {
     idCounter.current += 1;
@@ -170,7 +173,8 @@ const WebSocketComponent: React.FC = () => {
               });
               const openFile: FileTapType = {
                 fileName:data.name,
-                fileRouteAndName:`${data.path}/${data.name}`
+                fileRouteAndName:`${data.path}/${data.name}`,
+                content: data.content
               }
               addNewFile(openFile);
             } else if(data.action === "SAVE"){

@@ -3,6 +3,8 @@ import Editor from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
+import { useProjectEditor } from "../../../../context/ProjectEditorContext";
+import { DefaultFileRouteType } from "../../../../shared/types/projectApiResponse";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -10,6 +12,7 @@ interface ProjectEditorProps {
   framework?: string;
   fileRouteAndName?: string;
   userName?: string;
+  content?: string
 }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
@@ -17,11 +20,15 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   projectId,
   framework,
   fileRouteAndName,
-  userName
+  userName,
+  content
 }) => {
+  const {defaultFileRoutes, setDefaultFileRoutes} = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
-  const [value, setvalue] = useState("")
+  const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
+  // const [value, setvalue] = useState<string>(content || "")
+  const [value, setvalue] = useState<string>("CONTENT");
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
@@ -40,9 +47,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       case "SpringBoot":
         setLanguage("java");
         break;
-
     }
-
+    
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
@@ -79,13 +85,17 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       doc.on("update", (update) => {
         sendYjsUpdate(update);
       });
-    }
+    } 
 
     // ✅ 컴포넌트가 언마운트될 때 기존 WebSocket 연결 해제
     return () => {
       if (ws.current) {
         ws.current.close();
         ws.current = null;
+      }
+      if (providerRef.current) {
+        providerRef.current.destroy();
+        providerRef.current = null;
       }
     };
   }, []); // ✅ 빈 배열을 사용하여 최초 한 번만 실행
@@ -111,21 +121,19 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
     editor.focus();
-
-    // Yjs와 Monaco 연결
-    const provider = new WebrtcProvider(
-      room, // 방 이름
-      doc,
-      {
-        signaling: [signalingServer], // WebRTC 시그널링 서버
-      }
-    );
-    new MonacoBinding(
-      type,
-      editorRef.current.getModel(),
-      new Set([editorRef.current]),
-      provider.awareness
-    );
+    setvalue(content)
+    // provider가 아직 생성되지 않은 경우에만 생성
+    if (!providerRef.current) {
+      providerRef.current = new WebrtcProvider(room, doc, {
+        signaling: [signalingServer],
+      });
+      new MonacoBinding(
+        type,
+        editorRef.current.getModel(),
+        new Set([editorRef.current]),
+        providerRef.current.awareness
+      );
+    }
   };
 
   return (

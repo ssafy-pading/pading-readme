@@ -44,7 +44,7 @@ import MonitoringDashboard from "../features/projects/monitoring/components/Moni
 function ProjectPage() {
   // 로딩 상태 체크
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  
+
   // 네이게이션
   const navigate = useNavigate();
 
@@ -70,10 +70,15 @@ function ProjectPage() {
       })
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
-        if (error.response && (error.response.status === 400 || error.response.status === 403 )) {
-          toast.error("접근 권한이 없습니다. 그룹 오너(매니저)에게 문의하세요.")
+        if (
+          error.response &&
+          (error.response.status === 400 || error.response.status === 403)
+        ) {
+          toast.error(
+            "접근 권한이 없습니다. 그룹 오너(매니저)에게 문의하세요."
+          );
           navigate(`/projectlist/${groupId}`);
-        };
+        }
       });
   }, [groupId, projectId, getProjectDetails]);
 
@@ -83,50 +88,32 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const {
-    activeFileIndex,
-    setActiveFileIndex,
-    fileTap,
-    setFileTap,
-    user,
-    defaultFileRoutes,
-    setDefaultFileRoutes,
-  } = useProjectEditor();
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  const addNewFile = (file: FileTapType) => {
-    // if (defaultFileRoutes.length > 0 && file.fileRouteAndName in defaultFileRoutes) {
-    // 에디터에 setvalue 해주고 리스트에서 해당 경로 삭제
-    // }
-    const newFile = {
-      fileName: `NewFile${fileTap.length + 1}.js`,
-      fileRouteAndName: `/path/to/NewFile${fileTap.length + 1}.js`,
-    };
-    setFileTap([...fileTap, newFile]);
-    setActiveFileIndex(fileTap.length); // 새 탭을 활성화
-    console.log("project fileTap: ", fileTap);
-  };
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
-  // 파일 탭 추가 함수 파일탐색기에서 클릭했을 때 추가하는 부분
+  const { activeFile, setActiveFile, fileTap, setFileTap, user } =
+    useProjectEditor();
 
   // 파일 탭 삭제 함수
-  const deleteFile = (index: number) => {
-    const newFileTap = fileTap.filter((_, idx) => idx !== index);
+  const deleteFile = (deleteFileRouteAndName: string) => {
+    // 삭제할 파일 정보 확인
+    // 삭제할 파일을 제외한 새 배열 생성
+    const newFileTap = fileTap.filter(
+      (file) => file.fileRouteAndName !== deleteFileRouteAndName
+    );
     setFileTap(newFileTap);
-    if (newFileTap.length < 1) {
-      setActiveFileIndex(null);
+
+    // 탭이 1개였는데 삭제되어 남은 탭이 없으면 활성 파일을 null로 설정
+    if (newFileTap.length === 0) {
+      setActiveFile(null);
       return;
     }
-    // activeFileIndex가 null이 아닌지 확인
-    if (activeFileIndex === null) {
-      return;
+
+    // 삭제된 파일이 현재 활성 파일이라면,
+    // 활성 파일을 새 배열의 첫 번째 파일로 설정합니다.
+    if (activeFile === deleteFileRouteAndName) {
+      setActiveFile(newFileTap[0].fileRouteAndName);
     }
-    if (activeFileIndex === index) {
-      setActiveFileIndex(0);
-    } else if (activeFileIndex > index) {
-      setActiveFileIndex(activeFileIndex - 1);
-    }
+    // 삭제된 파일이 활성 파일이 아니라면 변경 없이 그대로 유지합니다.
   };
+
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
@@ -224,18 +211,19 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
-  if(isLoading){
+  if (isLoading) {
     return (
       <div>
         <Toaster
-              toastOptions={{
-                style: {
-                  zIndex: 9999,  // 최상위로 보이게 설정
-                },
-              }} />
+          toastOptions={{
+            style: {
+              zIndex: 9999, // 최상위로 보이게 설정
+            },
+          }}
+        />
         <ProjectSpinner />
       </div>
-    )
+    );
   }
 
   return (
@@ -308,62 +296,48 @@ function ProjectPage() {
             {/* 파일 탭 자리 */}
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
-                {fileTap.map((file, index) => (
-                  <div key={index} className="flex flex-row items-center">
+                {fileTap.map((file) => (
+                  <div
+                    key={file.fileRouteAndName}
+                    className="flex flex-row items-center"
+                  >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
-                        activeFileIndex === index
+                        activeFile === file.fileRouteAndName
                           ? "text-white"
                           : "text-[#858595] hover:text-white"
                       }`}
-                      onClick={() => setActiveFileIndex(index)}
+                      onClick={() => setActiveFile(file.fileRouteAndName)}
                     >
                       {file.fileName}
                     </div>
-                    {fileTap.length >= 1 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteFile(index);
-                        }}
-                        className="text-[#858595] hover:text-white ml-1"
-                      >
-                        <VscChromeClose />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteFile(file.fileRouteAndName);
+                      }}
+                      className="text-[#858595] hover:text-white ml-1"
+                    >
+                      <VscChromeClose />
+                    </button>
                   </div>
                 ))}
-              </div>
-              <div className="flex-none">
-                <button
-                  onClick={addNewFile}
-                  className="px-2 py-1 text-white hover:bg-blue-600"
-                  title="Add new file"
-                >
-                  <VscAdd />
-                </button>
               </div>
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
-              {fileTap.length && activeFileIndex !== null ? (
-                fileTap.map((file, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: activeFileIndex === index ? "block" : "none",
-                    }}
-                    className="w-full h-full"
-                  >
-                    <ProjectEditor
-                      groupId={groupId}
-                      projectId={projectId}
-                      framework={projectDetail?.project.projectImage.language}
-                      fileRouteAndName={file.fileRouteAndName}
-                      userName={user.name}
-                    />
-                  </div>
-                ))
+              {activeFile !== null && fileTap.length > 0 ? (
+                <ProjectEditor
+                key={activeFile} // activeFile이 변경되면 새로운 인스턴스로 마운트됨
+                  groupId={groupId}
+                  projectId={projectId}
+                  framework={projectDetail?.project.projectImage.language}
+                  fileRouteAndName={activeFile}
+                  userName={user.name}
+                  content={
+                    fileTap.find((file) => file.fileRouteAndName === activeFile)?.content || ""
+                  }
+                />
               ) : (
                 <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>

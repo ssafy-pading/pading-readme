@@ -109,5 +109,6 @@ export type AccessProjectResponse = {
 // 파일 타입
 export type FileTapType = {
   fileName: string;
-  fileRouteAndName: string
+  fileRouteAndName: string;
+  content: string;
 }
