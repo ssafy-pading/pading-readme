@@ -1,10 +1,12 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Slider from "react-slick";
 import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 import "./VerticalCarousel.css";
-import { VerticalCarouselProps } from '../type/VideoConferenceTypes'
+import { VerticalCarouselProps, RemoteParticipant } from "../../type/VideoConferenceTypes";
+import { useSelector } from 'react-redux';
+import { RootState } from "../../../../../app/redux/store";
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
@@ -14,27 +16,14 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   onJoin,
 }) => {
   const sliderRef = useRef<Slider>(null);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const slideHeight = isChatOpen
-        ? `calc(var(--carousel-container-height) / 2)`
-        : `calc(var(--carousel-container-height) / 4)`;
-
-      document.documentElement.style.setProperty("--slide-height", slideHeight);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isChatOpen]);
+  const isVideoOff = useSelector((state: RootState) => state.videoConference.isVideoOff);
+  const isMute = useSelector((state: RootState) => state.videoConference.isMute);
 
   const getSlideCount = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
     const maxSlides = isChatOpen ? 2 : 4;
     return Math.min(participantCount, maxSlides);
   };
-
 
   const shouldShowCarouselButtons = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
@@ -53,27 +42,41 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     arrows: false,
   };
 
+  useEffect(() => {
+    if (localParticipant?.videoTrack) {
+      const track = localParticipant.videoTrack.mediaStreamTrack;
+      track.enabled = !isVideoOff;
+    }
+  }, [isVideoOff, localParticipant]);
+
+  useEffect(() => {
+    if (localParticipant?.audioTrack) {
+      const track = localParticipant.audioTrack.mediaStreamTrack;
+      track.enabled = !isMute;
+    }
+  }, [isMute, localParticipant]);
+
   return (
     <div className="relative w-full h-full flex flex-col bg-[#212426] overflow-hidden">
       {hasJoined ? (
         <>
           <Slider ref={sliderRef} {...settings}>
             {localParticipant && localParticipant.videoTrack && (
-              <div key={localParticipant.id} className="relative p-2">
+              <div key={localParticipant.id} className="relative p-2 pb-0">
                 <VideoComponent
                   videoTrack={localParticipant.videoTrack}
                   participantIdentity={localParticipant.identity}
                   muted={true}
                 />
-                <div className="absolute top-0 left-4 mt-2 text-sm text-white">
+                <div className="absolute top-0 left-4 mt-2 text-xs text-white font-bold">
                   {localParticipant.identity && "(You)"}
                 </div>
               </div>
             )}
 
-            {remoteParticipants.map((participant) =>
+            {remoteParticipants.map((participant: RemoteParticipant) =>
               participant.videoTrack ? (
-                <div key={participant.id} className="relative p-2">
+                <div key={participant.id} className="relative p-2 pt-1 pb-0">
                   {participant.videoTrack && (
                     <VideoComponent
                       videoTrack={participant.videoTrack}
@@ -83,8 +86,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
                   {participant.audioTrack && (
                     <AudioComponent audioTrack={participant.audioTrack} />
                   )}
-                  <div className="absolute top-0 left-4 mt-2 text-sm text-white">
-                    {participant.identity}
+                  <div className="absolute top-0 left-4 mt-2 text-xs text-white font-bold">
+                    {participant.name}
                   </div>
                 </div>
               ) : null)}

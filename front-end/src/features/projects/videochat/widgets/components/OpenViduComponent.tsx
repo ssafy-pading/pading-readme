@@ -8,6 +8,7 @@ import {
     RemoteVideoTrack,
     RemoteAudioTrack,
 } from "livekit-client";
+import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import VerticalCarousel from './VerticalCarousel';
 import Modal from "react-modal";
@@ -15,7 +16,7 @@ import VideoComponent from "./VideoComponent";
 import { IoClose } from "react-icons/io5";
 import { FiInfo } from "react-icons/fi";
 import { PulseLoader } from "react-spinners";
-import { Participant } from "../../type/VideoConferenceTypes"
+import { Participant, RemoteParticipant } from "../../type/VideoConferenceTypes"
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
@@ -31,7 +32,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack | undefined>(undefined);
     const [remoteTracks, setRemoteTracks] = useState<TrackInfo[]>([]);
     const [localParticipant, setLocalParticipant] = useState<Participant | null>(null);
-    const [remoteParticipants, setRemoteParticipants] = useState<Participant[]>([]);
+    const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [hasJoined, setHasJoined] = useState<boolean>(false);
 
     const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
@@ -43,6 +44,8 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
 
     const [joiningRoom, setJoiningRoom] = useState<boolean>(false);
+    
+    const { groupId, projectId } = useParams();
 
     useEffect(() => {
         if (localVideoTrack || localAudioTrack) {
@@ -74,7 +77,15 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                 remoteMap[participantIdentity].audioTrack = trackPublication.track as RemoteAudioTrack;
             }
         });
-        setRemoteParticipants(Object.values(remoteMap));
+        const newRemoteParticipants = Object.values(remoteMap).map((participant) => {
+            const remoteParticipant = room?.remoteParticipants.get(participant.id);
+            return {
+                ...participant,
+                name: remoteParticipant?.name || participant.identity
+            };
+        });
+        // console.log("newRemoteParticipants: ", newRemoteParticipants);
+        setRemoteParticipants(newRemoteParticipants);
     }, [localVideoTrack, localAudioTrack, remoteTracks]);
 
     const openPreview = async () => {
@@ -111,7 +122,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         setJoiningRoom(true);
         const room = new Room();
         setRoom(room);
-        console.log("room", room);
+        // console.log("room", room);
 
         room.on(RoomEvent.TrackSubscribed, (_track, publication, participant) => {
             setRemoteTracks((prev) => [
@@ -129,6 +140,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         try {
             const token = await getToken();
             await room.connect(LIVEKIT_URL, token);
+            // console.log("token: ", token);
 
             await room.localParticipant.enableCameraAndMicrophone();
             const videoPublication = Array.from(room.localParticipant.videoTrackPublications.values())[0];
@@ -136,6 +148,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
             setLocalVideoTrack(videoPublication?.track as LocalVideoTrack);
             setLocalAudioTrack(audioPublication?.track as LocalAudioTrack);
             console.log("room.localParticipant", room.localParticipant)
+            // console.log("room.remoteParticipants", room.remoteParticipants)
 
             setHasJoined(true);
             setJoiningRoom(!false);
@@ -158,7 +171,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     };
 
     const getToken = async () => {
-        const response = await fetch(`${APPLICATION_SERVER_URL}/v1/openvidu/token/groups/8/projects/1`, {
+        const response = await fetch(`${APPLICATION_SERVER_URL}/v1/openvidu/token/groups/${groupId}/projects/${projectId}`, {
             method: 'POST',
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("accessToken"),
