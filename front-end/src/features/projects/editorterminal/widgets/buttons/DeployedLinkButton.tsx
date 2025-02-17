@@ -1,7 +1,11 @@
 import React from "react";
 import { MdOpenInBrowser } from "react-icons/md";
 
-const DeployedLinkButton = ({ link }) => {
+type DeployedLinkButtonType = {
+  link:string;
+}
+
+const DeployedLinkButton :React.FC<DeployedLinkButtonType> = ({ link }) => {
   const handleClick = () => {
     if (link) {
       window.open(link, "_blank");
