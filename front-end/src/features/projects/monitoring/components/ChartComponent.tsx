@@ -50,7 +50,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, newData, h
     const percentages = data.map((point) => point.percentage);
     const times = data.map((point) => point.time);
 
-    setChartOptions((prevOptions) => ({
+    setChartOptions((prevOptions:any) => ({
       ...prevOptions,
       xaxis: { categories: times },
     }));
