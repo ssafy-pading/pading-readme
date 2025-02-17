@@ -2,7 +2,6 @@ package site.paircoding.paircoding.service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -255,14 +254,28 @@ public class ProjectService {
 
   }
 
-  public List<Integer> getProjectUserIds(Integer groupId, Integer projectId) {
+  public List<GroupUserResponse> getProjectUserIds(Integer groupId, Integer projectId) {
     projectRepository.findByGroupIdAndProjectId(groupId, projectId)
         .orElseThrow(() -> new NotFoundException("Project not found"));
-    
+
     String pattern = "project:" + projectId + ":user:*";
     Set<String> keys = redisUtil.keys(pattern);
-    return keys.stream()
-        .map(key -> Integer.parseInt(key.split(":")[3]))
-        .collect(Collectors.toList());
+    List<GroupUserResponse> groupUserResponses = keys.stream()
+        .map(key -> {
+          String[] split = key.split(":");
+          Integer userId = Integer.parseInt(split[3]);
+          GroupUser groupUser = groupUserRepository.findByGroupIdAndUserId(groupId, userId)
+              .orElseThrow(() -> new NotFoundException("Group user not found"));
+          User user = groupUser.getUser();
+          return GroupUserResponse.builder()
+              .id(user.getId())
+              .name(user.getName())
+              .image(user.getImage())
+              .email(user.getEmail())
+              .role(groupUser.getRole())
+              .build();
+        })
+        .toList();
+    return groupUserResponses;
   }
 }
