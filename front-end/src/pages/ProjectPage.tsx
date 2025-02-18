@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
-import {
-  ProjectEditorProvider,
-  useProjectEditor,
-} from "../context/ProjectEditorContext"; // useContext
+import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
 
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
@@ -20,7 +17,7 @@ import RunButton from "../features/projects/editorterminal/widgets/buttons/RunBu
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/VideoChat";
+import RightContentsContainer from "../features/projects/videochat";
 import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
 import ProjectRun from "../features/projects/editorterminal/components/ProjectRun";
 // Models
@@ -514,8 +511,8 @@ function ProjectPage() {
                         display: activePanel === "resource" ? "block" : "none",
                       }}
                     >
-                      <MonitoringDashboard 
-                        data={monitoringDataList} 
+                      <MonitoringDashboard
+                        data={monitoringDataList}
                         height={terminalHeight - 30}
                         cpuDescription={projectDetail?.project.performance.cpuDescription}
                         memoryDescription={projectDetail?.project.performance.memoryDescription}
