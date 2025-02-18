@@ -17,6 +17,8 @@ import { IoClose } from "react-icons/io5";
 import { FiInfo } from "react-icons/fi";
 import { PulseLoader } from "react-spinners";
 import { Participant, RemoteParticipant } from "../../type/VideoConferenceTypes"
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from "../../../../../app/redux/store"; 
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
@@ -26,7 +28,9 @@ type TrackInfo = {
     participantIdentity: string;
 };
 
-const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) => {
+const OpenViduComponent: React.FC<{
+    isChatOpen: boolean;
+}> = ({ isChatOpen }) => {
     const [room, setRoom] = useState<Room | undefined>(undefined);
     const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack | undefined>(undefined);
     const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack | undefined>(undefined);
@@ -44,8 +48,11 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
 
     const [joiningRoom, setJoiningRoom] = useState<boolean>(false);
-    
+
     const { groupId, projectId } = useParams();
+
+    const dispatch = useDispatch();
+    const onLeave = useSelector((state: RootState) => state.videoConference.onLeave);
 
     useEffect(() => {
         if (localVideoTrack || localAudioTrack) {
@@ -147,7 +154,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
             const audioPublication = Array.from(room.localParticipant.audioTrackPublications.values())[0];
             setLocalVideoTrack(videoPublication?.track as LocalVideoTrack);
             setLocalAudioTrack(audioPublication?.track as LocalAudioTrack);
-            console.log("room.localParticipant", room.localParticipant)
+            // console.log("room.localParticipant", room.localParticipant)
             // console.log("room.remoteParticipants", room.remoteParticipants)
 
             setHasJoined(true);
@@ -189,6 +196,38 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         const data = await response.json();
         return data.token;
     };
+
+    useEffect(() => {
+        dispatch({ type: 'videoConference/setOnLeave', payload: leaveRoom });
+        console.log("leaveRoom");
+        return () => {
+          dispatch({ type: 'videoConference/setOnLeave', payload: null });
+        };
+      }, [dispatch]);
+    
+      useEffect(() => {
+        if (onLeave === null) {
+          leaveRoom();
+        }
+      }, [onLeave]);
+
+    // 페이지 새로고침 시 리소스 정리
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            leaveRoom();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            leaveRoom();
+        };
+    }, []);
 
     return (
         <div className="h-full w-full flex flex-1">
@@ -263,16 +302,16 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                         <div className="flex justify-center mt-4">
                             {joiningRoom ? (
                                 <div className="flex text-sm w-1/4 h-8 bg-blue-500 rounded-md justify-center items-center">
-                                    <PulseLoader 
+                                    <PulseLoader
                                         size={8}
                                         margin={4}
                                         color={"#ffffff"}
                                     />
                                 </div>
-                            ):(
+                            ) : (
                                 <button onClick={joinRoom} className="text-sm w-1/4 h-8 bg-blue-500 text-white rounded-md">
                                     참여하기
-                                </button>    
+                                </button>
                             )}
                         </div>
                     </div>
