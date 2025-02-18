@@ -183,7 +183,7 @@ function ProjectPage() {
 
   useEffect(() => {
     if (!projectDetail?.project?.containerId) return;
-
+    // 모니터링 데이터 불러오기
     const fetchMonitoringData = async () => {
       try {
         const monitoringData = await getMonitoringResource(
@@ -346,9 +346,9 @@ function ProjectPage() {
                       framework={projectDetail?.project.projectImage.language}
                       fileName={file.fileName}
                       fileRouteAndName={file.fileRouteAndName}
-                      userName={user.name}
+                  userName={user.name}
                       content={file.content}
-                    />
+                />
                   </div>
                 ))
               ) : (
@@ -387,6 +387,17 @@ function ProjectPage() {
                   {/* 상단 탭과 + 버튼 */}
                   <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                     <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
+                      {/* Resource 탭 */}
+                      <button
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                          activePanel === "resource"
+                            ? "border-b-2 border-b-[#3B82F6] text-white"
+                            : "text-[#858595] hover:text-white"
+                        } cursor-pointer`}
+                        onClick={() => setActivePanel("resource")}
+                      >
+                        Resource
+                      </button>
                       {/* Run 탭 */}
                       <button
                         className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
@@ -400,22 +411,10 @@ function ProjectPage() {
                       >
                         Run
                       </button>
-
-                      {/* Resource 탭 */}
-                      <button
-                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                          activePanel === "resource"
-                            ? "border-b-2 border-b-[#3B82F6] text-white"
-                            : "text-[#858595] hover:text-white"
-                        } cursor-pointer`}
-                        onClick={() => setActivePanel("resource")}
-                      >
-                        Resource
-                      </button>
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button
-                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-white cursor-pointer`}
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-[#858595] hover:text-white cursor-pointer`}
                           onClick={() => setActivePanel("terminal")}
                         >
                           Terminal
@@ -486,17 +485,17 @@ function ProjectPage() {
                         display: activePanel === "run" ? "block" : "none",
                       }} /* 수정: CSS로 런 패널 보이기/숨기기 */
                     >
-                        <ProjectRun
-                          active={true}
-                          height={terminalHeight - 30}
-                          isTerminalWidthChange={isTerminalWidthChange}
-                          groupId={groupId}
-                          projectId={projectId}
-                          runCommand={projectDetail?.project.runCommand}
-                          executeRunCommand={executeRunCommand}
-                          isRunTabInitialized={isRunTabInitialized}
-                          onRunCommandExecuted={() => setExecuteRunCommand(false)}
-                        />
+                      <ProjectRun
+                        active={true}
+                        height={terminalHeight - 30}
+                        isTerminalWidthChange={isTerminalWidthChange}
+                        groupId={groupId}
+                        projectId={projectId}
+                        runCommand={projectDetail?.project.runCommand}
+                        executeRunCommand={executeRunCommand}
+                        isRunTabInitialized={isRunTabInitialized}
+                        onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                      />
                     </div>
 
                     {/* Resource 패널 */}
@@ -506,9 +505,11 @@ function ProjectPage() {
                         display: activePanel === "resource" ? "block" : "none",
                       }}
                     >
-                      <MonitoringDashboard
-                        data={monitoringDataList}
+                      <MonitoringDashboard 
+                        data={monitoringDataList} 
                         height={terminalHeight - 30}
+                        cpuDescription={projectDetail?.project.performance.cpuDescription}
+                        memoryDescription={projectDetail?.project.performance.memoryDescription}
                       />
                     </div>
                     {/* 터미널 패널 */}

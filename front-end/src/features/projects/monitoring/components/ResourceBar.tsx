@@ -10,7 +10,7 @@ const getColor = (percent: number | undefined) => {
   if (percent === undefined) return "bg-gray-400"; // undefined일 때 회색
   if (percent > 75) return "bg-red-700";
   if (percent > 50) return "bg-yellow-700";
-  return "bg-blue-500";
+  return "bg-green-700";
 };
 
 const ResourceBar: React.FC<ResourceMonitorProps> = ({ name, percent, isCompact }) => {
@@ -23,8 +23,8 @@ const ResourceBar: React.FC<ResourceMonitorProps> = ({ name, percent, isCompact 
   return (
     <div className="w-full max-w-sm rounded-md shadow-sm bg-[#212426] relative ml-1 my-auto">
       <div className={`w-full flex items-center justify-around absolute ${isCompact ? `hidden`:''}`}>
-        <div className="text-[10px] font-semibold text-gray-400">{name}</div>
-        <div className="text-[10px] font-semibold text-gray-400">
+        <div className="text-[10px] font-semibold text-gray-300">{name}</div>
+        <div className="text-[10px] font-semibold text-gray-300">
           {percentage !== undefined ? `${percentage}%` : "N/A"}
         </div>
       </div>

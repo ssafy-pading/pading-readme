@@ -16,9 +16,9 @@ const fetchMetric = async (
     const url = `${API_BASE_URL}/api/v1/query?query=${query}`
     // Axios를 사용하여 GET 요청을 보냅니다.
     const response = await axios.get<MonitoringResponse>(url);
-  
-    // 응답 데이터의 data.result[0].value를 반환합니다.
-    return response.data.data.result[0].value;
+    
+    // 응답 데이터의 data.result 마지막 요소의 value를 반환합니다.
+    return response.data.data.result[response.data.data.result.length - 1].value;
 }
 
 
