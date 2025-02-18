@@ -20,6 +20,7 @@ export interface VerticalCarouselProps {
     remoteParticipants: RemoteParticipant[];
     hasJoined: boolean;
     onJoin: () => void;
+    startVideo: () => void;
 }
 
 export interface VideoComponentProps {

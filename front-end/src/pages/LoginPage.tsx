@@ -1,9 +1,3 @@
-// 1. 맨 처음 페이지 로딩 시 리프레시 토큰 확인
-// 1-1. 리프레시 토큰이 있다면 로그인 처리 하는 로직 만들기
-// 2. 로그인을 하면 현재 페이지로 리다이렉트, params에 토큰을 확인하여 클라이언트에서 로그인 처리 진행
-// 3. 1, 2번 처리 후 context에 프로필도 넣어줘야 함
-
-// src/pages/LoginPage.tsx
 import React, { useEffect, useState } from 'react';
 import TxtRotate from '../app/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
@@ -20,6 +14,10 @@ import { Toaster, toast } from 'react-hot-toast';
 
 // 스피너
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
+
+// 로그인 이미지
+import kakao_logo from "../assets/kakao_logo.svg"
+import naver_logo from "../assets/naver_logo.svg"
 
 declare global {
   interface Window {
@@ -61,7 +59,7 @@ interface ParticlesOptions {
 }
 
 const LoginPage: React.FC = () => {
-  const { loginWithGoogle } = useAuthAxios();
+  const { loginWith } = useAuthAxios();
   const { getGroups } = useGroupAxios();
 
   // 스피너 체크
@@ -180,7 +178,23 @@ const LoginPage: React.FC = () => {
 
   const googleLoginClick = async () => {
     try{
-        await loginWithGoogle();
+        await loginWith('google');
+      }catch(error){
+        toast.error('로그인 실패')
+      console.error(error);
+    }
+  }
+  const naverLoginClick = async () => {
+    try{
+        await loginWith('naver');
+      }catch(error){
+        toast.error('로그인 실패')
+      console.error(error);
+    }
+  }
+  const kakaoLoginClick = async () => {
+    try{
+        await loginWith('kakao');
       }catch(error){
         toast.error('로그인 실패')
       console.error(error);
@@ -199,7 +213,7 @@ const LoginPage: React.FC = () => {
         {/* <div className="absolute w-[50%] h-[70%]"> */}
         <div className="absolute w-[50%] h-[50%]">
           <h1 className="text-5xl font-bold mb-[3rem]">Pading</h1>
-          <TxtRotate className="text-lg" texts={["서비스 소개", "최고의 페어 프로그래밍 경험"]} period={2000} />
+          <TxtRotate className="text-lg" texts={["최고의 페어 프로그래밍 경험"]} period={2000} />
         </div>
       </div>
 
@@ -207,14 +221,40 @@ const LoginPage: React.FC = () => {
       <div className="flex-[1] bg-white rounded-l-xl justify-center relative">
         <div className="relative w-full top-[25%] flex flex-col items-center">
           <h1 className="text-5xl font-bold mb-8">Pading</h1>
-          <div className="flex flex-col gap-4 w-3/4 max-w-sm">
-            <button className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 px-4 hover:bg-gray-100" onClick={googleLoginClick}>
-            <svg xmlns="https://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 40 48" aria-hidden="true"><path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path><path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path><path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path><path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path></svg>
-              <span>Google로 로그인</span>
-            </button>
+          <div className="flex flex-col gap-4 w-1/2 max-w-sm">
+            <div className="flex flex-col gap-4 max-w-sm">
+              <button className="flex items-center font-semibold justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-gray-100 pl-4" onClick={googleLoginClick}>
+                <svg xmlns="https://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 40 48" aria-hidden="true">
+                  <path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path>
+                  <path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path>
+                  <path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path>
+                  <path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path>
+                </svg>
+                <div>
+                  <span>Google</span> <span>로그인</span>
+                </div>
+              </button>
+            </div>
+            <div className="flex flex-col gap-4 max-w-sm bg-[#2DB400] rounded-lg">
+              <button className="flex text-white font-semibold items-center justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-[#259600] pl-4" onClick={naverLoginClick}>
+                <img src={naver_logo} alt="naver" className="w-5 h-8" />
+                <div>
+                  <span>Naver</span> <span>로그인</span>
+                </div>
+              </button>
+            </div>
+            <div className="flex flex-col gap-4 max-w-sm bg-[#f9e000] rounded-lg">
+              <button className="flex items-center font-semibold justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-[#D6C000] pl-4" onClick={kakaoLoginClick}>
+                <img src={kakao_logo} alt="kakao" className="w-5 h-8" />
+                <div>
+                  <span>Kakao</span> <span>로그인</span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

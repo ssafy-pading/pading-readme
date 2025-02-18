@@ -11,6 +11,7 @@ interface ProjectEditorContextType {
   fileTap: FileTapType[];
   setFileTap: React.Dispatch<React.SetStateAction<FileTapType[]>>;
   user: any; // 추후에 수정 예정정
+  saveFile: (file: FileTapType) => void;
 }
 
 const ProjectEditorContext = createContext<
@@ -20,6 +21,11 @@ const ProjectEditorContext = createContext<
 export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [fileTap, setFileTap] = useState<FileTapType[]>([])
+  const saveFile = (file: FileTapType) => {
+    // 파일 저장 로직 
+    // 파일 저장 로직 
+    // 파일 저장 로직 
+  } 
   const { user } = useSelector((state: RootState) => state.user);
   return (
     <ProjectEditorContext.Provider
@@ -28,7 +34,8 @@ export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => 
         activeFile,
         setActiveFile,
         fileTap,
-        setFileTap
+        setFileTap,
+        saveFile
       }}
     >
       {children}

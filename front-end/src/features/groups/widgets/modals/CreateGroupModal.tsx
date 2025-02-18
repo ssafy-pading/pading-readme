@@ -94,27 +94,30 @@ const GroupCreateModal: React.FC<GroupCreateModalProps> = ({
       return;
     }
     
+    // 임시 테스트용으로 막았다는 문구
+    toast.error("그룹 생성이 제한된 상태입니다. \n\n 테스트를 원하신다면 C202에 문의!");
 
-    setIsLoading(true);
-    try {
-      const { id: groupId } = await createGroup({ name: groupName, capacity: capNumber });
-      if (groupId) {
-        toast.success("그룹이 성공적으로 생성되었습니다!");
-        // 그룹 생성 성공 시, 부모에게 그룹 목록 갱신 요청
-        onGroupCreated();
-        setGroupName("");
-        setCapacity("");
-        setDuplicateChecked(false);
-        setIsNameAvailable(false);
-        onClose();
-        window.location.href = `/projectlist/${groupId}`
-      }
-    } catch (error) {
-      toast.error("그룹 생성 실패: 알 수 없는 오류가 발생했습니다.");
-      console.error("그룹 생성 실패:", error);
-    } finally {
-      setIsLoading(false);
-    }
+
+    // setIsLoading(true);
+    // try {
+    //   const { id: groupId } = await createGroup({ name: groupName, capacity: capNumber });
+    //   if (groupId) {
+    //     toast.success("그룹이 성공적으로 생성되었습니다!");
+    //     // 그룹 생성 성공 시, 부모에게 그룹 목록 갱신 요청
+    //     onGroupCreated();
+    //     setGroupName("");
+    //     setCapacity("");
+    //     setDuplicateChecked(false);
+    //     setIsNameAvailable(false);
+    //     onClose();
+    //     window.location.href = `/projectlist/${groupId}`
+    //   }
+    // } catch (error) {
+    //   toast.error("그룹 생성 실패: 알 수 없는 오류가 발생했습니다.");
+    //   console.error("그룹 생성 실패:", error);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const handleClose = (): void => {

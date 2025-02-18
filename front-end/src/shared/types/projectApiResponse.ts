@@ -76,6 +76,7 @@ export type ProjectListItem = {
     email: string;
     status: boolean;
   }[];
+  callStatus: string;
 };
 
 // 전체 응답은 ProjectListItem의 배열
@@ -112,3 +113,13 @@ export type FileTapType = {
   fileRouteAndName: string;
   content: string;
 }
+
+// 프로젝트에 접속중인 멤버 리스트
+export type GetProjectMemberStatusResponse = {
+  id: number;
+  name: string;
+  image: string | null;
+  email: string;
+  role: string;
+  status: boolean | null;
+}[];
