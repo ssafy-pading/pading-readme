@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import site.paircoding.paircoding.entity.Performance;
 import site.paircoding.paircoding.entity.ProjectImage;
 import site.paircoding.paircoding.entity.enums.LabelKey;
-import site.paircoding.paircoding.global.exception.BadRequestException;
+import site.paircoding.paircoding.global.exception.WebsocketException;
 
 @Component
 @RequiredArgsConstructor
@@ -161,7 +161,7 @@ public class KubernetesUtil {
 
     } catch (KubernetesClientException e) {
       e.printStackTrace();
-      throw new BadRequestException("잠시 후 다시 요청해주세요.");
+      throw new RuntimeException("파드 생성 오류");
     }
   }
 
@@ -215,13 +215,29 @@ public class KubernetesUtil {
       String error = errorStream.toString().trim();
 
       if (!error.isEmpty()) {
-        throw new KubernetesClientException("Command failed: " + error);
+        if (error.contains("No such file or directory")) {
+          throw new WebsocketException("Path does not exist");
+        } else if (error.contains("Is a directory")) {
+          throw new WebsocketException("Invalid type");
+        } else if (error.contains("Permission denied")) {
+          throw new WebsocketException("Permission denied for command");
+        } else if (error.contains("cannot remove") || error.contains("failed to")) {
+          throw new WebsocketException("File operation failed");
+        } else {
+          throw new KubernetesClientException("Command failed: " + error);
+        }
       }
 
       return output;
-    } catch (Exception e) {
+    } catch (WebsocketException e) {
+      throw e;
+    } catch (InterruptedException e) {
+      e.printStackTrace();
       Thread.currentThread().interrupt();
-      throw new KubernetesClientException("Error executing command: " + command, e);
+      throw new KubernetesClientException("Command execution interrupted:", e);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new KubernetesClientException("Unexpected error executing command", e);
     }
   }
 }

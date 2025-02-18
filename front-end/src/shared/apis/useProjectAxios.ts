@@ -20,21 +20,32 @@ const useProjectAxios = () => {
   const navigate = useNavigate();
   const baseURL = import.meta.env.VITE_APP_API_BASE_URL;
 
-  // 참고용으로 Axios 인스턴스를 생성 (필요 시 반환)
+  // Axios 인스턴스 생성
   const projectAxios: AxiosInstance = axios.create({
     baseURL,
     headers: { 'Content-Type': 'application/json' },
   });
 
-  // 각 요청에 Authorization 헤더를 추가하는 함수
-  const withAuthHeader = useCallback(() => ({
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    },
-  }), []);
+  /**
+   * Access Token을 Authorization 헤더에 추가하는 함수
+   * @returns Authorization 헤더가 포함된 객체
+   */
+  const withAuthHeader = useCallback(() => {
+    const token = localStorage.getItem('accessToken');
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  }, []);
 
-  // 401 에러 발생 시 토큰 갱신 후 대기 중인 요청들을 재시도하는 함수
-  const handle401Error = useCallback(async (originalRequest: () => Promise<any>) => {
+  /**
+   * 401 에러 발생 시 Access Token 갱신을 시도하는 함수
+   * @param originalRequest - 재시도할 요청 함수
+   * @returns 토큰 갱신 성공 여부
+   */
+  const handle401Error = useCallback(async (originalRequest: () => Promise<any>): Promise<boolean> => {
+    if (!localStorage.getItem('refreshToken')) {
+      navigate('/');
+      return false;
+    }
+
     if (!isRefreshing) {
       isRefreshing = true;
       try {
@@ -42,230 +53,160 @@ const useProjectAxios = () => {
         if (newAccessToken) {
           failedQueue.forEach((retry) => retry());
           failedQueue = [];
+          return true;
         } else {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
           navigate('/');
+          return false;
         }
       } catch (error) {
         console.error('Failed to refresh token:', error);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         navigate('/');
+        return false;
       } finally {
         isRefreshing = false;
       }
     } else {
       return new Promise((resolve) => {
-        failedQueue.push(() => resolve(originalRequest()));
+        failedQueue.push(() =>
+          originalRequest()
+            .then(() => resolve(true))
+            .catch(() => resolve(false))
+        );
       });
     }
   }, [navigate]);
 
   /**
-   * 언어 목록 조회
+   * API 요청을 처리하고 401 에러 발생 시 토큰 갱신 후 재시도하는 함수
+   * @param request - 원래의 요청 함수
+   * @param retryCallback - 토큰 갱신 후 재시도할 함수
+   * @returns 요청 결과 또는 에러
    */
-  const getLanguages = useCallback(async (): Promise<GetLanguageListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/projects/option/language`, withAuthHeader());
-      return response.data.data;
-    };
+  const apiRequest = useCallback(async (request: () => Promise<any>, retryCallback: () => Promise<any>) => {
     try {
       return await request();
     } catch (error: any) {
       if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getLanguages();
+        const refreshed = await handle401Error(request);
+        if (refreshed) {
+          return retryCallback();
+        }
+        throw new Error('Token refresh failed, redirected to login');
       }
       throw error;
     }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  }, [handle401Error]);
 
   /**
-   * OS 목록 조회
+   * 언어 목록 조회 요청 함수
+   * @returns 언어 목록 데이터
    */
-  const getOSList = useCallback(async (language: string): Promise<GetOSListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/projects/option/os?language=${language}`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getOSList(language);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getLanguages = useCallback((): Promise<GetLanguageListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/projects/option/language`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, getLanguages);
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 사양 목록 조회
+   * 운영체제(OS) 목록 조회 요청 함수
+   * @param language - 선택한 언어
+   * @returns 운영체제 목록 데이터
    */
-  const getPerformanceList = useCallback(async (): Promise<GetPerformanceListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/projects/option/performance`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getPerformanceList();
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getOSList = useCallback((language: string): Promise<GetOSListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/projects/option/os?language=${language}`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => getOSList(language));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 멤버 목록 조회
+   * 성능 목록 조회 요청 함수
+   * @returns 성능 목록 데이터
    */
-  const getProjectsMemberList = useCallback(async (groupId: number): Promise<GetMemberListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}/projects/users`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getProjectsMemberList(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getPerformanceList = useCallback((): Promise<GetPerformanceListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/projects/option/performance`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, getPerformanceList);
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 목록 조회
+   * 프로젝트 멤버 목록 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 프로젝트 멤버 목록 데이터
    */
-  const getProjects = useCallback(async (groupId: number): Promise<GetProjectListResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}/projects`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getProjects(groupId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getProjectsMemberList = useCallback((groupId: number): Promise<GetMemberListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects/users`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => getProjectsMemberList(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 생성
+   * 프로젝트 목록 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @returns 프로젝트 목록 데이터
    */
-  const createProject = useCallback(async (
-    groupId: number,
-    projectData: Record<string, unknown>
-  ): Promise<CreateProjectResponse> => {
-    const request = async () => {
-      const response = await axios.post(`${baseURL}/v1/groups/${groupId}/projects`, projectData, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return createProject(groupId, projectData);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getProjects = useCallback((groupId: number): Promise<GetProjectListResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => getProjects(groupId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 상세 조회
+   * 프로젝트 생성 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectData - 생성할 프로젝트 정보
+   * @returns 생성된 프로젝트 데이터
    */
-  const getProjectDetails = useCallback(async (
-    groupId: number,
-    projectId: number
-  ): Promise<GetProjectDetailsResponse> => {
-    const request = async () => {
-      const response = await axios.get(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return getProjectDetails(groupId, projectId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const createProject = useCallback((groupId: number, projectData: Record<string, unknown>): Promise<CreateProjectResponse> => {
+    const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/projects`, projectData, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => createProject(groupId, projectData));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 입장
+   * 프로젝트 상세 정보 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 상세 정보 데이터
    */
-  const joinProject = useCallback(async (
-    groupId: number,
-    projectId: number
-  ): Promise<AccessProjectResponse> => {
-    const request = async () => {
-      const response = await axios.post(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/join`, null, withAuthHeader());
-      return response.data.data;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return joinProject(groupId, projectId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const getProjectDetails = useCallback((groupId: number, projectId: number): Promise<GetProjectDetailsResponse> => {
+    const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => getProjectDetails(groupId, projectId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 수정
+   * 프로젝트 참여 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 접근 결과 데이터
    */
-  const updateProject = useCallback(async (
-    groupId: number,
-    projectId: number,
-    projectData: Record<string, unknown>
-  ): Promise<boolean> => {
-    const request = async () => {
-      await axios.patch(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, projectData, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return updateProject(groupId, projectId, projectData);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const joinProject = useCallback((groupId: number, projectId: number): Promise<AccessProjectResponse> => {
+    const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/join`, null, withAuthHeader()).then((res) => res.data.data);
+    return apiRequest(request, () => joinProject(groupId, projectId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   /**
-   * 프로젝트 삭제
+   * 프로젝트 수정 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @param projectData - 수정할 프로젝트 정보
+   * @returns 수정 성공 여부
    */
-  const deleteProject = useCallback(async (
-    groupId: number,
-    projectId: number
-  ): Promise<boolean> => {
-    const request = async () => {
-      await axios.delete(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, withAuthHeader());
-      return true;
-    };
-    try {
-      return await request();
-    } catch (error: any) {
-      if (error.response?.status === 401) {
-        await handle401Error(request);
-        return deleteProject(groupId, projectId);
-      }
-      throw error;
-    }
-  }, [baseURL, withAuthHeader, handle401Error]);
+  const updateProject = useCallback((groupId: number, projectId: number, projectData: Record<string, unknown>): Promise<boolean> => {
+    const request = () => axios.patch(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, projectData, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => updateProject(groupId, projectId, projectData));
+  }, [baseURL, withAuthHeader, apiRequest]);
+
+  /**
+   * 프로젝트 삭제 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 삭제 성공 여부
+   */
+  const deleteProject = useCallback((groupId: number, projectId: number): Promise<boolean> => {
+    const request = () => axios.delete(`${baseURL}/v1/groups/${groupId}/projects/${projectId}`, withAuthHeader()).then(() => true);
+    return apiRequest(request, () => deleteProject(groupId, projectId));
+  }, [baseURL, withAuthHeader, apiRequest]);
 
   return {
-    projectAxios, // 참고용으로 생성한 인스턴스 (필요 시 사용)
+    projectAxios,
     getLanguages,
     getOSList,
     getPerformanceList,

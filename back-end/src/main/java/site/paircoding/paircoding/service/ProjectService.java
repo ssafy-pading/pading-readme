@@ -132,6 +132,13 @@ public class ProjectService {
             .project(project)
             .build())
         .toList();
+
+    // 서브도메인 생성
+    String subdomain = nginxConfigUtil.createSubdomain(project.getContainerId());
+    project.setDeploymentUrl(subdomain + "." + appConfig.getDomain());
+
+    // DeploymentUrl 지정 이후 저장
+    projectRepository.save(project);
     projectUserRepository.saveAll(projectUsers);
 
     // 사용 가능한 nodePort 조회
@@ -142,13 +149,11 @@ public class ProjectService {
         project.getNodePort());
 
     // 서브도메인 설정 - nginx config 파일 생성 및 reload
-    String subdomain = nginxConfigUtil.createSubdomain(project.getContainerId(),
-        project.getNodePort());
-    project.setDeploymentUrl(subdomain + "." + appConfig.getDomain());
+    nginxConfigUtil.createNginxConfig(subdomain, project.getNodePort());
 
     redisUtil.set(CALL_STATUS_KEY.formatted(project.getId()), "inactive");
 
-    return projectRepository.save(project);
+    return project;
   }
 
   public Project getProject(Integer groupId, Integer projectId) {
@@ -269,7 +274,7 @@ public class ProjectService {
     kubernetesUtil.deletePod(LabelKey.POD_NAME, project.getContainerId());
 
     // nginx config 삭제
-    nginxConfigUtil.deleteSubdomain(project.getContainerId());
+    nginxConfigUtil.deleteNginxConfig(project.getContainerId());
 
     redisUtil.delete(CALL_STATUS_KEY.formatted(projectId));
   }

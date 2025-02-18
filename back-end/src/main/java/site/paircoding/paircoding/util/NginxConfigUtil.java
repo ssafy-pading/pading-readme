@@ -96,10 +96,13 @@ public class NginxConfigUtil {
     channel.disconnect();
   }
 
-  public String createSubdomain(String podName, int nodePort) {
+  public String createSubdomain(String podName) {
+    return SUBDOMAIN_PREFIX + podName;
+  }
+
+  public void createNginxConfig(String subdomain, int nodePort) {
     Session session = null;
 
-    String subdomain = SUBDOMAIN_PREFIX + podName;
     String configFileName = subdomain + ".conf"; // Nginx 설정 파일명 변환
     String configFilePath = NGINX_AVAILABLE_PATH + configFileName;
     String configContent = generateNginxConfigContent(subdomain, nodePort);
@@ -127,11 +130,9 @@ public class NginxConfigUtil {
         session.disconnect();
       }
     }
-
-    return subdomain;
   }
 
-  public void deleteSubdomain(String subdomain) {
+  public void deleteNginxConfig(String subdomain) {
     Session session = null;
 
     String configFileName = SUBDOMAIN_PREFIX + subdomain + ".conf"; // Nginx 설정 파일명 변환

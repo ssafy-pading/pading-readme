@@ -7,8 +7,8 @@ import site.paircoding.paircoding.entity.enums.DirectoryType;
 @Getter
 public class DirectoryCreateDto {
 
-  private DirectoryType type;
   private DirectoryAction action;
+  private DirectoryType type;
   private String path;
   private String name;
 
