@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import Slider from "react-slick";
 import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
@@ -7,7 +7,6 @@ import "./VerticalCarousel.css";
 import { VerticalCarouselProps, RemoteParticipant } from "../../type/VideoConferenceTypes";
 import { useSelector } from 'react-redux';
 import { RootState } from "../../../../../app/redux/store";
-import { start } from "repl";
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
@@ -47,11 +46,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   useEffect(() => {
     if (localParticipant?.videoTrack) {
       if (isVideoOff) {
-        // 카메라 완전히 중지
         localParticipant.videoTrack.stop();
       } else {
-        // 카메라 다시 시작하는 로직 필요
-        // OpenViduComponent의 createLocalTracks 함수를 호출하여 새로운 비디오 트랙 생성
         startVideo();
       }
     }
@@ -124,8 +120,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
             Video
           </div>
           <div className="flex flex-1 justify-center items-center">
-            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">
-              <p className="text-sm">화상회의 참여하기</p>
+            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-2 rounded-md hover:scale-110 transition-transform duration-200 ease-in-out">
+              <p className="text-xs">화상회의 참여하기</p>
             </button>
           </div>
         </div>
