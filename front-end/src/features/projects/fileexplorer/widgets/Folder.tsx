@@ -181,7 +181,7 @@ const Folder: React.FC<FolderProps> = ({
       </div>
 
       {isCreating && (
-        <div className="flex items-center gap-2 my-1 ml-4">
+        <div className="flex items-center gap-2 my-1 ml-4 text-xs">
           <span className="flex items-center text-white">
             {createType === 'DIRECTORY' ? <VscFolder /> : <VscFile />}
           </span>
@@ -228,21 +228,21 @@ const Folder: React.FC<FolderProps> = ({
           {explorerData.type === "DIRECTORY" && (
             <>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
-                <VscNewFolder className="w-4 h-4 text-white" />
+                <VscNewFolder className="w-4 h-4 text-white text-xs" />
                 <span>New Folder</span>
               </div>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
-                <VscNewFile className="w-4 h-4 text-white" />
+                <VscNewFile className="w-4 h-4 text-white text-xs" />
                 <span>New File</span>
               </div>
             </>
           )}
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
-            <VscEdit className="w-4 h-4 text-white" />
+            <VscEdit className="w-4 h-4 text-white text-xs" />
             <span>Rename</span>
           </div>
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
-            <VscTrash className="w-4 h-4 text-white" />
+            <VscTrash className="w-4 h-4 text-white text-xs" />
             <span>Delete</span>
           </div>
         </div>

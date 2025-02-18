@@ -37,3 +37,7 @@ export interface RenamePayload {
   newName: string;
   path: string;
 }
+
+export interface RefreshWebSocket {
+  refreshWebSocket: ()=>void;
+}
