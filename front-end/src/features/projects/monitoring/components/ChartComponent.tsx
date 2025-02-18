@@ -24,7 +24,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, new
       animations: { enabled: true, easing: 'easeout', speed: 500 }, 
       toolbar: { show: false } 
     },
-    stroke: { curve: 'straight', width: 1, colors: ['#00E396'] },
+    stroke: { curve: 'straight', width: 1, colors: ['#15803D'] },
     fill: { 
       type: 'gradient', 
       gradient: { 
@@ -34,8 +34,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, new
         opacityFrom: 0.5, 
         opacityTo: 0.5, 
         stops: [0, 90, 100], 
-        gradientFromColors: ['#00E396'], 
-        gradientToColors: ['#00E396'], 
+        gradientFromColors: ['#15803D'], 
+        gradientToColors: ['#15803D'], 
       }
     },
     xaxis: { categories: [], labels: { show: false }, axisTicks: { show: false } },
