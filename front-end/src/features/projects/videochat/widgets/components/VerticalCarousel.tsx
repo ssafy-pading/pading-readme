@@ -7,6 +7,7 @@ import "./VerticalCarousel.css";
 import { VerticalCarouselProps, RemoteParticipant } from "../../type/VideoConferenceTypes";
 import { useSelector } from 'react-redux';
 import { RootState } from "../../../../../app/redux/store";
+import { start } from "repl";
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
@@ -14,6 +15,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   remoteParticipants,
   hasJoined,
   onJoin,
+  startVideo
 }) => {
   const sliderRef = useRef<Slider>(null);
   const isVideoOff = useSelector((state: RootState) => state.videoConference.isVideoOff);
@@ -44,10 +46,16 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
 
   useEffect(() => {
     if (localParticipant?.videoTrack) {
-      const track = localParticipant.videoTrack.mediaStreamTrack;
-      track.enabled = !isVideoOff;
+      if (isVideoOff) {
+        // 카메라 완전히 중지
+        localParticipant.videoTrack.stop();
+      } else {
+        // 카메라 다시 시작하는 로직 필요
+        // OpenViduComponent의 createLocalTracks 함수를 호출하여 새로운 비디오 트랙 생성
+        startVideo();
+      }
     }
-  }, [isVideoOff, localParticipant]);
+  }, [isVideoOff]);
 
   useEffect(() => {
     if (localParticipant?.audioTrack) {
