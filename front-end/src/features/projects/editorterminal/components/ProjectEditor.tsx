@@ -137,7 +137,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     }
     // 3초 후에 setValue 실행 (예시)
   setTimeout(() => {
-    setvalue(content); // 원하는 값으로 변경하세요.
+    if(type.toString() === "") {
+      type.insert(0, content)
+    }
   }, 1000);
   };
 

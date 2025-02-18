@@ -306,8 +306,6 @@ function ProjectPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
-                        alert(file.fileRouteAndName);
-                        
                       }}
                       className="text-[#858595] hover:text-white"
                     >
