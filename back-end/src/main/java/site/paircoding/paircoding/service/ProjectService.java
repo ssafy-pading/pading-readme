@@ -52,6 +52,7 @@ public class ProjectService {
   private final GroupUserRepository groupUserRepository;
   private final ProjectUserRepository projectUserRepository;
   private final RedisUtil redisUtil;
+  private static final String CALL_STATUS_KEY = "callStatusProjectId:%s"; // Redis 저장 키 형식
   private static final String PROJECT_USER_KEY = "project:%s:user:%s"; // Redis 저장 키 형식
 
   public List<ProjectLanguageDto> getLanguage() {
@@ -145,6 +146,8 @@ public class ProjectService {
         project.getNodePort());
     project.setDeploymentUrl(subdomain + "." + appConfig.getDomain());
 
+    redisUtil.set(CALL_STATUS_KEY.formatted(project.getId()), "inactive");
+
     return projectRepository.save(project);
   }
 
@@ -174,7 +177,7 @@ public class ProjectService {
               .map(projectUser -> {
                 String userId = String.valueOf(projectUser.getUser().getId());
                 String projectId = String.valueOf(project.getId()); // 현재 프로젝트 ID 가져오기
-                String redisKey = "project:%s:user:%s".formatted(projectId, userId);
+                String redisKey = PROJECT_USER_KEY.formatted(projectId, userId);
 
                 boolean status = redisUtil.hasKey(redisKey); // ✅ Redis에서 접속 여부 확인
 
@@ -188,9 +191,20 @@ public class ProjectService {
               })
               .toList();
 
+          // ✅ Redis에서 CALL_STATUS_KEY 값 조회
+          String callStatusKey = CALL_STATUS_KEY.formatted(project.getId());
+          String callStatus = (String) redisUtil.get(callStatusKey);
+
+          // ✅ 값이 null이면 "inactive"으로 설정
+          if (callStatus == null) {
+            redisUtil.set(callStatusKey, "inactive");
+            callStatus = "inactive";
+          }
+
           return ProjectWithUsersResponse.builder()
               .project(project)
               .users(userDtos)
+              .callStatus(callStatus) // ✅ Redis 상태 반영
               .build();
         })
         .toList();
@@ -210,7 +224,7 @@ public class ProjectService {
     List<ProjectUserDto> userDtos = projectUsers.stream()
         .map(projectUser -> {
           String userId = String.valueOf(projectUser.getUser().getId());
-          String redisKey = "project:%s:user:%s".formatted(projectId, userId);
+          String redisKey = PROJECT_USER_KEY.formatted(projectId, userId);
 
           boolean status = redisUtil.hasKey(redisKey); // ✅ Redis에서 접속 여부 확인
 
@@ -223,10 +237,20 @@ public class ProjectService {
               .build();
         })
         .toList();
+    // ✅ Redis에서 CALL_STATUS_KEY 값 조회
+    String callStatusKey = CALL_STATUS_KEY.formatted(projectId);
+    String callStatus = (String) redisUtil.get(callStatusKey);
+
+    // ✅ 값이 null이면 "inactive"으로 설정
+    if (callStatus == null) {
+      redisUtil.set(callStatusKey, "inactive");
+      callStatus = "inactive";
+    }
 
     return ProjectWithUsersResponse.builder()
         .project(project)
         .users(userDtos)
+        .callStatus(callStatus) // ✅ Redis 상태 반영
         .build();
   }
 
@@ -247,6 +271,7 @@ public class ProjectService {
     // nginx config 삭제
     nginxConfigUtil.deleteSubdomain(project.getContainerId());
 
+    redisUtil.delete(CALL_STATUS_KEY.formatted(projectId));
   }
 
   public List<GroupUserResponse> getProjectUserIds(Integer groupId, Integer projectId) {
