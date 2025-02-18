@@ -4,11 +4,13 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
+import { FileTapType } from "../../../../shared/types/projectApiResponse";
 
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
   framework?: string;
+  fileName?: string;
   fileRouteAndName?: string;
   userName?: string;
   content?: any
@@ -18,14 +20,22 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
   projectId,
   framework,
+  fileName,
   fileRouteAndName,
   userName,
   content
 }) => {
+  // ctr+s 눌렀을 때 saveFIle 실행
+  // example:
+  function saveExample(
+    fileName: string, fileRouteAndName: string, value: string
+  ): void {
+     // file.content = value 
+  }
+  const { saveFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
-  // const [value, setvalue] = useState<string>(content || "")
   const [value, setvalue] = useState<string>("CONTENT");
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";

@@ -340,6 +340,7 @@ function ProjectPage() {
                       groupId={groupId}
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
+                      fileName={file.fileName}
                       fileRouteAndName={file.fileRouteAndName}
                       userName={user.name}
                       content={file.content}
