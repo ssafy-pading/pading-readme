@@ -31,6 +31,7 @@ import TranslucentSpinner from '../features/projects/projectpage/widgets/spinner
 // 웹소켓
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import { CallSocketProvider } from '../features/projects/projectpage/components/CallSocket';
 
 // 타입 정의
 export type Project = ProjectListItem['project'];
@@ -76,6 +77,7 @@ const ProjectListPage: React.FC = () => {
   const [groupName, setGroupName] = useState<string>(''); // 그룹 이름
   const [projectList, setProjectList] = useState<ProjectListItem[]>([]); // 프로젝트 목록록
   const [onlineProjectMembers, setOnlineProjectMembers] = useState<{ [projectId: number]: GetProjectMemberStatusResponse }>({});
+  const [projectCall, setProjectCall] = useState<Record<number, string>>({});
 
   // ───── 유저 역할, 그룹 멤버 가져오기 ─────
   useEffect(() => {
@@ -124,6 +126,11 @@ const ProjectListPage: React.FC = () => {
         // getProjects 함수는 ProjectListItem[] 형태의 데이터를 반환한다고 가정합니다.
         const data = await getProjects(groupId);
         setProjectList(data);
+        const callStatusMap: Record<number, string> = {};
+        data.forEach((projectItem: ProjectListItem) => {
+          callStatusMap[projectItem.project.id] = projectItem.callStatus; // "active" 또는 "inactive"
+        });
+        setProjectCall(callStatusMap);
       } catch (err) {
         console.error('프로젝트 목록을 불러오는 데 실패했습니다:', err);
       }
@@ -141,7 +148,6 @@ const ProjectListPage: React.FC = () => {
       const onlineStatusMap: { [projectId: number]: GetProjectMemberStatusResponse } = {};
       for (const projectItem of projectList) {
         const currentProjectId = projectItem.project.id;
-        console.log("요청 보내는 그룹 ID:", groupId, "프로젝트 ID:", currentProjectId);
         try {
           // 여기서 getProjectMemberStatus는 단순 배열을 반환합니다.
           const onlineMembers = await getProjectMemberStatus(String(groupId), String(currentProjectId));
@@ -172,11 +178,9 @@ const ProjectListPage: React.FC = () => {
       },
       reconnectDelay: 5000,
       onConnect: () => {
-        console.log("웹소켓 연결완료")
         stompClient.subscribe(`/sub/project-status/groups/${groupId}`, async (messageData) => {
           try {
             const data = JSON.parse(messageData.body);
-            console.log("메시지 데이터:", data);
             // data 예시: { projectId: "1", status: "member" }
             if (data.status === "member") {
               const projectId = Number(data.projectId);
@@ -186,6 +190,10 @@ const ProjectListPage: React.FC = () => {
                 ...prev,
                 [projectId]: onlineMembers,
               }));
+            } else if (data.status === "active") {
+              setProjectCall((prev) => ({...prev, [data.projectId]: "active"}));
+            } else if (data.status === "inactive") {
+              setProjectCall((prev) => ({...prev, [data.projectId]: "inactive"}));
             }
           } catch (error) {
             console.error("프로젝트 멤버 상태 업데이트 중 오류:", error);
@@ -203,6 +211,8 @@ const ProjectListPage: React.FC = () => {
       stompClient.deactivate();
     };
   }, [groupId, userProfile?.id, getProjectMemberStatus]);
+
+
 
   /* ============================================
     모달 관리
@@ -297,14 +307,17 @@ const ProjectListPage: React.FC = () => {
 
           {/* 실제 프로젝트 리스트 */}
           {projectList.map((item) => (
-            <ProjectCard
-              key={item.project.id}
-              groupId={groupId!}
-              project={item} // 전체 item (project와 users 모두 포함)
-              userRole={userRole}
-              onDelete={openDeleteConfirmModal}
-              onlineMembers={onlineProjectMembers[item.project.id] || []}
-            />
+            <CallSocketProvider groupId={groupId!} projectId={item.project.id}>
+              <ProjectCard
+                key={item.project.id}
+                groupId={groupId!}
+                project={item} // 전체 item (project와 users 모두 포함)
+                userRole={userRole}
+                onDelete={openDeleteConfirmModal}
+                onlineMembers={onlineProjectMembers[item.project.id] || []}
+                hasCall={projectCall[item.project.id]}
+              />
+            </CallSocketProvider>
           ))}
         </div>
       </div>

@@ -40,6 +40,8 @@ import { ResourceData } from "../features/projects/monitoring/types/monitoringTy
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
+import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
+import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
 function ProjectPage() {
   // 로딩 상태 체크
@@ -238,6 +240,13 @@ function ProjectPage() {
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
+          </div>
+          <div>
+            <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
+              <div className="flex items-center space-x-4">
+                <CallButton />
+              </div>
+            </CallSocketProvider>
           </div>
         </div>
         <div className="flex items-center justify-center gap-20">
