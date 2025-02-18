@@ -301,13 +301,15 @@ function ProjectPage() {
                 {fileTap.map((file) => (
                   <div
                     key={file.fileRouteAndName}
-                    className="flex flex-row items-center"
+                    title={file.fileRouteAndName}
+                    className={`flex flex-row items-center 
+                      ${activeFile !== file.fileRouteAndName? "hover:bg-gray-600": ""}`}
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                         activeFile === file.fileRouteAndName
                           ? "text-white"
-                          : "text-[#858595] hover:text-white"
+                          : "text-[#858595]"
                       }`}
                       onClick={() => setActiveFile(file.fileRouteAndName)}
                     >
@@ -318,7 +320,7 @@ function ProjectPage() {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
                       }}
-                      className="text-[#858595] hover:text-white ml-1"
+                      className="text-[#858595] hover:text-white"
                     >
                       <VscChromeClose />
                     </button>
@@ -338,10 +340,11 @@ function ProjectPage() {
                     }}
                     className="w-full h-full"
                   >
-                <ProjectEditor
-                  groupId={groupId}
-                  projectId={projectId}
-                  framework={projectDetail?.project.projectImage.language}
+                    <ProjectEditor
+                      groupId={groupId}
+                      projectId={projectId}
+                      framework={projectDetail?.project.projectImage.language}
+                      fileName={file.fileName}
                       fileRouteAndName={file.fileRouteAndName}
                   userName={user.name}
                       content={file.content}
