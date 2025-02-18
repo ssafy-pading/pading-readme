@@ -151,7 +151,7 @@ const Folder: React.FC<FolderProps> = ({
       <Toaster />
       <div
         className={`flex items-center text-xs mt-0.5 hover:bg-gray-800 ${selectedId === explorerData.id ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6]" : ""
-          } ${explorerData.type==="FILE"?'ml-4':null}`}
+          } ${explorerData.type==="FILE"?'ml-3':null}`}
         onClick={toggleExpand}
         onDoubleClick={getFileContent}
         onContextMenu={handleContextMenu}
@@ -176,7 +176,7 @@ const Folder: React.FC<FolderProps> = ({
             className="h-4 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         ) : (
-          <span className="select-none ml-[6px] overflow-hidden whitespace-nowrap text-ellipsis">{explorerData.name==="/"?"App":explorerData.name}</span>
+          <span className="select-none ml-[6px] overflow-hidden whitespace-nowrap text-ellipsis">{explorerData.name==="/"?"app":explorerData.name}</span>
         )}
       </div>
 
