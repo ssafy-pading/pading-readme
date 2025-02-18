@@ -229,6 +229,16 @@ const OpenViduComponent: React.FC<{
         };
     }, []);
 
+    const startVideo = async () => {
+        try {
+          const tracks = await createLocalTracks({ video: true });
+          const videoTrack = tracks.find((t) => t.kind === "video") as LocalVideoTrack;
+          setLocalVideoTrack(videoTrack);
+        } catch (error) {
+          console.error("Failed to start video:", error);
+        }
+      };
+
     return (
         <div className="h-full w-full flex flex-1">
             <VerticalCarousel
@@ -237,6 +247,7 @@ const OpenViduComponent: React.FC<{
                 remoteParticipants={remoteParticipants}
                 hasJoined={hasJoined}
                 onJoin={openPreview}
+                startVideo={startVideo}
             />
 
             {showPermissionModal && (
