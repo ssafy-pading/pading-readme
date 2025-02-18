@@ -24,7 +24,7 @@ const WebSocketComponent: React.FC = () => {
 
   const { groupId } = useParams();
   const { projectId } = useParams();
-  const url = "https://api-dev.pair-coding.site";
+  const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
 
   const {
@@ -210,12 +210,21 @@ const WebSocketComponent: React.FC = () => {
     setSelectedId(nodeId);
   }, []);
 
-  useEffect(()=>{
-    initialWebSocket();
-    return ()=>{
+  useEffect(() => {
+    let isSubscribed = true;
+    
+    const cleanup = () => {
+      isSubscribed = false;
       clientRef.current?.deactivate();
+      nodesMapRef.current.clear();
+    };
+  
+    if (isSubscribed) {
+      initialWebSocket();
     }
-  }, [])
+  
+    return cleanup;
+  }, []);
 
   const handleRefresh = () => {
     initialWebSocket();

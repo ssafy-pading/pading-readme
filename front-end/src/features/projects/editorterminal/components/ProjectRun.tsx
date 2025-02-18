@@ -12,8 +12,8 @@ interface WebTerminalProps {
   projectId?: string;
   active?: boolean;
   runCommand?: string; // 실행 명령어
-  mode?: "terminal" | "run"  // 터미널 탭 상태
   executeRunCommand?: boolean; // run 버튼 클릭 시에만 true로 설정
+  isRunTabInitialized?: boolean // 실행버튼을 눌렀을 때 터미널 인스턴스 생성성
   onRunCommandExecuted?: () => void; 
 }
 
@@ -24,8 +24,8 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
   projectId,
   active,
   runCommand,
-  mode,
   executeRunCommand,
+  isRunTabInitialized,
   onRunCommandExecuted,
 }) => {
   const terminalRef = useRef<HTMLDivElement | null>(null);
@@ -105,122 +105,133 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
     // -------------------------
     // 2) STOMP/SockJS 연결
     // -------------------------
-    const socket: WebSocket = new SockJS(
-      `${import.meta.env.VITE_APP_API_BASE_URL}/ws`
-    ) as WebSocket;
-
-    stompClient.current = new Client({
-      webSocketFactory: () => socket,
-      connectHeaders: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      reconnectDelay: 5000,
-      onConnect: () => {
-        // 메시지 구독
-        stompClient.current?.subscribe(
-          `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
-          (message: IMessage) => {
-            term.current?.write(message.body);
-            checkForPrompt(message.body) // 메시지에서 #app이 포함되어있는지 확인 -> 마우스 포커싱을 위한 연결 확인
-          }
-        );
-
-        // 연결 시점에 서버에 알림
-        stompClient.current?.publish({
-          destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/connect`,
-          body: "",
-        });
-
-        // 사용자 입력을 서버로 전송 (Run모드일 때 runCommand를 보내기 위해 함수로 뺌)
-        term.current?.onData(handleInputData);
-
-        // 연결 직후 한 번 사이즈 동기화
-        handleResize();
-
-        setIsConnected(true);
-      },
-      onDisconnect: () => {
-        console.log("Disconnected");
-        setIsConnected(false);
-        setIsPromptReady(false);
-      },
-    });
-
-    stompClient.current.activate();
-
-    // -------------------------
-    // 3) 윈도우 리사이즈 이벤트 등록
-    // -------------------------
-    function handleResize() {
-      if (terminalRef.current && terminalRef.current.offsetParent !== null) {
-        fitAddon.current?.fit();
-        if (stompClient.current?.connected) {
-          const cols = term.current?.cols;
-          const rows = term.current?.rows;        
-          stompClient.current.publish({
-            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
-            body: JSON.stringify({ cols, rows })
+    if (isRunTabInitialized) {
+      const socket: WebSocket = new SockJS(
+        `${import.meta.env.VITE_APP_API_BASE_URL}/ws`
+      ) as WebSocket;
+  
+      stompClient.current = new Client({
+        webSocketFactory: () => socket,
+        connectHeaders: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        reconnectDelay: 5000,
+        onConnect: () => {
+          // 메시지 구독
+          stompClient.current?.subscribe(
+            `/sub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}`,
+            (message: IMessage) => {
+              term.current?.write(message.body);
+              checkForPrompt(message.body) // 메시지에서 #app이 포함되어있는지 확인 -> 마우스 포커싱을 위한 연결 확인
+            }
+          );
+  
+          // 연결 시점에 서버에 알림
+          stompClient.current?.publish({
+            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/connect`,
+            body: "",
           });
+  
+          // 사용자 입력을 서버로 전송 (Run모드일 때 runCommand를 보내기 위해 함수로 뺌)
+          term.current?.onData(handleInputData);
+  
+          // 연결 직후 한 번 사이즈 동기화
+          handleResize();
+  
+          setIsConnected(true);
+        },
+        onDisconnect: () => {
+          console.log("Disconnected");
+          setIsConnected(false);
+          setIsPromptReady(false);
+        },
+      });
+  
+      stompClient.current.activate();
+  
+      // -------------------------
+      // 3) 윈도우 리사이즈 이벤트 등록
+      // -------------------------
+      function handleResize() {
+        if (terminalRef.current && terminalRef.current.offsetParent !== null) {
+          fitAddon.current?.fit();
+          if (stompClient.current?.connected) {
+            const cols = term.current?.cols;
+            const rows = term.current?.rows;        
+            stompClient.current.publish({
+              destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
+              body: JSON.stringify({ cols, rows })
+            });
+          }
         }
       }
+  
+      window.addEventListener("resize", handleResize);
+  
+      // -------------------------
+      // 4) MutationObserver를 사용하여 display 상태 감지
+      // -------------------------
+      observer.current = new MutationObserver(() => {
+        if (terminalRef.current && getComputedStyle(terminalRef.current).display !== "none") {
+          setTimeout(() => {
+            fitAddon.current?.fit();
+          }, 100);
+        }
+      });
+  
+      if (terminalRef.current?.parentElement) {
+        observer.current.observe(terminalRef.current.parentElement, {
+          attributes: true,
+          attributeFilter: ["style", "class"],
+        });
+      }
+  
+      // -------------------------
+      // 5) 언마운트 시 정리(clean-up)
+      // -------------------------
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        observer.current?.disconnect();
+        stompClient.current?.deactivate();
+        term.current?.dispose();
+      };
     }
-
-    window.addEventListener("resize", handleResize);
-
+    }, [isRunTabInitialized]);
+  
     // -------------------------
-    // 4) MutationObserver를 사용하여 display 상태 감지
+    // 6) 높이·너비·탭활성 변화 시 재조정
     // -------------------------
-    observer.current = new MutationObserver(() => {
-      if (terminalRef.current && getComputedStyle(terminalRef.current).display !== "none") {
+    useEffect(() => {
+      if (active) {
         setTimeout(() => {
           fitAddon.current?.fit();
+          if (stompClient.current?.connected) {
+            const cols = term.current?.cols;
+            const rows = term.current?.rows;
+            stompClient.current?.publish({
+              destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
+              body: JSON.stringify({ cols, rows }),
+            });
+          }
         }, 100);
       }
-    });
-
-    if (terminalRef.current?.parentElement) {
-      observer.current.observe(terminalRef.current.parentElement, {
-        attributes: true,
-        attributeFilter: ["style", "class"],
-      });
-    }
-
-    // -------------------------
-    // 5) 언마운트 시 정리(clean-up)
-    // -------------------------
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      observer.current?.disconnect();
-      stompClient.current?.deactivate();
-      term.current?.dispose();
-    };
-  }, []);
-
-  // -------------------------
-  // 6) 높이·너비·탭활성 변화 시 재조정
-  // -------------------------
-  useEffect(() => {
-    if (active) {
-      setTimeout(() => {
-        fitAddon.current?.fit();
-        if (stompClient.current?.connected) {
-          const cols = term.current?.cols;
-          const rows = term.current?.rows;
-          stompClient.current?.publish({
-            destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/resize`,
-            body: JSON.stringify({ cols, rows }),
-          });
+    }, [height, isTerminalWidthChange, active, isRunTabInitialized]);
+    
+    useEffect(() => {
+      // cleanup: 기존 터미널 인스턴스가 있다면 dispose
+      return () => {
+        if (term.current) {
+          term.current.dispose();
+          term.current = null;
         }
-      }, 100);
-    }
-  }, [height, isTerminalWidthChange, active]);
-
+      };
+    }, [isRunTabInitialized]); // 컴포넌트 언마운트 시 한 번 실행
+    
   // -------------------------
   // 7) runCommand 전송 (run 탭) - 붙여넣기 방식으로 해결
   // -------------------------
   useEffect(() => {
     if (
-      mode === "run" &&
       runCommand &&
       executeRunCommand &&
       isConnected &&
@@ -232,17 +243,17 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
         // 전체 문자열을 붙여넣기 방식으로 전송 (엔터키 포함)
         simulatePasteEvent(runCommand + "\n");
         if (onRunCommandExecuted) onRunCommandExecuted();
-      }, 1000); // 딜레이가 필요
+      }, 500); // 딜레이가 필요
     }
   }, [
     executeRunCommand,
     isConnected,
     isPromptReady,
-    mode,
     runCommand,
     groupId,
     projectId,
     terminalId,
+    isRunTabInitialized,
     onRunCommandExecuted,
   ]);
 
