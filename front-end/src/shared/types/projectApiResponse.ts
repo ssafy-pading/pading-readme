@@ -76,6 +76,7 @@ export type ProjectListItem = {
     email: string;
     status: boolean;
   }[];
+  callStatus: string;
 };
 
 // 전체 응답은 ProjectListItem의 배열

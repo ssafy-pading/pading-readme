@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { GetProjectMemberStatusResponse, ProjectListItem } from "../../../../shared/types/projectApiResponse";
 import { RxDotsHorizontal } from "react-icons/rx";
@@ -8,6 +8,7 @@ import {
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import profileImage from '../../../../assets/profile_image.png';
+import { useCallSocket } from "../../../projects/projectpage/components/CallSocket";
 
 interface ProjectCardProps {
   groupId: number;
@@ -15,6 +16,7 @@ interface ProjectCardProps {
   userRole: string;
   onDelete: (project: ProjectListItem) => void; // Delete 로직 콜백
   onlineMembers?: GetProjectMemberStatusResponse;
+  hasCall?: string; 
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -23,9 +25,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   userRole,
   onDelete,
   onlineMembers = [],
+  hasCall,
 }) => {
   const { project: projectData } = project;
   const { id, name, projectImage, performance } = projectData;
+  const { sendCallInactive } = useCallSocket();
 
   // 옵션 드롭다운 (기존 메뉴)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -42,6 +46,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   }, []);
 
   const handleEnterProject = () => {
+    if ((userRole === "OWNER" || userRole === "MANAGER") && hasCall === "active") {
+      sendCallInactive();
+    }
     window.location.href = `/project/${groupId}/${id}`;
   };
 
@@ -109,6 +116,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
   return (
     <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 hover:scale-105 z-10">
+      {/* 알림 */}
+      {hasCall==="active" && (
+        <div>
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full filter blur-lg opacity-30"></span> 
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-90"></span>
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full opacity-75 animate-ping"></span>
+        </div>
+      )}
       {/* 프로젝트 제목 및 옵션 드롭다운 */}
       <div className="flex justify-between items-center">
         <p className="font-inter text-base font-semibold text-[#68687b]">{name}</p>
