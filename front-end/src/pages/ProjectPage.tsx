@@ -90,31 +90,9 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { activeFile, setActiveFile, fileTap, setFileTap, user } =
+  const { activeFile, setActiveFile, fileTap, setFileTap, user, deleteFile } =
     useProjectEditor();
 
-  // 파일 탭 삭제 함수
-  const deleteFile = (deleteFileRouteAndName: string) => {
-    // 삭제할 파일 정보 확인
-    // 삭제할 파일을 제외한 새 배열 생성
-    const newFileTap = fileTap.filter(
-      (file) => file.fileRouteAndName !== deleteFileRouteAndName
-    );
-    setFileTap(newFileTap);
-
-    // 탭이 1개였는데 삭제되어 남은 탭이 없으면 활성 파일을 null로 설정
-    if (newFileTap.length === 0) {
-      setActiveFile(null);
-      return;
-    }
-
-    // 삭제된 파일이 현재 활성 파일이라면,
-    // 활성 파일을 새 배열의 첫 번째 파일로 설정합니다.
-    if (activeFile === deleteFileRouteAndName) {
-      setActiveFile(newFileTap[0].fileRouteAndName);
-    }
-    // 삭제된 파일이 활성 파일이 아니라면 변경 없이 그대로 유지합니다.
-  };
 
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
@@ -328,6 +306,8 @@ function ProjectPage() {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
+                        alert(file.fileRouteAndName);
+                        
                       }}
                       className="text-[#858595] hover:text-white"
                     >
