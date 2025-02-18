@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperat
 import { useParams } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { FileNode, FileType, RefreshWebSocket } from "../type/directoryTypes";
+import { FileNode, FileType, RefreshWebSocket, Payload, PayloadAction } from "../type/directoryTypes";
 import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
@@ -30,7 +30,6 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   const {
     setActiveFile,
     setFileTap,
-    fileTap,
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
@@ -120,7 +119,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   );
 
   const sendActionRequest = useCallback(
-    (action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE", payload: any) => {
+    (action: PayloadAction, payload: Payload) => {
       if (!clientRef.current || !clientRef.current.connected) {
         console.error("STOMP client is not connected");
         return;

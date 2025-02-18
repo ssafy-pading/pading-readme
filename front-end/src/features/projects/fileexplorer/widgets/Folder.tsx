@@ -9,7 +9,7 @@ import {
   VscEdit,
   VscTrash,
 } from "react-icons/vsc";
-import { FileNode, FileType } from "../type/directoryTypes";
+import { FileNode, FileType, Payload, PayloadAction } from "../type/directoryTypes";
 import toast, { Toaster } from 'react-hot-toast';
 import Modal from 'react-modal';
 
@@ -25,8 +25,8 @@ interface FolderProps {
   explorerData: FileNode;
   selectedId: number | null;
   sendActionRequest: (
-    action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE",
-    payload: any
+    action: PayloadAction,
+    payload: Payload,
   ) => void;
   handleNodeSelect: (nodeId: number) => void;
   checkDuplicateName: (path: string, name: string) => boolean;
@@ -90,7 +90,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload = {
         action: "CREATE",
         type: createType,
         path: getFullPath(),
@@ -113,7 +113,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload  = {
         action: "RENAME",
         type: explorerData.type,
         path: explorerData.parent,
@@ -126,7 +126,7 @@ const Folder: React.FC<FolderProps> = ({
   };
 
   const handleDelete = () => {
-    const payload = {
+    const payload: Payload  = {
       action: "DELETE",
       type: explorerData.type,
       path: explorerData.parent,
@@ -137,7 +137,7 @@ const Folder: React.FC<FolderProps> = ({
 
   const getFileContent = () => {
     if(explorerData.type==="DIRECTORY") return;
-    const payload = {
+    const payload: Payload = {
       action: "CONTENT",
       type: explorerData.type,
       path: explorerData.parent,
