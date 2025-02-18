@@ -155,9 +155,9 @@ function ProjectPage() {
   };
 
   // 터미널 Tab 상태 관리
-  const [activePanel, setActivePanel] = useState<"terminal" | "run" | "resource">(
-    "terminal"
-  );
+  const [activePanel, setActivePanel] = useState<
+    "terminal" | "run" | "resource"
+  >("terminal");
   // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
   const [executeRunCommand, setExecuteRunCommand] = useState<boolean>(false);
   // 파일 실행 버튼 클릭시 호출 되는 함수
@@ -326,24 +326,33 @@ function ProjectPage() {
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
-              {activeFile !== null && fileTap.length > 0 ? (
-                <ProjectEditor
-                key={activeFile} // activeFile이 변경되면 새로운 인스턴스로 마운트됨
-                  groupId={groupId}
-                  projectId={projectId}
-                  framework={projectDetail?.project.projectImage.language}
-                  fileRouteAndName={activeFile}
-                  userName={user.name}
-                  content={
-                    fileTap.find((file) => file.fileRouteAndName === activeFile)?.content || ""
-                  }
-                />
+              {fileTap.length > 0 ? (
+                fileTap.map((file) => (
+                  <div
+                    key={file.fileRouteAndName}
+                    style={{
+                      display:
+                        activeFile === file.fileRouteAndName ? "block" : "none",
+                    }}
+                    className="w-full h-full"
+                  >
+                    <ProjectEditor
+                      groupId={groupId}
+                      projectId={projectId}
+                      framework={projectDetail?.project.projectImage.language}
+                      fileRouteAndName={file.fileRouteAndName}
+                      userName={user.name}
+                      content={file.content}
+                    />
+                  </div>
+                ))
               ) : (
                 <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>
                 </div>
               )}
             </div>
+
             <div className="w-full">
               <ResizableBox
                 width={Infinity}
@@ -492,8 +501,8 @@ function ProjectPage() {
                         display: activePanel === "resource" ? "block" : "none",
                       }}
                     >
-                      <MonitoringDashboard 
-                        data={monitoringDataList} 
+                      <MonitoringDashboard
+                        data={monitoringDataList}
                         height={terminalHeight - 30}
                       />
                     </div>
