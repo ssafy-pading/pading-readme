@@ -18,9 +18,10 @@ const VideoComponent = ({ videoTrack, participantIdentity, muted=false, isVideoO
     <div id={"camera-" + participantIdentity} className="video-container rounded-md overflow-hidden aspect-[4/3]">
       {
         !isVideoOff ?
-        <video ref={videoRef} autoPlay playsInline muted={muted}id={videoTrack?.sid} style={{ transform: "scaleX(-1)" }} className="w-full h-full object-cover"></video>:
+        <video ref={videoRef} autoPlay playsInline muted={muted}id={videoTrack?.sid} style={{ transform: "scaleX(-1)" }} className="w-full h-full object-cover"></video>
+        :
         <div className='w-full h-full bg-[#666871]'>
-
+          
         </div>
       }
     </div>

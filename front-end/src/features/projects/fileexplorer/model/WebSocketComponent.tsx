@@ -24,12 +24,13 @@ const WebSocketComponent: React.FC = () => {
 
   const { groupId } = useParams();
   const { projectId } = useParams();
-  const url = "https://api-dev.pair-coding.site";
+  const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
 
   const {
     setActiveFile,
     setFileTap,
+    fileTap,
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
@@ -37,13 +38,14 @@ const WebSocketComponent: React.FC = () => {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
       content: file.content
-    };
+    }; 
   
-    setFileTap((prevFileTap) => {
-      const updatedFileTap = [...prevFileTap, newFile];
-      setActiveFile(newFile.fileRouteAndName); // 새 파일을 활성 파일로 설정
-      
-      return updatedFileTap;
+    setFileTap(prevFileTap => {
+      if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
+        return prevFileTap;
+      }
+      setActiveFile(newFile.fileRouteAndName); 
+      return [...prevFileTap, newFile];
     });
   };
   
@@ -91,7 +93,7 @@ const WebSocketComponent: React.FC = () => {
         sendActionRequest('LIST', { path: data.path });
         return;
       }
-      console.log("Updating nodes map with data:", data);
+      // console.log("Updating nodes map with data:", data);
       const parentNode = getNodeByPath(data.path);
       if (!parentNode) {
         console.error("Parent node not found for path:", data.path);
@@ -111,7 +113,7 @@ const WebSocketComponent: React.FC = () => {
         nodesMapRef.current.set(newNode.id, newNode);
         return newNode;
       });
-      console.log("Updated nodes map:", Array.from(nodesMapRef.current.entries()));
+      // console.log("Updated nodes map:", Array.from(nodesMapRef.current.entries()));
       setTreeData(buildTreeFromMap());
     },
     [buildTreeFromMap, getNodeByPath]
@@ -124,7 +126,7 @@ const WebSocketComponent: React.FC = () => {
         return;
       }
       const destination = `/pub/groups/${groupId}/projects/${projectId}/directory/${action.toLowerCase()}`;
-      console.log("Sending request:", { destination, action, payload });
+      // console.log("Sending request:", { destination, action, payload });
       clientRef.current.publish({
         destination,
         headers: { Authorization: `Bearer ${access}` },
@@ -157,33 +159,34 @@ const WebSocketComponent: React.FC = () => {
         Authorization: `Bearer ${access}`,
       },
       onConnect: () => {
-        console.log("WebSocket connected");
+        // console.log("WebSocket connected");
         clientRef.current = client;
         const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
-            console.log("Received message:", data);
+            // console.log("Received message:", data);
             if (data.action === "CONTENT") {
-              console.log(`Received ${data.action} message:`, {
-                action: data.action,
-                fileName: data.name,
-                content: data.content,
-                path: data.path
-              });
+              // console.log(`Received ${data.action} message:`, {
+              //   action: data.action,
+              //   fileName: data.name,
+              //   content: data.content,
+              //   path: data.path
+              // });
               const openFile: FileTapType = {
                 fileName:data.name,
                 fileRouteAndName:`${data.path}/${data.name}`,
                 content: data.content
               }
+
               addNewFile(openFile);
             } else if(data.action === "SAVE"){
-              console.log(`Received ${data.action} message:`, {
-                action: data.action,
-                fileName: data.name,
-                contentLength: data.content,
-                path: data.path
-              });
+              // console.log(`Received ${data.action} message:`, {
+              //   action: data.action,
+              //   fileName: data.name,
+              //   contentLength: data.content,
+              //   path: data.path
+              // });
             } else {
               updateNodesMapWithList(data);
             }
@@ -210,16 +213,25 @@ const WebSocketComponent: React.FC = () => {
     setSelectedId(nodeId);
   }, []);
 
-  useEffect(()=>{
-    initialWebSocket();
-    return ()=>{
+  useEffect(() => {
+    let isSubscribed = true;
+    
+    const cleanup = () => {
+      isSubscribed = false;
       clientRef.current?.deactivate();
+      nodesMapRef.current.clear();
+    };
+  
+    if (isSubscribed) {
+      initialWebSocket();
     }
-  }, [])
+  
+    return cleanup;
+  }, []);
 
-  const handleRefresh = () => {
-    initialWebSocket();
-  };
+  // const handleRefresh = () => {
+  //   initialWebSocket();
+  // };
 
   const checkDuplicateName = useCallback((path: string, newName: string): boolean => {
     const parentNode = getNodeByPath(path);

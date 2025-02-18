@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import Slider from "react-slick";
 import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
@@ -14,6 +14,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   remoteParticipants,
   hasJoined,
   onJoin,
+  startVideo
 }) => {
   const sliderRef = useRef<Slider>(null);
   const isVideoOff = useSelector((state: RootState) => state.videoConference.isVideoOff);
@@ -44,10 +45,13 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
 
   useEffect(() => {
     if (localParticipant?.videoTrack) {
-      const track = localParticipant.videoTrack.mediaStreamTrack;
-      track.enabled = !isVideoOff;
+      if (isVideoOff) {
+        localParticipant.videoTrack.stop();
+      } else {
+        startVideo();
+      }
     }
-  }, [isVideoOff, localParticipant]);
+  }, [isVideoOff]);
 
   useEffect(() => {
     if (localParticipant?.audioTrack) {
@@ -116,8 +120,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
             Video
           </div>
           <div className="flex flex-1 justify-center items-center">
-            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">
-              <p className="text-sm">화상회의 참여하기</p>
+            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-2 rounded-md hover:scale-110 transition-transform duration-200 ease-in-out">
+              <p className="text-xs">화상회의 참여하기</p>
             </button>
           </div>
         </div>

@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
-import {
-  ProjectEditorProvider,
-  useProjectEditor,
-} from "../context/ProjectEditorContext"; // useContext
+import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
 
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
@@ -40,6 +37,8 @@ import { ResourceData } from "../features/projects/monitoring/types/monitoringTy
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
+import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
+import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
 function ProjectPage() {
   // 로딩 상태 체크
@@ -155,15 +154,17 @@ function ProjectPage() {
   };
 
   // 터미널 Tab 상태 관리
-  const [activePanel, setActivePanel] = useState<"terminal" | "run" | "resource">(
-    "terminal"
-  );
+  const [activePanel, setActivePanel] = useState<
+    "terminal" | "run" | "resource"
+  >("terminal");
+  const [isRunTabInitialized, setIsRunTabInitialized] = useState<boolean>(false)
   // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
   const [executeRunCommand, setExecuteRunCommand] = useState<boolean>(false);
   // 파일 실행 버튼 클릭시 호출 되는 함수
   const handleFileExecution = async () => {
     setActivePanel("run"); // 실행 결과 탭으로 전환
     setExecuteRunCommand(true); // 버튼을 누른 상태로 전환
+    setIsRunTabInitialized(true)
   };
 
   {
@@ -181,7 +182,7 @@ function ProjectPage() {
 
   useEffect(() => {
     if (!projectDetail?.project?.containerId) return;
-
+    // 모니터링 데이터 불러오기
     const fetchMonitoringData = async () => {
       try {
         const monitoringData = await getMonitoringResource(
@@ -236,6 +237,13 @@ function ProjectPage() {
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
+          </div>
+          <div>
+            <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
+              <div className="flex items-center space-x-4">
+                <CallButton />
+              </div>
+            </CallSocketProvider>
           </div>
         </div>
         <div className="flex items-center justify-center gap-20">
@@ -299,13 +307,15 @@ function ProjectPage() {
                 {fileTap.map((file) => (
                   <div
                     key={file.fileRouteAndName}
-                    className="flex flex-row items-center"
+                    title={file.fileRouteAndName}
+                    className={`flex flex-row items-center 
+                      ${activeFile !== file.fileRouteAndName? "hover:bg-gray-600": ""}`}
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                         activeFile === file.fileRouteAndName
                           ? "text-white"
-                          : "text-[#858595] hover:text-white"
+                          : "text-[#858595]"
                       }`}
                       onClick={() => setActiveFile(file.fileRouteAndName)}
                     >
@@ -316,7 +326,7 @@ function ProjectPage() {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
                       }}
-                      className="text-[#858595] hover:text-white ml-1"
+                      className="text-[#858595] hover:text-white"
                     >
                       <VscChromeClose />
                     </button>
@@ -326,24 +336,34 @@ function ProjectPage() {
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
-              {activeFile !== null && fileTap.length > 0 ? (
-                <ProjectEditor
-                key={activeFile} // activeFile이 변경되면 새로운 인스턴스로 마운트됨
-                  groupId={groupId}
-                  projectId={projectId}
-                  framework={projectDetail?.project.projectImage.language}
-                  fileRouteAndName={activeFile}
+              {fileTap.length > 0 ? (
+                fileTap.map((file) => (
+                  <div
+                    key={file.fileRouteAndName}
+                    style={{
+                      display:
+                        activeFile === file.fileRouteAndName ? "block" : "none",
+                    }}
+                    className="w-full h-full"
+                  >
+                    <ProjectEditor
+                      groupId={groupId}
+                      projectId={projectId}
+                      framework={projectDetail?.project.projectImage.language}
+                      fileName={file.fileName}
+                      fileRouteAndName={file.fileRouteAndName}
                   userName={user.name}
-                  content={
-                    fileTap.find((file) => file.fileRouteAndName === activeFile)?.content || ""
-                  }
+                      content={file.content}
                 />
+                  </div>
+                ))
               ) : (
                 <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>
                 </div>
               )}
             </div>
+
             <div className="w-full">
               <ResizableBox
                 width={Infinity}
@@ -373,6 +393,17 @@ function ProjectPage() {
                   {/* 상단 탭과 + 버튼 */}
                   <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                     <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
+                      {/* Resource 탭 */}
+                      <button
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                          activePanel === "resource"
+                            ? "border-b-2 border-b-[#3B82F6] text-white"
+                            : "text-[#858595] hover:text-white"
+                        } cursor-pointer`}
+                        onClick={() => setActivePanel("resource")}
+                      >
+                        Resource
+                      </button>
                       {/* Run 탭 */}
                       <button
                         className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
@@ -386,22 +417,10 @@ function ProjectPage() {
                       >
                         Run
                       </button>
-
-                      {/* Resource 탭 */}
-                      <button
-                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                          activePanel === "resource"
-                            ? "border-b-2 border-b-[#3B82F6] text-white"
-                            : "text-[#858595] hover:text-white"
-                        } cursor-pointer`}
-                        onClick={() => setActivePanel("resource")}
-                      >
-                        Resource
-                      </button>
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button
-                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-white cursor-pointer`}
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-[#858595] hover:text-white cursor-pointer`}
                           onClick={() => setActivePanel("terminal")}
                         >
                           Terminal
@@ -479,8 +498,8 @@ function ProjectPage() {
                         groupId={groupId}
                         projectId={projectId}
                         runCommand={projectDetail?.project.runCommand}
-                        mode="run"
                         executeRunCommand={executeRunCommand}
+                        isRunTabInitialized={isRunTabInitialized}
                         onRunCommandExecuted={() => setExecuteRunCommand(false)}
                       />
                     </div>
@@ -492,9 +511,11 @@ function ProjectPage() {
                         display: activePanel === "resource" ? "block" : "none",
                       }}
                     >
-                      <MonitoringDashboard 
-                        data={monitoringDataList} 
+                      <MonitoringDashboard
+                        data={monitoringDataList}
                         height={terminalHeight - 30}
+                        cpuDescription={projectDetail?.project.performance.cpuDescription}
+                        memoryDescription={projectDetail?.project.performance.memoryDescription}
                       />
                     </div>
                     {/* 터미널 패널 */}

@@ -150,8 +150,8 @@ const Folder: React.FC<FolderProps> = ({
     <div>
       <Toaster />
       <div
-        className={`flex items-center hover:bg-gray-800 ${selectedId === explorerData.id ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6]" : ""
-          } ${explorerData.type==="FILE"?'ml-4':null}`}
+        className={`flex items-center text-xs mt-0.5 hover:bg-gray-800 ${selectedId === explorerData.id ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6]" : ""
+          } ${explorerData.type==="FILE"?'ml-3':null}`}
         onClick={toggleExpand}
         onDoubleClick={getFileContent}
         onContextMenu={handleContextMenu}
@@ -173,10 +173,10 @@ const Folder: React.FC<FolderProps> = ({
             onKeyDown={handleRenameKeyDown}
             onBlur={() => setIsRenaming(false)}
             autoFocus
-            className="h-6 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
+            className="h-4 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         ) : (
-          <span className="select-none ml-[6px]">{explorerData.name}</span>
+          <span className="select-none ml-[6px] overflow-hidden whitespace-nowrap text-ellipsis">{explorerData.name==="/"?"app":explorerData.name}</span>
         )}
       </div>
 
@@ -196,7 +196,7 @@ const Folder: React.FC<FolderProps> = ({
             }}
             autoFocus
             placeholder={`Enter ${createType === 'DIRECTORY' ? 'folder' : 'file'} name`}
-            className="h-6 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
+            className="h-4 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         </div>
       )}
@@ -227,21 +227,21 @@ const Folder: React.FC<FolderProps> = ({
         <div className="py-2">
           {explorerData.type === "DIRECTORY" && (
             <>
-              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
+              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
                 <VscNewFolder className="w-4 h-4 text-white" />
                 <span>New Folder</span>
               </div>
-              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
+              <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
                 <VscNewFile className="w-4 h-4 text-white" />
                 <span>New File</span>
               </div>
             </>
           )}
-          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
+          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
             <VscEdit className="w-4 h-4 text-white" />
             <span>Rename</span>
           </div>
-          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-sm text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
+          <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
             <VscTrash className="w-4 h-4 text-white" />
             <span>Delete</span>
           </div>

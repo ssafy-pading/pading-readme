@@ -11,4 +11,5 @@ public class ProjectWithUsersResponse {
 
   private Project project;
   private List<ProjectUserDto> users;
+  private String callStatus;
 }
