@@ -11,11 +11,12 @@ type ChartComponentProps = {
   title: string;
   unit: string;
   bUnit: string;
+  maxValue: number;
   newData: ChartDataPoint[];
   height: number;
 };
 
-const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, newData, height }) => {
+const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, maxValue, newData, height }) => {
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [series, setSeries] = useState<any[]>([]);
   const [chartOptions, setChartOptions] = useState<any>({
@@ -125,17 +126,26 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, new
       ? (lastDataPoint.value / 1024).toFixed(2)
       : lastDataPoint.value.toFixed(2)
     : '0.00';
+
+  const displayMaxValue = lastDataPoint 
+  ? title === 'Memory Usage'
+    ? lastDataPoint.value > 1000 
+      ? maxValue
+      : maxValue * 1024
+    : maxValue
+  : '0.00';
+
   const displayUnit = lastDataPoint
     ? lastDataPoint.value > 1000
       ? bUnit
       : unit
     : unit;
-
+  console.log(`${title}`,  displayMaxValue);
   return (
-    <div className="w-full p-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
+    <div className="w-full pt-[15px] px-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
       <h4 className="text-white font-semibold mb-2">{title}</h4>
-      <div className="absolute top-[30px] left-2 text-white text-sm">
-        <p>{displayValue} {displayUnit}</p>
+      <div className="absolute top-[40px] left-2 text-white text-sm">
+        <p>{displayValue} {displayUnit} / {displayMaxValue} {displayUnit}</p>
         <p>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</p>
       </div>
       <Chart options={chartOptions} series={series} type="area" height={height - 50} />

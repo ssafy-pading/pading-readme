@@ -482,17 +482,17 @@ function ProjectPage() {
                         display: activePanel === "run" ? "block" : "none",
                       }} /* 수정: CSS로 런 패널 보이기/숨기기 */
                     >
-                        <ProjectRun
-                          active={true}
-                          height={terminalHeight - 30}
-                          isTerminalWidthChange={isTerminalWidthChange}
-                          groupId={groupId}
-                          projectId={projectId}
-                          runCommand={projectDetail?.project.runCommand}
-                          executeRunCommand={executeRunCommand}
-                          isRunTabInitialized={isRunTabInitialized}
-                          onRunCommandExecuted={() => setExecuteRunCommand(false)}
-                        />
+                      <ProjectRun
+                        active={true}
+                        height={terminalHeight - 30}
+                        isTerminalWidthChange={isTerminalWidthChange}
+                        groupId={groupId}
+                        projectId={projectId}
+                        runCommand={projectDetail?.project.runCommand}
+                        executeRunCommand={executeRunCommand}
+                        isRunTabInitialized={isRunTabInitialized}
+                        onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                      />
                     </div>
 
                     {/* Resource 패널 */}
@@ -505,6 +505,8 @@ function ProjectPage() {
                       <MonitoringDashboard 
                         data={monitoringDataList} 
                         height={terminalHeight - 30}
+                        cpuDescription={projectDetail?.project.performance.cpuDescription}
+                        memoryDescription={projectDetail?.project.performance.memoryDescription}
                       />
                     </div>
                     {/* 터미널 패널 */}
