@@ -1,5 +1,5 @@
 import WebSocketComponent from "../model/WebSocketComponent";
-import '../widgets/Folder.css';
+import '../widgets/Folder.css'; // scroll bar css
 
 function FileExplorer() {
 

@@ -158,12 +158,14 @@ function ProjectPage() {
   const [activePanel, setActivePanel] = useState<
     "terminal" | "run" | "resource"
   >("terminal");
+  const [isRunTabInitialized, setIsRunTabInitialized] = useState<boolean>(false)
   // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
   const [executeRunCommand, setExecuteRunCommand] = useState<boolean>(false);
   // 파일 실행 버튼 클릭시 호출 되는 함수
   const handleFileExecution = async () => {
     setActivePanel("run"); // 실행 결과 탭으로 전환
     setExecuteRunCommand(true); // 버튼을 누른 상태로 전환
+    setIsRunTabInitialized(true)
   };
 
   {
@@ -483,17 +485,17 @@ function ProjectPage() {
                         display: activePanel === "run" ? "block" : "none",
                       }} /* 수정: CSS로 런 패널 보이기/숨기기 */
                     >
-                      <ProjectRun
-                        active={true}
-                        height={terminalHeight - 30}
-                        isTerminalWidthChange={isTerminalWidthChange}
-                        groupId={groupId}
-                        projectId={projectId}
-                        runCommand={projectDetail?.project.runCommand}
-                        mode="run"
-                        executeRunCommand={executeRunCommand}
-                        onRunCommandExecuted={() => setExecuteRunCommand(false)}
-                      />
+                        <ProjectRun
+                          active={true}
+                          height={terminalHeight - 30}
+                          isTerminalWidthChange={isTerminalWidthChange}
+                          groupId={groupId}
+                          projectId={projectId}
+                          runCommand={projectDetail?.project.runCommand}
+                          executeRunCommand={executeRunCommand}
+                          isRunTabInitialized={isRunTabInitialized}
+                          onRunCommandExecuted={() => setExecuteRunCommand(false)}
+                        />
                     </div>
 
                     {/* Resource 패널 */}
