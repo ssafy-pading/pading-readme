@@ -23,7 +23,7 @@ const DeployedLinkButton :React.FC<DeployedLinkButtonType> = ({ link }) => {
       >
         <MdOpenInBrowser className="text-white text-md" />
         <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 px-2 py-1 bg-gray-700 text-white text-xs whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-          Go to Deployed Web-site
+          배포 링크
         </div>
       </button>
     </div>
