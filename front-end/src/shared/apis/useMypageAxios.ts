@@ -118,6 +118,7 @@ const useMypageAxios = () => {
       await axios.delete(`${baseURL}/v1/mypage/logout`, withAuthHeader());
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('email');
       navigate('/');
       return true;
     } catch (error) {
@@ -135,6 +136,8 @@ const useMypageAxios = () => {
       await axios.delete(`${baseURL}/v1/mypage`, withAuthHeader());
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      localStorage.removeItem('email');
+
       navigate('/');
       return true;
     } catch (error) {

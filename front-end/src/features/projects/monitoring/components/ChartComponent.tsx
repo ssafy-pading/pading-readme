@@ -140,7 +140,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
       ? bUnit
       : unit
     : unit;
-  console.log(`${title}`,  displayMaxValue);
+  // console.log(`${title}`,  displayMaxValue);
   return (
     <div className="w-full pt-[15px] px-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
       <h4 className="text-white font-semibold mb-2">{title}</h4>

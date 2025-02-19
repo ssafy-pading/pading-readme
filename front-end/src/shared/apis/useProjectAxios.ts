@@ -213,7 +213,7 @@ const useProjectAxios = () => {
    * @returns 프로젝트 멤버 상태 데이터
    */
   const getProjectMemberStatus = useCallback((groupId: string, projectId: string): Promise<GetProjectMemberStatusResponse> => {
-      console.log("요청시:", typeof groupId, groupId, projectId);
+      // console.log("요청시:", typeof groupId, groupId, projectId);
       const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/status`, withAuthHeader()).then((res) => res.data.data);
 
       return apiRequest(request, () => getProjectMemberStatus(groupId, projectId));

@@ -18,6 +18,8 @@ import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/Pr
 // 로그인 이미지
 import kakao_logo from "../assets/kakao_logo.svg"
 import naver_logo from "../assets/naver_logo.svg"
+import useMypageAxios from '../shared/apis/useMypageAxios';
+import { GetMyPageResponse } from '../shared/types/mypageApiResponse';
 
 declare global {
   interface Window {
@@ -61,7 +63,7 @@ interface ParticlesOptions {
 const LoginPage: React.FC = () => {
   const { loginWith } = useAuthAxios();
   const { getGroups } = useGroupAxios();
-
+  const { getProfile } = useMypageAxios();
   // 스피너 체크
   const [isLoading, setIsLoading] = useState(true);
   
@@ -118,7 +120,10 @@ const LoginPage: React.FC = () => {
       setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
-
+  const getUserEmail = async () => {
+    const user = await getProfile();
+    localStorage.setItem("email", user.email);
+  }
   useEffect(() => {
     // URL 파라미터에서 토큰 확인
     const params = new URLSearchParams(window.location.search);
@@ -129,6 +134,8 @@ const LoginPage: React.FC = () => {
     if (accessToken && refreshToken) {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+      getUserEmail();
+      
       const redirectPath = sessionStorage.getItem("redirectPath");
       if (redirectPath) {
         sessionStorage.removeItem("redirectPath");

@@ -3,14 +3,13 @@ import Editor from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
-import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
 
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
   framework?: string;
   fileName?: string;
+  fileRoute?: string;
   fileRouteAndName?: string;
   userName?: string;
   content?: any
@@ -21,6 +20,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   projectId,
   framework,
   fileName,
+  fileRoute,
   fileRouteAndName,
   userName,
   content

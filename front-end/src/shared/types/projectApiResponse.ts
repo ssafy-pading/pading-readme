@@ -108,8 +108,9 @@ export type AccessProjectResponse = {
 };
 
 // 파일 타입
-export type FileTapType = {
+export type FileTabType = {
   fileName: string;
+  fileRoute: string;
   fileRouteAndName: string;
   content: string;
 }
@@ -125,8 +126,8 @@ export type GetProjectMemberStatusResponse = {
 }[];
 
 // 탭 매니징 타입
-export type TapManagerType = {
+export type TabManagerType = {
   email: string;
-  activeTap: string | null;
-  Tabs: FileTapType[];
+  activeTab: string | null;
+  tabs: FileTabType[];
 }

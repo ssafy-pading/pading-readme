@@ -35,9 +35,9 @@ import { Toaster, toast } from "react-hot-toast";
 
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
-import { FileTapType, TapManagerType } from "../shared/types/projectApiResponse";
+import { FileTabType, TabManagerType } from "../shared/types/projectApiResponse";
 import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
-import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
+import { GetProjectDetailsResponse } from "../shared/types/projectabiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
 import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
@@ -90,31 +90,28 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { tapManager, setTapManager, emailToTabs, user, deleteFile } = useProjectEditor();
-  const email = user?.email
-  console.log("email: ", email);
-  
-  // 한 명의 탭 매니저
-  const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === email)
-  console.log("userTapManager: ", userTapManager);
-  
-  // 한 명의 탭탭
-  const taps: FileTapType[] | undefined = userTapManager?.Tabs
-  console.log("taps: ", taps);
-  
-  // 전역 active 파일은 context 내 userTapManager의 activeTap로 관리
-  const activeFile: string = userTapManager?.activeTap || "";
+  const { tabManager, setTabManager, user, deleteFile } = useProjectEditor();
+  const email = localStorage.getItem("email")
+  const [tabs, setTabs] = useState<FileTabType[]>([])
+  const [activeTab, setActiveTab] = useState<string | null>(null)
 
-  // 파일 탭 클릭 시 activeTap 업데이트 함수
-  const handleTabClick = (fileRouteAndName: string) => {
-    if (!email) return;
-    setTapManager((prev) =>
-      prev.map((tm) =>
-        tm.email === email ? { ...tm, activeTap: fileRouteAndName } : tm
-      )
-    );
-  };
-
+  useEffect(() => {
+    console.log(`${email}님의 TM 업데이트`, tabManager);
+    if (!tabManager) {
+      return
+    }
+    const userTabManager: TabManagerType = tabManager.find((tm) => tm.email === email)
+    
+    if (!userTabManager) {
+      return
+    }
+    setTabs(userTabManager?.tabs)
+    console.log("tabs: ", userTabManager.tabs);
+    
+    setActiveTab(userTabManager?.activeTab)
+    console.log("activeTab: ", userTabManager.activeTab);
+    
+  }, [tabManager]);
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
@@ -307,19 +304,19 @@ function ProjectPage() {
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
                 
-                {taps !== undefined && taps.length > 0 ? 
-                  (taps.map((file) => (
+                {tabs !== undefined && tabs.length > 0 ? 
+                  (tabs.map((file) => (
                   <div
                     key={file.fileRouteAndName}
                     className="flex flex-row items-center"
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
-                        activeFile === file.fileRouteAndName
+                        activeTab === file.fileRouteAndName
                           ? "text-white"
                           : "text-[#858595] hover:text-white"
                       }`}
-                      onClick={() => handleTabClick(file.fileRouteAndName)}
+                      onClick={() => alert(activeTab)}
                     >
                       {file.fileName}
                     </div>
@@ -338,13 +335,13 @@ function ProjectPage() {
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
-              {taps && taps.length > 0 ? (
-                taps?.map((file) => (
+              {tabs && tabs.length > 0 ? (
+                tabs?.map((file) => (
                   <div
                     key={file.fileRouteAndName}
                     style={{
                       display:
-                        activeFile === file.fileRouteAndName ? "block" : "none",
+                        activeTab === file.fileRouteAndName ? "block" : "none",
                     }}
                     className="w-full h-full"
                   >
@@ -352,6 +349,8 @@ function ProjectPage() {
                       groupId={groupId}
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
+                      fileName={file.fileName}
+                      fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
                       userName={user.name}
                       content={file.content}
