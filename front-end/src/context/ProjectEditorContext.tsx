@@ -25,7 +25,27 @@ const ProjectEditorContext = createContext<
 export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [fileTap, setFileTap] = useState<FileTapType[]>([])
-  const [tapManager, setTapManager] = useState<TapManagerType[]>([])
+  const [tapManager, setTapManager] = useState<TapManagerType[]>([{
+    email: "shinheewon0107@gmail.com", 
+    activeTap: "file2Route", 
+    Tabs: [
+      {fileName: "file1",
+      fileRouteAndName: "file1Route",
+      content: "content1"},
+      {fileName: "file2",
+        fileRouteAndName: "file2Route",
+        content: "content2"},
+        {fileName: "file3",
+          fileRouteAndName: "file3Route",
+          content: "content3"}
+  
+    ]
+  },
+    {
+      email: "email2", 
+      activeTap: "activeTap2", 
+      Tabs: []
+    }])
 
   // 파일 추가
   const emailToTabs = (email: string): FileTapType[] => {

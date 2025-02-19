@@ -29,16 +29,6 @@ const WebSocketComponent: React.FC = () => {
   const { projectId } = useParams();
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
-  
-  const { user, status } = useSelector((state: RootState) => state.user)
-  const email = user?.email
-  
-  useEffect (() => {
-    if (!user && status === "idle") {
-      disPatch(fetchUserInfo())
-    }
-  }, [disPatch, user, status])
-
   const {
     setActiveFile,
     setFileTap,
@@ -49,40 +39,37 @@ const WebSocketComponent: React.FC = () => {
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
-    if (!email) return console.error("사용자 이메일 로드 X");
-    
+    const userEmail: string = "임시시"
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
       content: file.content
     }; 
-    const userTaps = emailToTabs(email!)
-    const newUserTaps = [...userTaps, newFile]
+    const userTaps = emailToTabs(userEmail);
+    const newUserTaps = [...userTaps, newFile];
     console.log("추가되는 탭", newUserTaps);
-    const userTapManager: TapManagerType | undefined = tapManager.find((tapManager) => tapManager.email === email)
+    const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === userEmail);
     console.log("유저의 탭 매니저", userTapManager);
     if (userTapManager) {
       const updatedTapManager = tapManager.map((tm) =>
-        tm.email === email
-          ? { ...tm, Tabs: [...tm.Tabs, newFile] } // newUserTaps[newUserTaps.length - 1] 대신 newFile 사용
+        tm.email === userEmail
+          ? { ...tm, Tabs: [...tm.Tabs, newFile] }
           : tm
       );
       setTapManager(updatedTapManager);
       console.log("기존 유저 탭에 추가: ", updatedTapManager);
     } else {
-      // 신규 유저 탭 생성: 새로운 항목을 추가
-    const newTapManagerEntry: TapManagerType = {
-      email,
-      activeTap: newFile.fileName,
-      Tabs: [newFile],
-    };
-    setTapManager([...tapManager, newTapManagerEntry]);
-    console.log("신규 유저 탭 생성: ", [...tapManager, newTapManagerEntry]);
+      const newTapManagerEntry: TapManagerType = {
+        email: userEmail,
+        activeTap: newFile.fileName,
+        Tabs: [newFile],
+      };
+      setTapManager([...tapManager, newTapManagerEntry]);
+      console.log("신규 유저 탭 생성: ", [...tapManager, newTapManagerEntry]);
       
     }
-    
-    
-    
+    console.log("전체 tapManager: ", tapManager);
+    console.log("해당 유저 tapManager: ", tapManager.find((tm) => tm.email === userEmail));
 
     setFileTap(prevFileTap => {
       if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
@@ -304,12 +291,6 @@ const WebSocketComponent: React.FC = () => {
   
     return parentNode.children.some(child => child.name === newName);
   }, [getNodeByPath]);
-// 사용자 이메일이 로드된 후에만 WebSocket 연결 시작
-useEffect(() => {
-  if (email) {
-    initialWebSocket();
-  }
-}, [email, initialWebSocket]);
   return (
     <div className="w-full">
       {treeData ? (
