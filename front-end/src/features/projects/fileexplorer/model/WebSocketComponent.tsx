@@ -6,7 +6,7 @@ import { FileNode, FileType, RefreshWebSocket, Payload, PayloadAction } from "..
 import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType, TapManagerType } from "../../../../shared/types/projectApiResponse";
+import { FileTabType, TabManagerType } from "../../../../shared/types/projectApiResponse";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../../app/redux/store";
 import { fetchUserInfo } from "../../../../app/redux/user";
@@ -19,64 +19,68 @@ interface TreeNode {
   parent: string;
 }
 
-const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { user, status } = useSelector((state: RootState) => state.user);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [treeData, setTreeData] = useState<FileNode | null>(null);
-  const [userEmail, setUserEmail] = useState<string>("");
-  const nodesMapRef = useRef(new Map<number, TreeNode>());
-  const clientRef = useRef<Client | null>(null);
-  const { groupId } = useParams();
-  const { projectId } = useParams();
-  const url = import.meta.env.VITE_APP_API_BASE_URL;
-  const access = localStorage.getItem("accessToken");
-  const {
-    tapManager,
-    setTapManager,
-    emailToTabs
-  } = useProjectEditor();
 
-  const addNewFile = (file: FileTapType) => {
-    const newFile = {
-      fileName: file.fileName,
-      fileRouteAndName: file.fileRouteAndName,
-      content: file.content
-    }; 
-    const userTaps = emailToTabs(userEmail);
-    const newUserTaps = [...userTaps, newFile];
-    console.log("추가되는 탭", newUserTaps);
-    const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === userEmail);
-    console.log("유저의 탭 매니저", userTapManager);
-    if (userTapManager) {
-      const updatedTapManager = tapManager.map((tm) =>
-        tm.email === userEmail
-          ? { ...tm, Tabs: [...tm.Tabs, newFile] }
-          : tm
-      );
-      setTapManager(updatedTapManager);
-      console.log("기존 유저 탭에 추가: ", updatedTapManager);
-    } else {
-      const newTapManagerEntry: TapManagerType = {
-        email: userEmail,
-        activeTap: newFile.fileName,
-        Tabs: [newFile],
+  const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { user, status } = useSelector((state: RootState) => state.user);
+    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [treeData, setTreeData] = useState<FileNode | null>(null);
+    const nodesMapRef = useRef(new Map<number, TreeNode>());
+    const clientRef = useRef<Client | null>(null);
+    const { groupId } = useParams();
+    const { projectId } = useParams();
+    const url = import.meta.env.VITE_APP_API_BASE_URL;
+    const access = localStorage.getItem("accessToken");
+    const {
+      tabManager,
+      setTabManager,
+    } = useProjectEditor();
+    
+    const addNewFile = (file: FileTabType) => {
+      const newFile = {
+        fileName: file.fileName,
+        fileRouteAndName: file.fileRouteAndName,
+        fileRoute: file.fileRoute,
+        content: file.content
       };
-      setTapManager([...tapManager, newTapManagerEntry]);
-      console.log("신규 유저 탭 생성: ", [...tapManager, newTapManagerEntry]);
+    
+      const email = localStorage.getItem("email");
+      if (!email) return console.error("이메일이 없습니다.");
+      ; 
+      console.log("전체 TMS: ", tabManager);
       
-    }
-    console.log("전체 tapManager: ", tapManager);
-    console.log("해당 유저 tapManager: ", tapManager.find((tm) => tm.email === userEmail));
-
-    // setFileTap(prevFileTap => {
-    //   if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
-    //     return prevFileTap;
-    //   }
-    //   setActiveFile(newFile.fileRouteAndName); 
-    //   return [...prevFileTap, newFile];
-    // });
-  };
+      const userTabManager: TabManagerType | undefined = tabManager.find((tm) => tm.email === email);
+      console.log("수정할 TM: ", userTabManager);
+      
+      if (userTabManager !== undefined) {
+        console.log("수정전 TM: ", userTabManager);
+        
+        // 이미 탭 매니저가 존재하면, 기존 탭에 새 파일 추가
+        const updatedTabManager = tabManager.map((tm) =>
+          tm.email === email
+            ? { ...tm, Tabs: [...tm.tabs, newFile] }
+            : tm
+        );
+        setTabManager(prev => {
+          const updated = [...prev, updatedTabManager]
+          return updated
+        });
+        // console.log("기존 유저 탭에 추가: ", updatedTapManager);
+      } else {
+        console.log("TM 신규생성");
+        
+        // 탭 매니저가 없으므로 신규 생성
+        const newTabManagerEntry: TabManagerType = {
+          email: email,
+          activeTab: newFile.fileRouteAndName,
+          tabs: [newFile],
+        };
+        
+        setTabManager(prev => {
+          const updated = [...prev, newTabManagerEntry];
+          return updated;
+        });
+      }}
 
   useEffect(() => {
     if (!user && status === 'idle') {
@@ -211,9 +215,10 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
               //   content: data.content,
               //   path: data.path
               // });
-              const openFile: FileTapType = {
+              const openFile: FileTabType = {
                 fileName:data.name,
                 fileRouteAndName:`${data.path}/${data.name}`,
+                fileRoute: data.path,
                 content: data.content
               }
 
@@ -254,7 +259,6 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   useEffect(() => {
     if (user && status === 'succeeded') {
       initialWebSocket();
-      setUserEmail(user.email);
     }
   }, [initialWebSocket, user, status]);
 
