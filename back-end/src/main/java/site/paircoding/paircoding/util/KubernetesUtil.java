@@ -3,6 +3,10 @@ package site.paircoding.paircoding.util;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.PersistentVolume;
+import io.fabric8.kubernetes.api.model.PersistentVolumeBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
@@ -20,6 +24,7 @@ import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import lombok.RequiredArgsConstructor;
@@ -100,14 +105,54 @@ public class KubernetesUtil {
   public void createPod(int groupId, String deploymentName, ProjectImage projectImage,
       Performance performance, int nodePort) {
     try {
+      // PersistentVolume (PV) 생성
+      PersistentVolume pv = new PersistentVolumeBuilder()
+          .withNewMetadata()
+          .withName(deploymentName + "-pv")
+          .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
+          .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
+          .addToLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
+          .endMetadata()
+          .withNewSpec()
+          .withCapacity(Map.of("storage", new Quantity(performance.getStorage())))
+          .withAccessModes("ReadWriteOnce") // 단일 노드에서 읽기/쓰기 가능
+          .withPersistentVolumeReclaimPolicy("Retain") // 삭제 시 데이터 유지
+          .withStorageClassName(deploymentName) // StorageClass 지정
+          .withNewHostPath()
+          .withPath("/mnt/data/" + deploymentName) // 노드의 실제 저장 경로
+          .withType("DirectoryOrCreate")
+          .endHostPath()
+          .endSpec()
+          .build();
 
-      // pv, pvc 생성 with label
+      // PV 생성
+      kubernetesClient.persistentVolumes().create(pv);
+
+      // PersistentVolumeClaim (PVC) 생성
+      PersistentVolumeClaim pvc = new PersistentVolumeClaimBuilder()
+          .withNewMetadata()
+          .withName(deploymentName + "-pvc")
+          .withNamespace(namespace)
+          .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
+          .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
+          .addToLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
+          .endMetadata()
+          .withNewSpec()
+          .withAccessModes("ReadWriteOnce") // 단일 노드에서 읽기/쓰기 가능
+          .withStorageClassName(deploymentName) // PV와 동일한 StorageClass
+          .withNewResources()
+          .addToRequests("storage", new Quantity(performance.getStorage())) // PVC 크기 설정
+          .endResources()
+          .endSpec()
+          .build();
+
+      // PVC 생성
+      kubernetesClient.persistentVolumeClaims().inNamespace(namespace).create(pvc);
 
       // 리소스 제한 설정
       ResourceRequirements resources = new ResourceRequirementsBuilder()
           .addToLimits("cpu", new Quantity(performance.getCpu()))
           .addToLimits("memory", new Quantity(performance.getMemory()))
-          .addToLimits("ephemeral-storage", new Quantity(performance.getStorage()))
           .build();
 
       // 컨테이너 정의
@@ -118,6 +163,10 @@ public class KubernetesUtil {
           .addNewPort()
           .withContainerPort(projectImage.getPort()) // 컨테이너 내부 포트
           .endPort()
+          .addNewVolumeMount()
+          .withName(deploymentName + "-volume")
+          .withMountPath("/data") // 컨테이너 내 마운트 경로
+          .endVolumeMount()
           .build();
 
       // Deployment 정의
@@ -139,6 +188,12 @@ public class KubernetesUtil {
           .endMetadata()
           .withNewSpec()
           .withContainers(container)
+          .addNewVolume()
+          .withName(deploymentName + "-volume")
+          .withNewPersistentVolumeClaim()
+          .withClaimName(deploymentName + "-pvc") // PVC 연결
+          .endPersistentVolumeClaim()
+          .endVolume()
           .endSpec()
           .endTemplate()
           .endSpec()
