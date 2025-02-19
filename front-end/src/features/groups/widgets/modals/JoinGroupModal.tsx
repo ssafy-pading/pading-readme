@@ -40,7 +40,7 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
       return {groupId:groupId, code:code}
 
     } catch (error) {
-      console.log("초대 링크 파싱 에러:", error);
+      console.error("초대 링크 파싱 에러:", error);
       return null;
     }
   };
@@ -56,7 +56,6 @@ const GroupJoinModal: React.FC<GroupJoinModalProps> = ({
 
     const inviteInfo: { groupId:number, code:string } | null = extractGroupId(inviteLink.trim());
     if (inviteInfo == null) return;
-    console.log(inviteInfo);
     if (!inviteInfo.groupId || !inviteInfo.code) {
       toast.error("유효한 초대 링크를 입력해주세요.");
       return;

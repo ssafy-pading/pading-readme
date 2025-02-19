@@ -216,7 +216,6 @@ const ProfileNavigationBar: React.FC = () => {
             const updated = prevUsers.map((user) =>
               user.id == data.userId ? { ...user, status: data.status } : user
             );
-            console.log("업데이트된 groupUsers:", updated);
             return updated;
           });
         });
