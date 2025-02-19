@@ -144,7 +144,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
     : unit;
   return (
     <div className="w-full pt-[15px] px-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
-      <h4 className="text-white font-semibold mb-2">{title} : <span className={`${data.length > 0 ? (data[data.length - 1].percentage < 80 ? 'text-[#15803D]' : 'text-[#FF0000]'): '0%' } `}>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</span> | {displayValue} / {displayMaxValue} {displayUnit}</h4>
+      <h4 className="text-white font-semibold mb-2">{title} : <span className={`${data.length > 0 ? (data[data.length - 1].percentage < 80 ? 'text-[#1EC84E]' : 'text-[#FF0000]'): '0%' } `}>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</span> | {displayValue} / {displayMaxValue} {displayUnit}</h4>
       <Chart options={chartOptions} series={series} type="area" height={height - 30} />
     </div>
   );
