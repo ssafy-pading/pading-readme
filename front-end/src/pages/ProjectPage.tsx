@@ -304,8 +304,8 @@ function ProjectPage() {
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
                 
-                {tabs !== undefined && tabs.length > 0 ? 
-                  (tabs.map((file) => (
+              {tabManager.find((tm) => tm.email === email) && tabManager.find((tm) => tm.email === email)!.tabs.length > 0 ? 
+                  (tabManager.find((tm) => tm.email === email)!.tabs.map((file) => (
                   <div
                     key={file.fileRouteAndName}
                     className="flex flex-row items-center"

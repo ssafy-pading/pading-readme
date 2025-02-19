@@ -37,45 +37,40 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       fileRoute: file.fileRoute,
       content: file.content
     };
-
+  
     const email = localStorage.getItem("email");
     if (!email) return console.error("이메일이 없습니다.");
-    ;
+  
     console.log("전체 TMS: ", tabManager);
-
-    const userTabManager: TabManagerType | undefined = tabManager.find((tm) => tm.email === email);
-    console.log("수정할 TM: ", userTabManager);
-
-    if (userTabManager !== undefined) {
-      console.log("수정전 TM: ", userTabManager);
-
-      // 이미 탭 매니저가 존재하면, 기존 탭에 새 파일 추가
-      const updatedTabManager = tabManager.map((tm) =>
-        tm.email === email
-          ? { ...tm, Tabs: [...tm.tabs, newFile] }
-          : tm
-      );
-      setTabManager(prev => {
-        const updated = [...prev, updatedTabManager]
-        return updated
-      });
-      // console.log("기존 유저 탭에 추가: ", updatedTapManager);
-    } else {
-      console.log("TM 신규생성");
-
-      // 탭 매니저가 없으므로 신규 생성
-      const newTabManagerEntry: TabManagerType = {
-        email: email,
-        activeTab: newFile.fileRouteAndName,
-        tabs: [newFile],
-      };
-
-      setTabManager(prev => {
-        const updated = [...prev, newTabManagerEntry];
-        return updated;
-      });
-    }
-  }
+  
+    setTabManager((prev) => {
+      const userTabManager = prev.find((tm) => tm.email === email);
+  
+      if (userTabManager) {
+        console.log("기존 TM 수정 전: ", userTabManager);
+  
+        // 기존 사용자 -> tabs 배열에 새 파일 추가
+        return prev.map((tm) =>
+          tm.email === email
+            ? { ...tm, tabs: [...tm.tabs, newFile], activeTab: newFile.fileRouteAndName }
+            : tm
+        );
+      } else {
+        console.log("TM 신규 생성");
+  
+        // 새로운 사용자 -> 새로운 TabManager 객체 생성
+        return [
+          ...prev,
+          {
+            email: email,
+            activeTab: newFile.fileRouteAndName,
+            tabs: [newFile],
+          },
+        ];
+      }
+    });
+  };
+  
 
   const idCounter = useRef(1);
   const generateUniqueId = () => {
