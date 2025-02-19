@@ -90,17 +90,31 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { activeFile, setActiveFile, fileTap, tapManager, user, deleteFile } =
-    useProjectEditor();
+  const { tapManager, setTapManager, emailToTabs, user, deleteFile } = useProjectEditor();
   const email = user?.email
   console.log("email: ", email);
   
+  // 한 명의 탭 매니저
   const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === email)
   console.log("userTapManager: ", userTapManager);
   
+  // 한 명의 탭탭
   const taps: FileTapType[] | undefined = userTapManager?.Tabs
   console.log("taps: ", taps);
   
+  // 전역 active 파일은 context 내 userTapManager의 activeTap로 관리
+  const activeFile: string = userTapManager?.activeTap || "";
+
+  // 파일 탭 클릭 시 activeTap 업데이트 함수
+  const handleTabClick = (fileRouteAndName: string) => {
+    if (!email) return;
+    setTapManager((prev) =>
+      prev.map((tm) =>
+        tm.email === email ? { ...tm, activeTap: fileRouteAndName } : tm
+      )
+    );
+  };
+
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
@@ -301,11 +315,11 @@ function ProjectPage() {
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
-                        currentActive === file.fileRouteAndName
+                        activeFile === file.fileRouteAndName
                           ? "text-white"
                           : "text-[#858595] hover:text-white"
                       }`}
-                      onClick={() => setActiveFile(file.fileRouteAndName)}
+                      onClick={() => handleTabClick(file.fileRouteAndName)}
                     >
                       {file.fileName}
                     </div>
@@ -330,7 +344,7 @@ function ProjectPage() {
                     key={file.fileRouteAndName}
                     style={{
                       display:
-                        currentActive === file.fileRouteAndName ? "block" : "none",
+                        activeFile === file.fileRouteAndName ? "block" : "none",
                     }}
                     className="w-full h-full"
                   >

@@ -19,10 +19,12 @@ interface TreeNode {
   parent: string;
 }
 
-const WebSocketComponent: React.FC = () => {
-  const disPatch = useDispatch<AppDispatch>();
+const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, status } = useSelector((state: RootState) => state.user);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [treeData, setTreeData] = useState<FileNode | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const nodesMapRef = useRef(new Map<number, TreeNode>());
   const clientRef = useRef<Client | null>(null);
   const { groupId } = useParams();
@@ -30,16 +32,12 @@ const WebSocketComponent: React.FC = () => {
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
   const {
-    setActiveFile,
-    setFileTap,
-    fileTap,
     tapManager,
     setTapManager,
     emailToTabs
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
-    const userEmail: string = "임시시"
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
@@ -71,14 +69,20 @@ const WebSocketComponent: React.FC = () => {
     console.log("전체 tapManager: ", tapManager);
     console.log("해당 유저 tapManager: ", tapManager.find((tm) => tm.email === userEmail));
 
-    setFileTap(prevFileTap => {
-      if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
-        return prevFileTap;
-      }
-      setActiveFile(newFile.fileRouteAndName); 
-      return [...prevFileTap, newFile];
-    });
+    // setFileTap(prevFileTap => {
+    //   if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
+    //     return prevFileTap;
+    //   }
+    //   setActiveFile(newFile.fileRouteAndName); 
+    //   return [...prevFileTap, newFile];
+    // });
   };
+
+  useEffect(() => {
+    if (!user && status === 'idle') {
+      dispatch(fetchUserInfo());
+    }
+  }, [dispatch, user, status]);
   
   const idCounter = useRef(1);
   const generateUniqueId = () => {
@@ -127,7 +131,7 @@ const WebSocketComponent: React.FC = () => {
       // console.log("Updating nodes map with data:", data);
       const parentNode = getNodeByPath(data.path);
       if (!parentNode) {
-        console.error("Parent node not found for path:", data.path);
+        // console.error("Parent node not found for path:", data.path);
         return;
       }
       parentNode.children.forEach((child) => {
@@ -180,6 +184,9 @@ const WebSocketComponent: React.FC = () => {
   }, [buildTreeFromMap]);
 
   const initialWebSocket = useCallback(() => {
+    if (!user || status !== 'succeeded') {
+      return;
+    }
     const socket = new SockJS(`${url}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
@@ -190,7 +197,7 @@ const WebSocketComponent: React.FC = () => {
         Authorization: `Bearer ${access}`,
       },
       onConnect: () => {
-        // console.log("WebSocket connected");
+        console.log("WebSocket connected", user.email);
         clientRef.current = client;
         const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
         client.subscribe(topic, (message) => {
@@ -238,11 +245,18 @@ const WebSocketComponent: React.FC = () => {
       },
     });
     client.activate();
-  }, [groupId, projectId, access, sendActionRequest, updateNodesMapWithList]);
+  }, [groupId, projectId, access, sendActionRequest, updateNodesMapWithList, user, status]);
 
   const handleNodeSelect = useCallback((nodeId: number) => {
     setSelectedId(nodeId);
   }, []);
+
+  useEffect(() => {
+    if (user && status === 'succeeded') {
+      initialWebSocket();
+      setUserEmail(user.email);
+    }
+  }, [initialWebSocket, user, status]);
 
   useEffect(() => {
     let isSubscribed = true;

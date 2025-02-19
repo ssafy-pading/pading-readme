@@ -6,10 +6,6 @@ import {
 } from "../shared/types/projectApiResponse";
 
 interface ProjectEditorContextType {
-  activeFile: string | null; // fileRouteAndName 으로 관리
-  setActiveFile: (activeFile: string | null) => void;
-  fileTap: FileTapType[];
-  setFileTap: React.Dispatch<React.SetStateAction<FileTapType[]>>;
   user: any; // 추후에 수정 예정정
   deleteFile: (fileRouteAndName: string) => void;
   saveFile: (file: FileTapType) => void;
@@ -23,8 +19,6 @@ const ProjectEditorContext = createContext<
 >(undefined);
 
 export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
-  const [activeFile, setActiveFile] = useState<string | null>(null);
-  const [fileTap, setFileTap] = useState<FileTapType[]>([])
   const [tapManager, setTapManager] = useState<TapManagerType[]>([{
     email: "shinheewon0107@gmail.com", 
     activeTap: "file2Route", 
@@ -42,9 +36,17 @@ export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => 
     ]
   },
     {
-      email: "email2", 
-      activeTap: "activeTap2", 
-      Tabs: []
+      email: "shinpading@gmail.com", 
+      activeTap: "shinpading1", 
+      Tabs: [{fileName: "shinpading1",
+        fileRouteAndName: "shinpading1",
+        content: "shinpading1"},
+        {fileName: "shinpading2",
+          fileRouteAndName: "shinpading2",
+          content: "shinpading2"},
+          {fileName: "shinpading3",
+            fileRouteAndName: "shinpading3",
+            content: "shinpading3"}]
     }])
 
   // 파일 추가
@@ -55,25 +57,28 @@ export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => 
       return userTapInformation ? userTapInformation.Tabs : []
   }
 
+// 파일 삭제 함수: 현재 사용자의 탭 배열에서 특정 파일을 제거하고,
+  // 만약 삭제한 파일이 activeTap이라면 첫 번째 파일로 activeTap을 업데이트하거나 탭이 없으면 null로 설정합니다.
   const deleteFile = (deleteFileRouteAndName: string) => {
-// 삭제할 파일을 제외한 새 배열 생성
-const newFileTap = fileTap.filter(
-  (file) => file.fileRouteAndName !== deleteFileRouteAndName
-);
-setFileTap(newFileTap);
+    const user = useSelector((state: RootState) => state.user).user;
+    const userEmail: string | undefined = user?.email;
+    if (!userEmail) return;
 
-// 남은 탭이 없으면 활성 파일을 null로 설정
-if (newFileTap.length === 0) {
-  setActiveFile(null);
-  return;
-}
+    setTapManager((prev) =>
+      prev.map((tm) => {
+        if (tm.email !== userEmail) return tm;
 
-// 삭제된 파일이 현재 활성 파일이라면, 새 배열의 첫 번째 파일을 활성 파일로 설정
-if (activeFile === deleteFileRouteAndName) {
-  setActiveFile(newFileTap[0].fileRouteAndName);
-}
-// 삭제된 파일이 활성 파일이 아니라면 그대로 유지
-};
+        const newTabs = tm.Tabs.filter(
+          (file) => file.fileRouteAndName !== deleteFileRouteAndName
+        );
+        let newActiveTap = tm.activeTap;
+        if (tm.activeTap === deleteFileRouteAndName) {
+          newActiveTap = newTabs.length > 0 ? newTabs[0].fileRouteAndName : null;
+        }
+        return { ...tm, Tabs: newTabs, activeTap: newActiveTap };
+      })
+    );
+  };
   const saveFile = (file: FileTapType) => {
     // 파일 저장 로직 
     // 파일 저장 로직 
@@ -84,10 +89,6 @@ if (activeFile === deleteFileRouteAndName) {
     <ProjectEditorContext.Provider
       value={{
         user,
-        activeFile,
-        setActiveFile,
-        fileTap,
-        setFileTap,
         tapManager,
         setTapManager,
       
