@@ -132,9 +132,9 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
   const displayMaxValue = lastDataPoint 
   ? title === 'Memory Usage'
     ? lastDataPoint.value > 1000 
-      ? (maxValue).toFixed(2)
-      : (maxValue * 1024).toFixed(2)
-    : (maxValue * 1000).toFixed(2)
+      ? maxValue
+      : maxValue * 1024
+    : maxValue * 1000
   : '0.00';
 
   const displayUnit = lastDataPoint
@@ -144,12 +144,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
     : unit;
   return (
     <div className="w-full pt-[15px] px-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
-      <h4 className="text-white font-semibold mb-2">{title}</h4>
-      <div className="absolute top-[40px] left-2 text-white text-sm">
-        <p>{displayValue} / {displayMaxValue} {displayUnit}</p>
-        <p>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</p>
-      </div>
-      <Chart options={chartOptions} series={series} type="area" height={height - 50} />
+      <h4 className="text-white font-semibold mb-2">{title} : <span className={`${data.length > 0 ? (data[data.length - 1].percentage < 80 ? 'text-[#15803D]' : 'text-[#FF0000]'): '0%' } `}>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</span> | {displayValue} / {displayMaxValue} {displayUnit}</h4>
+      <Chart options={chartOptions} series={series} type="area" height={height - 30} />
     </div>
   );
 };
