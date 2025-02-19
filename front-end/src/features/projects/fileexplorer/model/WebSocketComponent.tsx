@@ -7,9 +7,6 @@ import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 import { FileTabType, TabManagerType } from "../../../../shared/types/projectApiResponse";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../../app/redux/store";
-import { fetchUserInfo } from "../../../../app/redux/user";
 
 interface TreeNode {
   id: number;
@@ -19,75 +16,67 @@ interface TreeNode {
   parent: string;
 }
 
+const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [treeData, setTreeData] = useState<FileNode | null>(null);
+  const nodesMapRef = useRef(new Map<number, TreeNode>());
+  const clientRef = useRef<Client | null>(null);
+  const { groupId } = useParams();
+  const { projectId } = useParams();
+  const url = import.meta.env.VITE_APP_API_BASE_URL;
+  const access = localStorage.getItem("accessToken");
+  const {
+    tabManager,
+    setTabManager,
+  } = useProjectEditor();
 
-  const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
-    const dispatch = useDispatch<AppDispatch>();
-    const { user, status } = useSelector((state: RootState) => state.user);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
-    const [treeData, setTreeData] = useState<FileNode | null>(null);
-    const nodesMapRef = useRef(new Map<number, TreeNode>());
-    const clientRef = useRef<Client | null>(null);
-    const { groupId } = useParams();
-    const { projectId } = useParams();
-    const url = import.meta.env.VITE_APP_API_BASE_URL;
-    const access = localStorage.getItem("accessToken");
-    const {
-      tabManager,
-      setTabManager,
-    } = useProjectEditor();
-    
-    const addNewFile = (file: FileTabType) => {
-      const newFile = {
-        fileName: file.fileName,
-        fileRouteAndName: file.fileRouteAndName,
-        fileRoute: file.fileRoute,
-        content: file.content
+  const addNewFile = (file: FileTabType) => {
+    const newFile = {
+      fileName: file.fileName,
+      fileRouteAndName: file.fileRouteAndName,
+      fileRoute: file.fileRoute,
+      content: file.content
+    };
+
+    const email = localStorage.getItem("email");
+    if (!email) return console.error("이메일이 없습니다.");
+    ;
+    console.log("전체 TMS: ", tabManager);
+
+    const userTabManager: TabManagerType | undefined = tabManager.find((tm) => tm.email === email);
+    console.log("수정할 TM: ", userTabManager);
+
+    if (userTabManager !== undefined) {
+      console.log("수정전 TM: ", userTabManager);
+
+      // 이미 탭 매니저가 존재하면, 기존 탭에 새 파일 추가
+      const updatedTabManager = tabManager.map((tm) =>
+        tm.email === email
+          ? { ...tm, Tabs: [...tm.tabs, newFile] }
+          : tm
+      );
+      setTabManager(prev => {
+        const updated = [...prev, updatedTabManager]
+        return updated
+      });
+      // console.log("기존 유저 탭에 추가: ", updatedTapManager);
+    } else {
+      console.log("TM 신규생성");
+
+      // 탭 매니저가 없으므로 신규 생성
+      const newTabManagerEntry: TabManagerType = {
+        email: email,
+        activeTab: newFile.fileRouteAndName,
+        tabs: [newFile],
       };
-    
-      const email = localStorage.getItem("email");
-      if (!email) return console.error("이메일이 없습니다.");
-      ; 
-      console.log("전체 TMS: ", tabManager);
-      
-      const userTabManager: TabManagerType | undefined = tabManager.find((tm) => tm.email === email);
-      console.log("수정할 TM: ", userTabManager);
-      
-      if (userTabManager !== undefined) {
-        console.log("수정전 TM: ", userTabManager);
-        
-        // 이미 탭 매니저가 존재하면, 기존 탭에 새 파일 추가
-        const updatedTabManager = tabManager.map((tm) =>
-          tm.email === email
-            ? { ...tm, Tabs: [...tm.tabs, newFile] }
-            : tm
-        );
-        setTabManager(prev => {
-          const updated = [...prev, updatedTabManager]
-          return updated
-        });
-        // console.log("기존 유저 탭에 추가: ", updatedTapManager);
-      } else {
-        console.log("TM 신규생성");
-        
-        // 탭 매니저가 없으므로 신규 생성
-        const newTabManagerEntry: TabManagerType = {
-          email: email,
-          activeTab: newFile.fileRouteAndName,
-          tabs: [newFile],
-        };
-        
-        setTabManager(prev => {
-          const updated = [...prev, newTabManagerEntry];
-          return updated;
-        });
-      }}
 
-  useEffect(() => {
-    if (!user && status === 'idle') {
-      dispatch(fetchUserInfo());
+      setTabManager(prev => {
+        const updated = [...prev, newTabManagerEntry];
+        return updated;
+      });
     }
-  }, [dispatch, user, status]);
-  
+  }
+
   const idCounter = useRef(1);
   const generateUniqueId = () => {
     idCounter.current += 1;
@@ -98,6 +87,7 @@ interface TreeNode {
     const map = nodesMapRef.current;
     const rootNode = map.get(1);
     if (!rootNode) return null;
+
     const buildNode = (node: TreeNode): FileNode => ({
       id: node.id,
       name: node.name,
@@ -122,25 +112,43 @@ interface TreeNode {
     });
   }, []);
 
+  const sendActionRequest = useCallback(
+    (action: PayloadAction, payload: Payload) => {
+      if (!clientRef.current?.connected) {
+        console.error("STOMP client is not connected");
+        return;
+      }
+      const destination = `/pub/groups/${groupId}/projects/${projectId}/directory/${action.toLowerCase()}`;
+      clientRef.current.publish({
+        destination,
+        headers: { Authorization: `Bearer ${access}` },
+        body: JSON.stringify({ action, ...payload }),
+      });
+    },
+    [groupId, projectId, access]
+  );
+
   const updateNodesMapWithList = useCallback(
     (data: {
       action: string;
       path: string;
       children: { type: string; name: string }[];
     }) => {
-      if (data.action !== 'LIST') { // create, delete, rename 요청 완료 후 재렌더링
+      if (data.action !== 'LIST') {
         sendActionRequest('LIST', { path: data.path });
         return;
       }
-      // console.log("Updating nodes map with data:", data);
+
       const parentNode = getNodeByPath(data.path);
       if (!parentNode) {
-        // console.error("Parent node not found for path:", data.path);
+        console.error("Parent node not found for path:", data.path);
         return;
       }
+
       parentNode.children.forEach((child) => {
         nodesMapRef.current.delete(child.id);
       });
+
       parentNode.children = data.children.map((child) => {
         const newNode: TreeNode = {
           id: generateUniqueId(),
@@ -152,139 +160,55 @@ interface TreeNode {
         nodesMapRef.current.set(newNode.id, newNode);
         return newNode;
       });
-      // console.log("Updated nodes map:", Array.from(nodesMapRef.current.entries()));
+
       setTreeData(buildTreeFromMap());
-    },
-    [buildTreeFromMap, getNodeByPath]
+    }, [buildTreeFromMap, getNodeByPath, sendActionRequest]
   );
 
-  const sendActionRequest = useCallback(
-    (action: PayloadAction, payload: Payload) => {
-      if (!clientRef.current || !clientRef.current.connected) {
-        console.error("STOMP client is not connected");
-        return;
-      }
-      const destination = `/pub/groups/${groupId}/projects/${projectId}/directory/${action.toLowerCase()}`;
-      // console.log("Sending request:", { destination, action, payload });
-      clientRef.current.publish({
-        destination,
-        headers: { Authorization: `Bearer ${access}` },
-        body: JSON.stringify({ action, ...payload }),
-      });
-    },
-    [groupId, projectId, access]
-  );
-
-  useEffect(() => {
-    const initialNode: TreeNode = {
-      id: 1,
-      name: "/",
-      type: "DIRECTORY",
-      children: [],
-      parent: "",
-    };
-    nodesMapRef.current.set(1, initialNode);
-    setTreeData(buildTreeFromMap());
-  }, [buildTreeFromMap]);
-
-  const initialWebSocket = useCallback(() => {
-    if (!user || status !== 'succeeded') {
-      return;
-    }
+  const initializeWebSocket = useCallback(() => {
     const socket = new SockJS(`${url}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
-      connectHeaders: {
-        Authorization: `Bearer ${access}`,
-      },
+      connectHeaders: { Authorization: `Bearer ${access}` },
       onConnect: () => {
-        console.log("WebSocket connected", user.email);
         clientRef.current = client;
         const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
+
         client.subscribe(topic, (message) => {
           try {
             const data = JSON.parse(message.body);
-            // console.log("Received message:", data);
             if (data.action === "CONTENT") {
-              // console.log(`Received ${data.action} message:`, {
-              //   action: data.action,
-              //   fileName: data.name,
-              //   content: data.content,
-              //   path: data.path
-              // });
-              const openFile: FileTabType = {
-                fileName:data.name,
-                fileRouteAndName:`${data.path}/${data.name}`,
+              addNewFile({
+                fileName: data.name,
+                fileRouteAndName: `${data.path}/${data.name}`,
                 fileRoute: data.path,
                 content: data.content
-              }
-
-              addNewFile(openFile);
-            } else if(data.action === "SAVE"){
-              // console.log(`Received ${data.action} message:`, {
-              //   action: data.action,
-              //   fileName: data.name,
-              //   contentLength: data.content,
-              //   path: data.path
-              // });
-            } else {
+              });
+            } else if (data.action !== "SAVE") {
               updateNodesMapWithList(data);
             }
           } catch (error) {
             console.error("Error processing message:", error);
           }
         });
-        setTimeout(() => {
-          sendActionRequest("LIST", { path: "/" });
-        }, 500);
+        sendActionRequest("LIST", { path: "/" });
       },
-      onStompError: (frame) => {
-        console.error("STOMP error:", frame.headers["message"]);
-      },
+      onStompError: (frame) => console.error("STOMP error:", frame.headers["message"]),
       onWebSocketClose: () => {
         console.warn("WebSocket connection closed");
         clientRef.current = null;
       },
     });
+
     client.activate();
-  }, [groupId, projectId, access, sendActionRequest, updateNodesMapWithList, user, status]);
+    return client;
+  }, [access, groupId, projectId]);
 
-  const handleNodeSelect = useCallback((nodeId: number) => {
-    setSelectedId(nodeId);
-  }, []);
-
+  // 탐색기 데이터 초기화 
   useEffect(() => {
-    if (user && status === 'succeeded') {
-      initialWebSocket();
-    }
-  }, [initialWebSocket, user, status]);
-
-  useEffect(() => {
-    let isSubscribed = true;
-    
-    const cleanup = () => {
-      isSubscribed = false;
-      clientRef.current?.deactivate();
-      nodesMapRef.current.clear();
-    };
-  
-    if (isSubscribed) {
-      initialWebSocket();
-    }
-  
-    return cleanup;
-  }, [clientRef]);
-
-  const refreshWebSocket = () => {
-    if (clientRef.current && clientRef.current.connected) {
-      clientRef.current.deactivate();
-    }
-  
-    nodesMapRef.current.clear();
-  
     const initialNode: TreeNode = {
       id: 1,
       name: "/",
@@ -293,22 +217,49 @@ interface TreeNode {
       parent: "",
     };
     nodesMapRef.current.set(1, initialNode);
-    
     setTreeData(buildTreeFromMap());
-  
-    initialWebSocket();
-  };
-  
+    // setSendActionRequest(sendActionRequest);
+
+    const client = initializeWebSocket();
+
+    return () => {
+      client.deactivate();
+      nodesMapRef.current.clear();
+    };
+  }, [buildTreeFromMap, initializeWebSocket]); // setSendActionRequest, 
+
+  // RefreshWebSocket implementation
+  const refreshWebSocket = useCallback(() => {
+    if (clientRef.current?.connected) {
+      clientRef.current.deactivate();
+    }
+
+    nodesMapRef.current.clear();
+    nodesMapRef.current.set(1, {
+      id: 1,
+      name: "/",
+      type: "DIRECTORY",
+      children: [],
+      parent: "",
+    });
+
+    setTreeData(buildTreeFromMap());
+    initializeWebSocket();
+  }, [buildTreeFromMap, initializeWebSocket]);
+
   useImperativeHandle(ref, () => ({
-    refreshWebSocket,
+    refreshWebSocket
   }));
+
+  const handleNodeSelect = useCallback((nodeId: number) => {
+    setSelectedId(nodeId);
+  }, []);
 
   const checkDuplicateName = useCallback((path: string, newName: string): boolean => {
     const parentNode = getNodeByPath(path);
-    if (!parentNode) return false;
-  
-    return parentNode.children.some(child => child.name === newName);
-  }, [getNodeByPath]);
+    return parentNode ? parentNode.children.some(child => child.name === newName) : false;
+  }, []);
+
   return (
     <div className="w-full">
       {treeData ? (
