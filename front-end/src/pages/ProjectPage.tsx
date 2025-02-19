@@ -3,10 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
-import {
-  ProjectEditorProvider,
-  useProjectEditor,
-} from "../context/ProjectEditorContext"; // useContext
+import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
+
 
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
