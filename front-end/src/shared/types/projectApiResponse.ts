@@ -123,3 +123,10 @@ export type GetProjectMemberStatusResponse = {
   role: string;
   status: boolean | null;
 }[];
+
+// 탭 매니징 타입
+export type TapManagerType = {
+  email: string;
+  activeTap: string | null;
+  Tabs: FileTapType[];
+}

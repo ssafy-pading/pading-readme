@@ -2,7 +2,7 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../app/redux/store";
 import {
-  FileTapType,
+  FileTapType, TapManagerType
 } from "../shared/types/projectApiResponse";
 
 interface ProjectEditorContextType {
@@ -13,6 +13,9 @@ interface ProjectEditorContextType {
   user: any; // 추후에 수정 예정정
   deleteFile: (fileRouteAndName: string) => void;
   saveFile: (file: FileTapType) => void;
+  tapManager: TapManagerType[];
+  setTapManager: (tapManager: TapManagerType[]) => void;
+  emailToTabs: (email: string) => FileTapType[]
 }
 
 const ProjectEditorContext = createContext<
@@ -22,6 +25,16 @@ const ProjectEditorContext = createContext<
 export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => {
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [fileTap, setFileTap] = useState<FileTapType[]>([])
+  const [tapManager, setTapManager] = useState<TapManagerType[]>([])
+
+  // 파일 추가
+  const emailToTabs = (email: string): FileTapType[] => {
+    // 파일 변경하는 유저 정보(ex, email, activeTap, Tabs)
+    const userTapInformation = tapManager.find((info) => info.email === email)
+    
+      return userTapInformation ? userTapInformation.Tabs : []
+  }
+
   const deleteFile = (deleteFileRouteAndName: string) => {
 // 삭제할 파일을 제외한 새 배열 생성
 const newFileTap = fileTap.filter(
@@ -55,8 +68,12 @@ if (activeFile === deleteFileRouteAndName) {
         setActiveFile,
         fileTap,
         setFileTap,
+        tapManager,
+        setTapManager,
+      
         saveFile,
-        deleteFile
+        deleteFile,
+        emailToTabs
       }}
     >
       {children}

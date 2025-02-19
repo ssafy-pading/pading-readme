@@ -6,7 +6,10 @@ import { FileNode, FileType } from "../type/directoryTypes";
 import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
+import { FileTapType, TapManagerType } from "../../../../shared/types/projectApiResponse";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../app/redux/store";
+import { fetchUserInfo } from "../../../../app/redux/user";
 
 interface TreeNode {
   id: number;
@@ -17,29 +20,70 @@ interface TreeNode {
 }
 
 const WebSocketComponent: React.FC = () => {
+  const disPatch = useDispatch<AppDispatch>();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [treeData, setTreeData] = useState<FileNode | null>(null);
   const nodesMapRef = useRef(new Map<number, TreeNode>());
   const clientRef = useRef<Client | null>(null);
-
   const { groupId } = useParams();
   const { projectId } = useParams();
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
+  
+  const { user, status } = useSelector((state: RootState) => state.user)
+  const email = user?.email
+  
+  useEffect (() => {
+    if (!user && status === "idle") {
+      disPatch(fetchUserInfo())
+    }
+  }, [disPatch, user, status])
 
   const {
     setActiveFile,
     setFileTap,
     fileTap,
+    tapManager,
+    setTapManager,
+    emailToTabs
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
+    if (!email) return console.error("사용자 이메일 로드 X");
+    
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
       content: file.content
     }; 
-  
+    const userTaps = emailToTabs(email!)
+    const newUserTaps = [...userTaps, newFile]
+    console.log("추가되는 탭", newUserTaps);
+    const userTapManager: TapManagerType | undefined = tapManager.find((tapManager) => tapManager.email === email)
+    console.log("유저의 탭 매니저", userTapManager);
+    if (userTapManager) {
+      const updatedTapManager = tapManager.map((tm) =>
+        tm.email === email
+          ? { ...tm, Tabs: [...tm.Tabs, newFile] } // newUserTaps[newUserTaps.length - 1] 대신 newFile 사용
+          : tm
+      );
+      setTapManager(updatedTapManager);
+      console.log("기존 유저 탭에 추가: ", updatedTapManager);
+    } else {
+      // 신규 유저 탭 생성: 새로운 항목을 추가
+    const newTapManagerEntry: TapManagerType = {
+      email,
+      activeTap: newFile.fileName,
+      Tabs: [newFile],
+    };
+    setTapManager([...tapManager, newTapManagerEntry]);
+    console.log("신규 유저 탭 생성: ", [...tapManager, newTapManagerEntry]);
+      
+    }
+    
+    
+    
+
     setFileTap(prevFileTap => {
       if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
         return prevFileTap;
@@ -239,7 +283,12 @@ const WebSocketComponent: React.FC = () => {
   
     return parentNode.children.some(child => child.name === newName);
   }, [getNodeByPath]);
-
+// 사용자 이메일이 로드된 후에만 WebSocket 연결 시작
+useEffect(() => {
+  if (email) {
+    initialWebSocket();
+  }
+}, [email, initialWebSocket]);
   return (
     <div className="w-full">
       <div>
