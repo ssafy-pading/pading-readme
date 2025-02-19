@@ -4,7 +4,6 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.ResourceRequirementsBuilder;
@@ -12,13 +11,15 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
-import io.fabric8.kubernetes.client.dsl.PodResource;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import lombok.RequiredArgsConstructor;
@@ -89,14 +90,15 @@ public class KubernetesUtil {
     throw new RuntimeException("지정 범위 내 NodePort 전부 사용중");
   }
 
-  public boolean isExists(String podName) {
-    PodResource podResource = kubernetesClient.pods().inNamespace(namespace).withName(podName);
-    return podResource.get() != null;
+  public boolean isExists(String deploymentName) {
+    return kubernetesClient.apps().deployments()
+        .inNamespace(namespace)
+        .withName(deploymentName)
+        .get() != null;
   }
 
-  public void createPod(int groupId, String podName, ProjectImage projectImage,
-      Performance performance,
-      int nodePort) {
+  public void createPod(int groupId, String deploymentName, ProjectImage projectImage,
+      Performance performance, int nodePort) {
     try {
 
       // pv, pvc 생성 with label
@@ -110,7 +112,7 @@ public class KubernetesUtil {
 
       // 컨테이너 정의
       Container container = new ContainerBuilder()
-          .withName(podName)
+          .withName(deploymentName)
           .withImage(imageRegistry + ":" + projectImage.getTag())
           .withResources(resources)
           .addNewPort()
@@ -118,31 +120,41 @@ public class KubernetesUtil {
           .endPort()
           .build();
 
-      // 파드 정의
-      Pod pod = new PodBuilder()
+      // Deployment 정의
+      Deployment deployment = new DeploymentBuilder()
           .withNewMetadata()
-          .withName(podName)
+          .withName(deploymentName)
           .withNamespace(namespace)
           .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
           .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
-          .addToLabels(LabelKey.POD_NAME.getKey(), podName)
+          .addToLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
+          .endMetadata()
+          .withNewSpec()
+          .withNewSelector()
+          .addToMatchLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName) // Selector 설정
+          .endSelector()
+          .withNewTemplate()
+          .withNewMetadata()
+          .addToLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
           .endMetadata()
           .withNewSpec()
           .withContainers(container)
           .endSpec()
+          .endTemplate()
+          .endSpec()
           .build();
 
-      // 파드 생성
-      kubernetesClient.pods().inNamespace(namespace).create(pod);
+      // Deployment 생성
+      kubernetesClient.apps().deployments().inNamespace(namespace).create(deployment);
 
       // NodePort 방식의 서비스 생성
       Service service = new ServiceBuilder()
           .withNewMetadata()
-          .withName(podName + "-service")
+          .withName(deploymentName + "-service")
           .withNamespace(namespace)
           .addToLabels(LabelKey.ENV.getKey(), ENV_LABEL)
           .addToLabels(LabelKey.GROUP_ID.getKey(), String.valueOf(groupId))
-          .addToLabels(LabelKey.POD_NAME.getKey(), podName)
+          .addToLabels(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
           .endMetadata()
           .withNewSpec()
           .withType("NodePort")
@@ -152,7 +164,7 @@ public class KubernetesUtil {
           .withTargetPort(new IntOrString(projectImage.getPort())) // 컨테이너 내부 포트
           .withNodePort(nodePort) // NodePort 지정 (30000~32767 범위에서 지정 가능)
           .endPort()
-          .addToSelector(LabelKey.POD_NAME.getKey(), podName) // 파드와 서비스 매칭
+          .addToSelector(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName) // 파드와 서비스 매칭
           .endSpec()
           .build();
 
@@ -168,7 +180,12 @@ public class KubernetesUtil {
   public void deletePod(LabelKey labelKey, String labelValue) {
     try {
 
-      kubernetesClient.pods()
+//      kubernetesClient.pods()
+//          .inNamespace(namespace)
+//          .withLabel(labelKey.getKey(), labelValue)
+//          .delete();
+
+      kubernetesClient.apps().deployments()
           .inNamespace(namespace)
           .withLabel(labelKey.getKey(), labelValue)
           .delete();
@@ -183,10 +200,23 @@ public class KubernetesUtil {
     }
   }
 
-  public String executeCommand(String podName, String command) {
+  public String executeCommand(String deploymentName, String command) {
     CountDownLatch latch = new CountDownLatch(1); // 실행 완료를 기다릴 latch
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+
+    // Deployment에서 Pod 목록 가져오기
+    List<Pod> pods = kubernetesClient.pods()
+        .inNamespace(namespace)
+        .withLabel(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
+        .list()
+        .getItems();
+
+    if (pods.isEmpty()) {
+      throw new RuntimeException("해당 Deployment에서 실행 중인 Pod가 없습니다.");
+    }
+
+    String podName = pods.get(0).getMetadata().getName(); // 첫 번째 Pod 선택
 
     try (ExecWatch watch = kubernetesClient.pods()
         .inNamespace(namespace)

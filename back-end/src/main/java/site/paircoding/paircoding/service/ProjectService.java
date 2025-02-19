@@ -109,10 +109,10 @@ public class ProjectService {
         .orElseThrow(() -> new BadRequestException("Performance not found"));
 
     // 고유한 파드명 생성
-    String podName;
+    String deploymentName;
     do {
-      podName = request.getName() + "-" + RandomUtil.generateRandomString();
-    } while (kubernetesUtil.isExists(podName));
+      deploymentName = request.getName() + "-" + RandomUtil.generateRandomString();
+    } while (kubernetesUtil.isExists(deploymentName));
 
     // 프로젝트 생성
     Project project = Project.builder()
@@ -121,7 +121,7 @@ public class ProjectService {
         .runCommand(projectImage.getDefaultRunCommand())
         .performance(performance)
         .name(request.getName())
-        .containerId(podName)
+        .containerId(deploymentName)
         .build();
 
     // 유효한 유저들을 필터링 (해당 유저가 그룹에 속한 유저인지 확인)
@@ -145,7 +145,7 @@ public class ProjectService {
     project.setNodePort(kubernetesUtil.getAvailableNodePort());
 
     // 프로젝트 생성 확인 후 파드 생성 요청
-    kubernetesUtil.createPod(group.getId(), podName, projectImage, performance,
+    kubernetesUtil.createPod(group.getId(), deploymentName, projectImage, performance,
         project.getNodePort());
 
     // 서브도메인 설정 - nginx config 파일 생성 및 reload
@@ -271,7 +271,7 @@ public class ProjectService {
     projectRepository.delete(project);
 
     // pod 삭제
-    kubernetesUtil.deletePod(LabelKey.POD_NAME, project.getContainerId());
+    kubernetesUtil.deletePod(LabelKey.DEPLOYMENT_NAME, project.getContainerId());
 
     // nginx config 삭제
     nginxConfigUtil.deleteNginxConfig(project.getContainerId());

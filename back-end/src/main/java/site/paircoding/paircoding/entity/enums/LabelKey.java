@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum LabelKey {
   ENV("env"),
   GROUP_ID("groupId"),
-  POD_NAME("podName");
+  DEPLOYMENT_NAME("deploymentName");
 
   private final String key;
 
