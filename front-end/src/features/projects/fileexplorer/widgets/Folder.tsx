@@ -9,7 +9,7 @@ import {
   VscEdit,
   VscTrash,
 } from "react-icons/vsc";
-import { FileNode, FileType } from "../type/directoryTypes";
+import { FileNode, FileType, Payload, PayloadAction } from "../type/directoryTypes";
 import toast, { Toaster } from 'react-hot-toast';
 import Modal from 'react-modal';
 
@@ -25,8 +25,8 @@ interface FolderProps {
   explorerData: FileNode;
   selectedId: number | null;
   sendActionRequest: (
-    action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE",
-    payload: any
+    action: PayloadAction,
+    payload: Payload,
   ) => void;
   handleNodeSelect: (nodeId: number) => void;
   checkDuplicateName: (path: string, name: string) => boolean;
@@ -90,7 +90,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload = {
         action: "CREATE",
         type: createType,
         path: getFullPath(),
@@ -113,7 +113,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload  = {
         action: "RENAME",
         type: explorerData.type,
         path: explorerData.parent,
@@ -126,7 +126,7 @@ const Folder: React.FC<FolderProps> = ({
   };
 
   const handleDelete = () => {
-    const payload = {
+    const payload: Payload  = {
       action: "DELETE",
       type: explorerData.type,
       path: explorerData.parent,
@@ -137,7 +137,7 @@ const Folder: React.FC<FolderProps> = ({
 
   const getFileContent = () => {
     if(explorerData.type==="DIRECTORY") return;
-    const payload = {
+    const payload: Payload = {
       action: "CONTENT",
       type: explorerData.type,
       path: explorerData.parent,
@@ -181,7 +181,7 @@ const Folder: React.FC<FolderProps> = ({
       </div>
 
       {isCreating && (
-        <div className="flex items-center gap-2 my-1 ml-4">
+        <div className="flex items-center gap-2 my-1 ml-4 text-xs">
           <span className="flex items-center text-white">
             {createType === 'DIRECTORY' ? <VscFolder /> : <VscFile />}
           </span>
@@ -228,21 +228,21 @@ const Folder: React.FC<FolderProps> = ({
           {explorerData.type === "DIRECTORY" && (
             <>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
-                <VscNewFolder className="w-4 h-4 text-white" />
+                <VscNewFolder className="w-4 h-4 text-white text-xs" />
                 <span>New Folder</span>
               </div>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
-                <VscNewFile className="w-4 h-4 text-white" />
+                <VscNewFile className="w-4 h-4 text-white text-xs" />
                 <span>New File</span>
               </div>
             </>
           )}
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
-            <VscEdit className="w-4 h-4 text-white" />
+            <VscEdit className="w-4 h-4 text-white text-xs" />
             <span>Rename</span>
           </div>
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
-            <VscTrash className="w-4 h-4 text-white" />
+            <VscTrash className="w-4 h-4 text-white text-xs" />
             <span>Delete</span>
           </div>
         </div>

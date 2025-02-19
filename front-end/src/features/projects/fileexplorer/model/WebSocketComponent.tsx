@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperativeHandle } from "react";
 import { useParams } from 'react-router-dom';
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
-import { FileNode, FileType } from "../type/directoryTypes";
+import { FileNode, FileType, RefreshWebSocket, Payload, PayloadAction } from "../type/directoryTypes";
 import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
@@ -16,7 +16,7 @@ interface TreeNode {
   parent: string;
 }
 
-const WebSocketComponent: React.FC = () => {
+const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [treeData, setTreeData] = useState<FileNode | null>(null);
   const nodesMapRef = useRef(new Map<number, TreeNode>());
@@ -30,7 +30,6 @@ const WebSocketComponent: React.FC = () => {
   const {
     setActiveFile,
     setFileTap,
-    fileTap,
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
@@ -120,7 +119,7 @@ const WebSocketComponent: React.FC = () => {
   );
 
   const sendActionRequest = useCallback(
-    (action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE", payload: any) => {
+    (action: PayloadAction, payload: Payload) => {
       if (!clientRef.current || !clientRef.current.connected) {
         console.error("STOMP client is not connected");
         return;
@@ -227,11 +226,32 @@ const WebSocketComponent: React.FC = () => {
     }
   
     return cleanup;
-  }, []);
+  }, [clientRef]);
 
-  // const handleRefresh = () => {
-  //   initialWebSocket();
-  // };
+  const refreshWebSocket = () => {
+    if (clientRef.current && clientRef.current.connected) {
+      clientRef.current.deactivate();
+    }
+  
+    nodesMapRef.current.clear();
+  
+    const initialNode: TreeNode = {
+      id: 1,
+      name: "/",
+      type: "DIRECTORY",
+      children: [],
+      parent: "",
+    };
+    nodesMapRef.current.set(1, initialNode);
+    
+    setTreeData(buildTreeFromMap());
+  
+    initialWebSocket();
+  };
+  
+  useImperativeHandle(ref, () => ({
+    refreshWebSocket,
+  }));
 
   const checkDuplicateName = useCallback((path: string, newName: string): boolean => {
     const parentNode = getNodeByPath(path);
@@ -242,9 +262,6 @@ const WebSocketComponent: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div>
-        {/* <button onClick={handleRefresh}>새로고침</button> 새로고침 후 3번째 depth 부터 데이터 렌더링이 안 됨*/}
-      </div>
       {treeData ? (
         <Folder
           explorerData={treeData}
@@ -258,6 +275,6 @@ const WebSocketComponent: React.FC = () => {
       )}
     </div>
   );
-};
+});
 
 export default WebSocketComponent;
