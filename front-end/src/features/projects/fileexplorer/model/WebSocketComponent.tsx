@@ -7,6 +7,9 @@ import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 import { FileTapType } from "../../../../shared/types/projectApiResponse";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../../../../app/redux/store";
+import { fetchUserInfo } from "../../../../app/redux/user";
 
 interface TreeNode {
   id: number;
@@ -26,6 +29,9 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   const { projectId } = useParams();
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
+
+  const { user, status } = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch<AppDispatch>();
 
   const {
     setActiveFile,
@@ -47,6 +53,12 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       return [...prevFileTap, newFile];
     });
   };
+
+  useEffect(() => {
+    if (!user && status === 'idle') {
+      dispatch(fetchUserInfo());
+    }
+  }, [dispatch, user, status]);
   
   const idCounter = useRef(1);
   const generateUniqueId = () => {
@@ -95,7 +107,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       // console.log("Updating nodes map with data:", data);
       const parentNode = getNodeByPath(data.path);
       if (!parentNode) {
-        console.error("Parent node not found for path:", data.path);
+        // console.error("Parent node not found for path:", data.path);
         return;
       }
       parentNode.children.forEach((child) => {
@@ -148,6 +160,9 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   }, [buildTreeFromMap]);
 
   const initialWebSocket = useCallback(() => {
+    if (!user || status !== 'succeeded') {
+      return;
+    }
     const socket = new SockJS(`${url}/ws`);
     const client = new Client({
       webSocketFactory: () => socket,
@@ -158,7 +173,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
         Authorization: `Bearer ${access}`,
       },
       onConnect: () => {
-        // console.log("WebSocket connected");
+        console.log("WebSocket connected", user.email);
         clientRef.current = client;
         const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
         client.subscribe(topic, (message) => {
@@ -206,11 +221,17 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       },
     });
     client.activate();
-  }, [groupId, projectId, access, sendActionRequest, updateNodesMapWithList]);
+  }, [groupId, projectId, access, sendActionRequest, updateNodesMapWithList, user, status]);
 
   const handleNodeSelect = useCallback((nodeId: number) => {
     setSelectedId(nodeId);
   }, []);
+
+  useEffect(() => {
+    if (user && status === 'succeeded') {
+      initialWebSocket();
+    }
+  }, [initialWebSocket, user, status]);
 
   useEffect(() => {
     let isSubscribed = true;
