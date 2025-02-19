@@ -116,7 +116,7 @@ public class KubernetesUtil {
           .withNewSpec()
           .withCapacity(Map.of("storage", new Quantity(performance.getStorage())))
           .withAccessModes("ReadWriteOnce") // 단일 노드에서 읽기/쓰기 가능
-          .withPersistentVolumeReclaimPolicy("Retain") // 삭제 시 데이터 유지
+          .withPersistentVolumeReclaimPolicy("Delete") // 삭제 시 데이터 유지
           .withStorageClassName(deploymentName) // StorageClass 지정
           .withNewHostPath()
           .withPath("/mnt/data/" + deploymentName) // 노드의 실제 저장 경로
@@ -235,17 +235,17 @@ public class KubernetesUtil {
   public void deletePod(LabelKey labelKey, String labelValue) {
     try {
 
-//      kubernetesClient.pods()
-//          .inNamespace(namespace)
-//          .withLabel(labelKey.getKey(), labelValue)
-//          .delete();
-
       kubernetesClient.apps().deployments()
           .inNamespace(namespace)
           .withLabel(labelKey.getKey(), labelValue)
           .delete();
 
       kubernetesClient.services()
+          .inNamespace(namespace)
+          .withLabel(labelKey.getKey(), labelValue)
+          .delete();
+
+      kubernetesClient.persistentVolumeClaims()
           .inNamespace(namespace)
           .withLabel(labelKey.getKey(), labelValue)
           .delete();
