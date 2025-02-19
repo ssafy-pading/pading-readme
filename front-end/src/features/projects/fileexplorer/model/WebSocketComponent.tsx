@@ -6,9 +6,9 @@ import { FileNode, FileType, RefreshWebSocket, Payload, PayloadAction } from "..
 import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
-import { useSelector, useDispatch } from "react-redux";
-import type { RootState, AppDispatch } from "../../../../app/redux/store";
+import { FileTapType, TapManagerType } from "../../../../shared/types/projectApiResponse";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../../app/redux/store";
 import { fetchUserInfo } from "../../../../app/redux/user";
 
 interface TreeNode {
@@ -20,31 +20,60 @@ interface TreeNode {
 }
 
 const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { user, status } = useSelector((state: RootState) => state.user);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [treeData, setTreeData] = useState<FileNode | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
   const nodesMapRef = useRef(new Map<number, TreeNode>());
   const clientRef = useRef<Client | null>(null);
-
   const { groupId } = useParams();
   const { projectId } = useParams();
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
 
-  const { user, status } = useSelector((state: RootState) => state.user);
-  const dispatch = useDispatch<AppDispatch>();
-
   const {
     setActiveFile,
     setFileTap,
+    fileTap,
+    tapManager,
+    setTapManager,
+    emailToTabs
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
+    // const userEmail: string = "임시시"
     const newFile = {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
       content: file.content
     }; 
-  
+    const userTaps = emailToTabs(userEmail);
+    const newUserTaps = [...userTaps, newFile];
+    console.log("추가되는 탭", newUserTaps);
+    const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === userEmail);
+    console.log("유저의 탭 매니저", userTapManager);
+    if (userTapManager) {
+      const updatedTapManager = tapManager.map((tm) =>
+        tm.email === userEmail
+          ? { ...tm, Tabs: [...tm.Tabs, newFile] }
+          : tm
+      );
+      setTapManager(updatedTapManager);
+      console.log("기존 유저 탭에 추가: ", updatedTapManager);
+    } else {
+      const newTapManagerEntry: TapManagerType = {
+        email: userEmail,
+        activeTap: newFile.fileName,
+        Tabs: [newFile],
+      };
+      setTapManager([...tapManager, newTapManagerEntry]);
+      console.log("신규 유저 탭 생성: ", [...tapManager, newTapManagerEntry]);
+      
+    }
+    console.log("전체 tapManager: ", tapManager);
+    console.log("해당 유저 tapManager: ", tapManager.find((tm) => tm.email === userEmail));
+
     setFileTap(prevFileTap => {
       if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
         return prevFileTap;
@@ -230,6 +259,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   useEffect(() => {
     if (user && status === 'succeeded') {
       initialWebSocket();
+      setUserEmail(user.email);
     }
   }, [initialWebSocket, user, status]);
 
@@ -280,7 +310,6 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   
     return parentNode.children.some(child => child.name === newName);
   }, [getNodeByPath]);
-
   return (
     <div className="w-full">
       {treeData ? (

@@ -35,7 +35,7 @@ import { Toaster, toast } from "react-hot-toast";
 
 // Api or Type
 import useProjectAxios from "../shared/apis/useProjectAxios";
-import { FileTapType } from "../shared/types/projectApiResponse";
+import { FileTapType, TapManagerType } from "../shared/types/projectApiResponse";
 import { ResourceData } from "../features/projects/monitoring/types/monitoringTypes";
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
@@ -90,32 +90,17 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
-  const { activeFile, setActiveFile, fileTap, setFileTap, user } =
+  const { activeFile, setActiveFile, fileTap, tapManager, user, deleteFile } =
     useProjectEditor();
-
-  // 파일 탭 삭제 함수
-  const deleteFile = (deleteFileRouteAndName: string) => {
-    // 삭제할 파일 정보 확인
-    // 삭제할 파일을 제외한 새 배열 생성
-    const newFileTap = fileTap.filter(
-      (file) => file.fileRouteAndName !== deleteFileRouteAndName
-    );
-    setFileTap(newFileTap);
-
-    // 탭이 1개였는데 삭제되어 남은 탭이 없으면 활성 파일을 null로 설정
-    if (newFileTap.length === 0) {
-      setActiveFile(null);
-      return;
-    }
-
-    // 삭제된 파일이 현재 활성 파일이라면,
-    // 활성 파일을 새 배열의 첫 번째 파일로 설정합니다.
-    if (activeFile === deleteFileRouteAndName) {
-      setActiveFile(newFileTap[0].fileRouteAndName);
-    }
-    // 삭제된 파일이 활성 파일이 아니라면 변경 없이 그대로 유지합니다.
-  };
-
+  const email = user?.email
+  console.log("email: ", email);
+  
+  const userTapManager: TapManagerType | undefined = tapManager.find((tm) => tm.email === email)
+  console.log("userTapManager: ", userTapManager);
+  
+  const taps: FileTapType[] | undefined = userTapManager?.Tabs
+  console.log("taps: ", taps);
+  
   {
     /*//////////////////////////////// Editor And Explorer  ////////////////////////////////////////*/
   }
@@ -307,14 +292,16 @@ function ProjectPage() {
             {/* 파일 탭 자리 */}
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
-                {fileTap.map((file) => (
+                
+                {taps !== undefined && taps.length > 0 ? 
+                  (taps.map((file) => (
                   <div
                     key={file.fileRouteAndName}
                     className="flex flex-row items-center"
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
-                        activeFile === file.fileRouteAndName
+                        currentActive === file.fileRouteAndName
                           ? "text-white"
                           : "text-[#858595] hover:text-white"
                       }`}
@@ -332,18 +319,18 @@ function ProjectPage() {
                       <VscChromeClose />
                     </button>
                   </div>
-                ))}
+                ))) : []}
               </div>
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
-              {fileTap.length > 0 ? (
-                fileTap.map((file) => (
+              {taps && taps.length > 0 ? (
+                taps?.map((file) => (
                   <div
                     key={file.fileRouteAndName}
                     style={{
                       display:
-                        activeFile === file.fileRouteAndName ? "block" : "none",
+                        currentActive === file.fileRouteAndName ? "block" : "none",
                     }}
                     className="w-full h-full"
                   >
