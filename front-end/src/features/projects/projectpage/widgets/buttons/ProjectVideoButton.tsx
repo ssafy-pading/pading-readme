@@ -20,7 +20,7 @@ function VideoButton() {
         onMouseLeave={() => setIsPressed(false)}
         onClick={handleVideoToggle} className={`text-white cursor-pointer transition-transform duration-200 ease-in-out ${isPressed ? "scale-75" : "scale-100"
         }`}>
-            {!isVideoOff ? <BsFillCameraVideoFill className="text-md" /> : <BsCameraVideoOffFill className="text-md" />}
+            {isVideoOff ? <BsFillCameraVideoFill className="text-md" /> : <BsCameraVideoOffFill className="text-md" />}
         </button>
     )
 }
