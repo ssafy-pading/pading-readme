@@ -174,7 +174,7 @@ const AboutPage = () => {
 
                         {/* 설명 */}
                         <p className="text-gray-700 text-sm mt-2">
-                            여러 프로젝트를 생성하고 각 구성원을 실시간으로 관리할 수 있습니다.
+                            여러 프로젝트를 생성하고 실시간으로 팀원을 관리할 수 있습니다.
                         </p>
                     </div>
                     <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-lg p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
@@ -184,11 +184,11 @@ const AboutPage = () => {
                         </div>
                         
                         {/* 제목 */}
-                        <h3 className="text-xl font-semibold text-gray-900">다양한 환경 제공</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">다양한 개발 환경 제공</h3>
 
                         {/* 설명 */}
                         <p className="text-gray-700 text-sm mt-2">
-                            다양한 언어, 사양등을 지원하고 강력한 가상 개발 환경을 제공합니다.
+                            다양한 언어, 사양, 자동배포 등을 지원하는 강력한 가상 개발 환경을 제공합니다.
                         </p>
                     </div>
                     <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-lg p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
@@ -198,7 +198,7 @@ const AboutPage = () => {
                         </div>
                         
                         {/* 제목 */}
-                        <h3 className="text-xl font-semibold text-gray-900">실시간 협업 환경</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">실시간 협업 기능</h3>
 
                         {/* 설명 */}
                         <p className="text-gray-700 text-sm mt-2">
@@ -212,32 +212,32 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold mb-12">주요 기능</h2>
             <div className="flex flex-wrap justify-center gap-8">
                 <div className="max-w-xs text-center">
-                <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                    1
-                </div>
-                <h3 className="text-xl font-semibold mb-2">그룹 관리</h3>
-                <p>초대링크 생성, 멤버관리 등 다양한 관리 기능을 제공받습니다.</p>
-                </div>
-                <div className="max-w-xs text-center">
-                    <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                        2
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2">그룹 참가</h3>
-                    <p>사용자들은 초대링크로 그룹에 참가할 수 있습니다.</p>
+                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                      1
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">그룹 관리</h3>
+                  <p>초대링크 생성, 멤버관리 등 다양한 관리 기능을 제공합니다.</p>
                 </div>
                 <div className="max-w-xs text-center">
-                <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                    3
-                </div>
-                <h3 className="text-xl font-semibold mb-2">프로젝트 설정</h3>
-                <p>다양한 개발 환경을 제공하며, 프로젝트에 참여할 사용자들을 지정할 수 있습니다.</p>
+                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                      2
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">그룹 참가</h3>
+                  <p>사용자들은 초대링크로 그룹에 참가할 수 있습니다.</p>
                 </div>
                 <div className="max-w-xs text-center">
-                <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                    4
+                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                      3
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">프로젝트 설정</h3>
+                  <p>다양한 개발 환경을 선택할 수 있으며, 팀원을 지정하여 프로젝트를 구성할 수 있습니다.</p>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">프로젝트 사용</h3>
-                <p>실시간 코드 동시 편집과 테스트, 다양한 실시간 협업도구로 개발 환경을 제공합니다.</p>
+                <div className="max-w-xs text-center">
+                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white flex items-center justify-center mx-auto mb-4 text-xl font-bold">
+                      4
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">실시간 프로젝트 작업</h3>
+                  <p>실시간 코드 동시 편집과 테스트, 다양한 실시간 협업도구로 개발 환경을 제공합니다.</p>
                 </div>
             </div>
             </div>
