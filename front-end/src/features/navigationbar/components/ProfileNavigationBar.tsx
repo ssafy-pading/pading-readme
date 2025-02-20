@@ -455,7 +455,7 @@ const ProfileNavigationBar: React.FC = () => {
               <div
                 className="nav-scroll ml-10 mb-2 overflow-y-auto"
                 style={{
-                  height: isProfileNavOpen ? "calc(100vh - 200px)" : "calc(100vh - 350px)",
+                  height: isProfileNavOpen ? `calc(100vh - ${userRole === "OWNER" ? '300px':'200px'})` : `calc(100vh - ${userRole === "OWNER" ? '450px':'350px'})`,
                 }}
               >
                 <ul>
