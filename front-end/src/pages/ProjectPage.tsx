@@ -346,7 +346,7 @@ function ProjectPage() {
                       framework={projectDetail?.project.projectImage.language}
                       fileName={file.fileName}
                       fileRouteAndName={file.fileRouteAndName}
-                  userName={user.name}
+                      userName={user.name}
                       content={file.content}
                 />
                   </div>
