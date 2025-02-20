@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import site.paircoding.paircoding.entity.dto.DirectoryContentDto;
 import site.paircoding.paircoding.entity.dto.DirectoryCreateDto;
@@ -22,44 +23,52 @@ import site.paircoding.paircoding.service.DirectoryService;
 public class DirectoryController {
 
   private final DirectoryService directoryService;
+  private final SimpMessagingTemplate messagingTemplate;
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/list")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
-  public DirectoryListDto get(@DestinationVariable("groupId") Integer groupId,
-      @DestinationVariable("projectId") Integer projectId, DirectoryListDto dto) {
-    return directoryService.get(groupId, projectId, dto);
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/list")
+  public void get(@DestinationVariable("groupId") Integer groupId,
+      @DestinationVariable("projectId") Integer projectId,
+      @DestinationVariable("userId") Integer userId, DirectoryListDto dto) {
+    messagingTemplate.convertAndSend(
+        "/sub/groups/" + groupId + "/projects/" + projectId + "/users/" + userId + "/directory",
+        directoryService.get(groupId, projectId, dto));
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/create")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/create")
+  @SendTo("/sub/groups/{groupId}/projects/{projectId}/users/all/directory")
   public DirectoryCreateDto create(@DestinationVariable("groupId") Integer groupId,
-      @DestinationVariable("projectId") Integer projectId, DirectoryCreateDto dto) {
+      @DestinationVariable("projectId") Integer projectId,
+      @DestinationVariable("userId") Integer userId, DirectoryCreateDto dto) {
     return directoryService.create(groupId, projectId, dto);
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/delete")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/delete")
+  @SendTo("/sub/groups/{groupId}/projects/{projectId}/users/all/directory")
   public DirectoryDeleteDto delete(@DestinationVariable("groupId") Integer groupId,
-      @DestinationVariable("projectId") Integer projectId, DirectoryDeleteDto dto) {
+      @DestinationVariable("projectId") Integer projectId,
+      @DestinationVariable("userId") Integer userId, DirectoryDeleteDto dto) {
     return directoryService.delete(groupId, projectId, dto);
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/rename")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/rename")
+  @SendTo("/sub/groups/{groupId}/projects/{projectId}/users/all/directory")
   public DirectoryRenameDto rename(@DestinationVariable("groupId") Integer groupId,
-      @DestinationVariable("projectId") Integer projectId, DirectoryRenameDto dto) {
+      @DestinationVariable("projectId") Integer projectId,
+      @DestinationVariable("userId") Integer userId, DirectoryRenameDto dto) {
     return directoryService.rename(groupId, projectId, dto);
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/content")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
-  public DirectoryContentDto content(@DestinationVariable("groupId") Integer groupId,
-      @DestinationVariable("projectId") Integer projectId, DirectoryContentDto dto) {
-    return directoryService.content(groupId, projectId, dto);
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/content")
+  public void content(@DestinationVariable("groupId") Integer groupId,
+      @DestinationVariable("projectId") Integer projectId,
+      @DestinationVariable("userId") Integer userId, DirectoryContentDto dto) {
+    messagingTemplate.convertAndSend(
+        "/sub/groups/" + groupId + "/projects/" + projectId + "/users/" + userId + "/directory",
+        directoryService.content(groupId, projectId, dto));
   }
 
-  @MessageMapping("/groups/{groupId}/projects/{projectId}/directory/save")
-  @SendTo("/sub/groups/{groupId}/projects/{projectId}/directory")
+  @MessageMapping("/groups/{groupId}/projects/{projectId}/users/{userId}/directory/save")
+  @SendTo("/sub/groups/{groupId}/projects/{projectId}/users/all/directory")
   public DirectorySaveDto save(@DestinationVariable("groupId") Integer groupId,
       @DestinationVariable("projectId") Integer projectId, DirectorySaveDto dto) {
     return directoryService.save(groupId, projectId, dto);
