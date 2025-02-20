@@ -20,7 +20,7 @@ import RunButton from "../features/projects/editorterminal/widgets/buttons/RunBu
 import ProjectEditor from "../features/projects/editorterminal/components/ProjectEditor";
 import ProjectTerminal from "../features/projects/editorterminal/components/ProjectTerminal";
 import FileExplorer from "../features/projects/fileexplorer/components";
-import RightContentsContainer from "../features/projects/VideoChat";
+import RightContentsContainer from "../features/projects/videochat";
 import ResourceMonitorBar from "../features/projects/monitoring/components/MonitoringBar";
 import ProjectRun from "../features/projects/editorterminal/components/ProjectRun";
 // Models
@@ -40,6 +40,8 @@ import { ResourceData } from "../features/projects/monitoring/types/monitoringTy
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
+import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
+import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
 function ProjectPage() {
   // 로딩 상태 체크
@@ -183,7 +185,7 @@ function ProjectPage() {
 
   useEffect(() => {
     if (!projectDetail?.project?.containerId) return;
-    // 모니터링 데이터 불러오기
+
     const fetchMonitoringData = async () => {
       try {
         const monitoringData = await getMonitoringResource(
@@ -238,6 +240,13 @@ function ProjectPage() {
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
+          </div>
+        <div>
+            <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
+              <div className="flex items-center space-x-4">
+                <CallButton />
+              </div>
+            </CallSocketProvider>
           </div>
         </div>
         <div className="flex items-center justify-center gap-20">
@@ -301,15 +310,13 @@ function ProjectPage() {
                 {fileTap.map((file) => (
                   <div
                     key={file.fileRouteAndName}
-                    title={file.fileRouteAndName}
-                    className={`flex flex-row items-center 
-                      ${activeFile !== file.fileRouteAndName? "hover:bg-gray-600": ""}`}
+                    className="flex flex-row items-center"
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                         activeFile === file.fileRouteAndName
                           ? "text-white"
-                          : "text-[#858595]"
+                          : "text-[#858595] hover:text-white"
                       }`}
                       onClick={() => setActiveFile(file.fileRouteAndName)}
                     >
@@ -320,7 +327,7 @@ function ProjectPage() {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
                       }}
-                      className="text-[#858595] hover:text-white"
+                      className="text-[#858595] hover:text-white ml-1"
                     >
                       <VscChromeClose />
                     </button>
@@ -344,11 +351,10 @@ function ProjectPage() {
                       groupId={groupId}
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
-                      fileName={file.fileName}
                       fileRouteAndName={file.fileRouteAndName}
                       userName={user.name}
                       content={file.content}
-                />
+                    />
                   </div>
                 ))
               ) : (
@@ -411,6 +417,7 @@ function ProjectPage() {
                       >
                         Run
                       </button>
+
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button
@@ -505,8 +512,8 @@ function ProjectPage() {
                         display: activePanel === "resource" ? "block" : "none",
                       }}
                     >
-                      <MonitoringDashboard 
-                        data={monitoringDataList} 
+                      <MonitoringDashboard
+                        data={monitoringDataList}
                         height={terminalHeight - 30}
                         cpuDescription={projectDetail?.project.performance.cpuDescription}
                         memoryDescription={projectDetail?.project.performance.memoryDescription}

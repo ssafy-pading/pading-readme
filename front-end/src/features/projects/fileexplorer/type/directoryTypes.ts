@@ -1,6 +1,6 @@
-export type PayloadAction = "LIST" | "CREATE" | "DELETE" | "RENAME";
+export type PayloadAction = "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE";
 
-export type FileType = "FILE" | "DIRECTORY";
+export type FileType = "FILE" | "DIRECTORY" | null;
 
 export interface FileNode {
   id: number;
@@ -36,4 +36,18 @@ export interface RenamePayload {
   oldName: string;
   newName: string;
   path: string;
+}
+
+export interface Payload {
+  action?: PayloadAction;
+  type?: FileType;
+  path: string;
+  name?: string;
+  oldName?: string;
+  newName?: string;
+  content?: string;
+}
+
+export interface RefreshWebSocket {
+  refreshWebSocket: ()=>void;
 }
