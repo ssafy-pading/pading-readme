@@ -1,0 +1,23 @@
+/* src/index.css */
+
+.nav-scroll::-webkit-scrollbar {
+    width: 8px;
+} 
+  
+.nav-scroll::-webkit-scrollbar-track {
+    background: #d3dede;
+}
+  
+.nav-scroll::-webkit-scrollbar-thumb {
+  background-color: #aaa; /* thumb 색상 */
+  border-radius: 6px;
+}
+  
+.nav-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #777;
+}
+
+.nav-scroll::-webkit-scrollbar-button {
+    display: none;
+}
+  

@@ -32,8 +32,8 @@ const MonitoringDashboard: React.FC<MonitoringDashboardProps> = ({ data, height,
 
   return (
     <div className="grid grid-cols-2 gap-4 px-2" style={{ height: `${height}px`, overflow: 'hidden' }}>
-      <ChartComponent title="CPU Usage" unit="ms" bUnit="s" maxValue={cpuMaxValue} newData={cpuData} height={chartHeight} />
-      <ChartComponent title="Memory Usage" unit="MB" bUnit="GB" maxValue={memoryMaxValue} newData={memoryData} height={chartHeight} />
+      <ChartComponent title="CPU Usage" unit="m" bUnit="m" maxValue={cpuMaxValue} newData={cpuData} height={chartHeight} />
+      <ChartComponent title="Memory Usage" unit="Mi" bUnit="Gi" maxValue={memoryMaxValue} newData={memoryData} height={chartHeight} />
     </div>
   );
 };

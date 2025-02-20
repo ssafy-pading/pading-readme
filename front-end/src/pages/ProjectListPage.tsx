@@ -16,6 +16,9 @@ import ProjectCard from '../features/groups/widgets/components/ProjectCard';
 import InviteLink from '../features/groups/widgets/components/CreateLinkComponents';
 import { FaPlus } from 'react-icons/fa';
 
+// css
+import "../shared/widgets/ScrollBar.css";
+
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
 
@@ -285,7 +288,7 @@ const ProjectListPage: React.FC = () => {
       )}
       <Toaster />
       {/* 프로젝트 목록 영역 */}
-      <div className="relative pl-6 pr-10 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
+      <div className="scroll relative pl-6 pr-10 pb-6 overflow-y-auto max-h-screen transition-all duration-1000 ml-32 z-0">
         <div className="flex justify-between items-center relative mt-20 mb-3">
           <p className="text-2xl text-[#4D4650] font-semibold mr-4">{groupName}</p>
           {(userRole === 'OWNER' || userRole === 'MANAGER') && (

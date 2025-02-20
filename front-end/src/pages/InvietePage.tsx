@@ -148,7 +148,7 @@ const InvitePage = () => {
             }
         } catch (error) {
             setGroupName(null);
-            console.log(error);
+            console.error(error);
         }
       };
 
@@ -165,7 +165,7 @@ const InvitePage = () => {
             return true;
           }
         }catch (err){
-          console.log(err)
+          console.error(err)
           return true;
         }
       }

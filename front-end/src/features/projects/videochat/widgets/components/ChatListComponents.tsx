@@ -225,7 +225,7 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
 
                   {/* 채팅 메시지 */}
                   <div
-                    className={`px-3 py-[0.3rem] rounded-lg ${
+                    className={`px-2 py-[0.3rem] rounded-lg ${
                       isMe ? 'bg-[#3B82F6]' : 'bg-[#273654]'
                     } mr-2 text-white relative`}
                   >

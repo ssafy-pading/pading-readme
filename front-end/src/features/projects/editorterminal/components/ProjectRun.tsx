@@ -51,7 +51,6 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
 
   // STOMP를 통해 데이터를 전송하는 함수 
   const handleInputData = useCallback((data: string) => {
-    console.log(`Sending message: ${data}`);
     if (stompClient.current && stompClient.current.connected) {
       stompClient.current.publish({
         destination: `/pub/groups/${groupId}/projects/${projectId}/terminal/${terminalId}/input`,
@@ -77,7 +76,6 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
       cancelable: true,
       clipboardData,
     });
-    console.log("Dispatching paste event with text:", text);
     textarea.dispatchEvent(pasteEvent);
   };
 
@@ -141,7 +139,6 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
           setIsConnected(true);
         },
         onDisconnect: () => {
-          console.log("Disconnected");
           setIsConnected(false);
           setIsPromptReady(false);
         },
@@ -237,7 +234,6 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
       isConnected &&
       isPromptReady
     ) {
-      console.log("Waiting 1s before sending runCommand via simulated paste event:", runCommand);
       term.current?.focus();
       setTimeout(() => {
         // 전체 문자열을 붙여넣기 방식으로 전송 (엔터키 포함)
