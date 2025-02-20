@@ -19,16 +19,16 @@ interface ProjectEditorProps {
 }
 
 // 자동저장 디바운스 함수
-function debounce(func: Function, delay: number) {
-  let timer: NodeJS.Timeout;
+// function debounce(func: Function, delay: number) {
+//   let timer: NodeJS.Timeout;
 
-  return (...args: any[]) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-}
+//   return (...args: any[]) => {
+//     if (timer) clearTimeout(timer);
+//     timer = setTimeout(() => {
+//       func(...args);
+//     }, delay);
+//   };
+// }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
@@ -58,32 +58,32 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const type = doc.getText("monaco");
 
   ///////////////////////// 자동완성 기능 /////////////////////////
-  const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
+  // const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
   //// 자동완성 함수: Monaco의 기본 자동완성(Trigger Suggest) 호출
-  const autoComplete = () => {
-    if (editorRef.current) {
-      setIsSaving(true);
-      const currentValue: Payload = {
-        action: "SAVE",
-        type: "FILE",
-        path: fileRoute!,
-        name: fileName,
-        content: editorRef.current.getValue(),
-      };
+  // const autoComplete = () => {
+  //   if (editorRef.current) {
+  //     setIsSaving(true);
+  //     const currentValue: Payload = {
+  //       action: "SAVE",
+  //       type: "FILE",
+  //       path: fileRoute!,
+  //       name: fileName,
+  //       content: editorRef.current.getValue(),
+  //     };
 
-      if (typeof sendActionRequest !== "function") {
-        console.error("sendActionRequest is not initialized");
-        return;
-      }
-      sendActionRequest("SAVE", currentValue);
-      setTimeout(() => {
-        setIsSaving(false);
-      }, 2000);
-    }
-  };
+  //     if (typeof sendActionRequest !== "function") {
+  //       console.error("sendActionRequest is not initialized");
+  //       return;
+  //     }
+  //     sendActionRequest("SAVE", currentValue);
+  //     setTimeout(() => {
+  //       setIsSaving(false);
+  //     }, 2000);
+  //   }
+  // };
 
   // 코드 칠 때마다 디바운싱 적용 (2000ms 후 실행)
-  const debouncedAutoComplete = useRef(debounce(autoComplete, 2000)).current;
+  // const debouncedAutoComplete = useRef(debounce(autoComplete, 2000)).current;
 
   // setCurrentFile({
   //   action: "SAVE",
@@ -175,7 +175,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         console.error("sendActionRequest is not initialized");
         return;
       }
-      setIsSaving(true);
+      // setIsSaving(true);
       const currentValue: Payload = {
         action: "SAVE",
         type: "FILE",
@@ -185,7 +185,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       };
       sendActionRequest("SAVE", currentValue);
       setTimeout(() => {
-        setIsSaving(false);
+        // setIsSaving(false);
       }, 2000);
     });
 
@@ -218,16 +218,16 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         value={value}
         onChange={(value) => {
           setvalue(value || "");
-          debouncedAutoComplete();
+          // debouncedAutoComplete();
         }}
         options={{
           mouseWheelZoom: true, // 마우스 휠로 줌
           smoothScrolling: true, // 부드러운 스크롤
         }}
       />
-      {isSaving && (
+      {/* {isSaving && (
         <div className="autosave-indicator top-4 left-1/2">Saving...</div>
-      )}
+      )} */}
     </div>
   );
 };
