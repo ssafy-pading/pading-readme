@@ -7,6 +7,7 @@ import Folder from "../widgets/Folder";
 // userContext
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 import { FileTabType, TabManagerType } from "../../../../shared/types/projectApiResponse";
+import { jwtDecode } from "jwt-decode";
 
 interface TreeNode {
   id: number;
@@ -25,6 +26,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   const { projectId } = useParams();
   const url = import.meta.env.VITE_APP_API_BASE_URL;
   const access = localStorage.getItem("accessToken");
+  const decoded = access ? jwtDecode(access) : null;
   const {
     tabManager,
     setTabManager,
@@ -118,14 +120,33 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
         console.error("STOMP client is not connected");
         return;
       }
-      const destination = `/pub/groups/${groupId}/projects/${projectId}/directory/${action.toLowerCase()}`;
+      const personalDestination = `/pub/groups/${groupId}/projects/${projectId}/users/${Number(decoded?.sub)}/directory/${action.toLowerCase()}`;
+      const publicDestination = `/pub/groups/${groupId}/projects/${projectId}/users/all/directory/${action.toLowerCase()}`;
+      
+      let destination;
+      switch(action) {
+        case "LIST":
+        case "CONTENT":
+          destination = personalDestination;
+          break;
+        case "CREATE":
+        case "DELETE":
+        case "RENAME":
+        case "SAVE":
+          destination = publicDestination;
+          break;
+        default:
+          console.error("Unknown action:", action);
+          return;
+      }
+  
       clientRef.current.publish({
         destination,
         headers: { Authorization: `Bearer ${access}` },
         body: JSON.stringify({ action, ...payload }),
       });
     },
-    [groupId, projectId, access]
+    [groupId, projectId, access, decoded]
   );
 
   const updateNodesMapWithList = useCallback(
@@ -174,10 +195,12 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       heartbeatOutgoing: 4000,
       connectHeaders: { Authorization: `Bearer ${access}` },
       onConnect: () => {
+        console.log(decoded);
         clientRef.current = client;
-        const topic = `/sub/groups/${groupId}/projects/${projectId}/directory`;
+        const personalTopic = `/sub/groups/${groupId}/projects/${projectId}/users/${Number(decoded?.sub)}/directory`;
+        const publicTopic = `/sub/groups/${groupId}/projects/${projectId}/users/all/directory`;
 
-        client.subscribe(topic, (message) => {
+        client.subscribe(personalTopic, (message) => {
           try {
             const data = JSON.parse(message.body);
             if (data.action === "CONTENT") {
@@ -187,11 +210,22 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
                 fileRoute: data.path,
                 content: data.content
               });
-            } else if (data.action !== "SAVE") {
+            } else if (data.action === "LIST") {
               updateNodesMapWithList(data);
             }
           } catch (error) {
-            console.error("Error processing message:", error);
+            console.error("Error processing personal message:", error);
+          }
+        });
+  
+        client.subscribe(publicTopic, (message) => {
+          try {
+            const data = JSON.parse(message.body);
+            if (["CREATE", "DELETE", "RENAME", "SAVE"].includes(data.action)) {
+              sendActionRequest("LIST", { path: "/" });
+            }
+          } catch (error) {
+            console.error("Error processing public message:", error);
           }
         });
         sendActionRequest("LIST", { path: "/" });
