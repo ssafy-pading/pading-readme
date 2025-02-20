@@ -9,6 +9,8 @@ import {
 } from '@heroicons/react/24/outline';
 import profileImage from '../../../../assets/profile_image.png';
 import { useCallSocket } from "../../../projects/projectpage/components/CallSocket";
+import { FaPowerOff } from "react-icons/fa";
+import useProjectAxios from "../../../../shared/apis/useProjectAxios";
 
 interface ProjectCardProps {
   groupId: number;
@@ -28,8 +30,12 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   hasCall,
 }) => {
   const { project: projectData } = project;
-  const { id, name, projectImage, performance } = projectData;
+  const { id, name, projectImage, performance, status } = projectData;
   const { sendCallInactive } = useCallSocket();
+  const { getProjectStatus, turnProjectOn, turnProjectOff  } = useProjectAxios();
+  
+  // 카드의 속성
+  const [cardStatus, setCardStatus] = useState<boolean>(status);
 
   // 옵션 드롭다운 (기존 메뉴)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -45,7 +51,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleEnterProject = () => {
+  const handleEnterProject = async() => {
+    await getProjectStatus(groupId, id)
+    .then((response) => {
+      // 프로젝트의 현재 상태가 false면 turnOn을 하고 들어가기
+      if(!response.status){
+        turnProjectOn(groupId, id);
+      }
+    });
     if ((userRole === "OWNER" || userRole === "MANAGER") && hasCall === "active") {
       sendCallInactive();
     }
@@ -114,8 +127,27 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     );
   };
 
+  // 버튼 테스트
+  const closeProject = async () => {
+    if (cardStatus){
+      if(await turnProjectOff(groupId, id)){
+        projectData.status = false;
+        setCardStatus(false);
+        console.log("프로젝트 닫았음");
+        console.log("projectData", projectData);
+      }
+    }else{
+      if(await turnProjectOn(groupId, id)){
+        projectData.status = true;
+        setCardStatus(true);
+        console.log("프로젝트 열었음");
+        console.log("projectData", projectData);
+      }
+    }
+  };
+
   return (
-    <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 hover:scale-105 z-10">
+    <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 z-10 hover:shadow-xl">
       {/* 알림 */}
       {hasCall==="active" && (
         <div>
@@ -127,59 +159,67 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* 프로젝트 제목 및 옵션 드롭다운 */}
       <div className="flex justify-between items-center">
         <p className="font-inter text-base font-semibold text-[#68687b]">{name}</p>
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={toggleDropdown}
-            className="hover:bg-gray-300 p-1 rounded-full focus:outline-none"
+        <div className="flex gap-2">
+          <button 
+            onClick={closeProject}
+            className={`m-auto ${ cardStatus ? 'text-[#FF484B] cursor-pointer transition-colors hover:text-[#CC3A3C] hover:bg-gray-300 p-1 rounded-full focus:outline-none' : 'text-[#999] p-1 '}`}
           >
-            <RxDotsHorizontal className="w-5 h-5 text-[#68687b]" />
+            <FaPowerOff />
           </button>
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20 transition ease-out duration-100">
-              <ul className="py-1" role="menu">
-                {userRole === 'OWNER' || userRole === 'MANAGER' ? (
-                  <>
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={toggleDropdown}
+              className="hover:bg-gray-300 p-1 rounded-full focus:outline-none"
+            >
+              <RxDotsHorizontal className="w-5 h-5 text-[#68687b]" />
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-md shadow-lg z-20 transition ease-out duration-100">
+                <ul className="py-1" role="menu">
+                  {userRole === 'OWNER' || userRole === 'MANAGER' ? (
+                    <>
+                      <li role="none">
+                        <button
+                          className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
+                          onClick={() => {
+                            setIsDropdownOpen(false);
+                          }}
+                          role="menuitem"
+                        >
+                          <PencilSquareIcon className="w-4 h-4 mr-2 text-gray-500" />
+                          Edit
+                        </button>
+                      </li>
+                      <li role="none">
+                        <button
+                          className="w-full flex items-center text-left px-4 py-2 text-xs text-[#EF4444] hover:bg-red-500 hover:text-white group"
+                          onClick={() => {
+                            onDelete(project);
+                            setIsDropdownOpen(false);
+                          }}
+                          role="menuitem"
+                        >
+                          <TrashIcon className="w-4 h-4 mr-2 text-[#EF4444] group-hover:text-white transition-colors duration-200" />
+                          Delete
+                        </button>
+                      </li>
+                    </>
+                  ) : (
                     <li role="none">
                       <button
                         className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
-                        onClick={() => {
-                          setIsDropdownOpen(false);
-                        }}
+                        onClick={() => setIsDropdownOpen(false)}
                         role="menuitem"
                       >
-                        <PencilSquareIcon className="w-4 h-4 mr-2 text-gray-500" />
-                        Edit
+                        <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-gray-500" />
+                        Exit
                       </button>
                     </li>
-                    <li role="none">
-                      <button
-                        className="w-full flex items-center text-left px-4 py-2 text-xs text-[#EF4444] hover:bg-red-500 hover:text-white group"
-                        onClick={() => {
-                          onDelete(project);
-                          setIsDropdownOpen(false);
-                        }}
-                        role="menuitem"
-                      >
-                        <TrashIcon className="w-4 h-4 mr-2 text-[#EF4444] group-hover:text-white transition-colors duration-200" />
-                        Delete
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <li role="none">
-                    <button
-                      className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
-                      role="menuitem"
-                    >
-                      <ArrowRightOnRectangleIcon className="w-4 h-4 mr-2 text-gray-500" />
-                      Exit
-                    </button>
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
