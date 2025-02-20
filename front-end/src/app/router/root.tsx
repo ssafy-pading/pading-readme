@@ -25,7 +25,7 @@ const InvitePage = lazy(() => import("../../pages/InvietePage"));
 const RoleChangePage = lazy(() => import("../../pages/RoleChangePage"));
 
 // 멤버 권한 변경 페이지
-const OnboardingPage = lazy(() => import("../../pages/OnboardingPage"));
+const AboutPage = lazy(() => import("../../pages/AboutPage"));
 
 
 const routes: RouteObject[] = [
@@ -80,10 +80,10 @@ const routes: RouteObject[] = [
     ),
   },
   {
-    path: "onboarding",
+    path: "about",
     element: (
       <Suspense fallback={Loading}>
-        <OnboardingPage />
+        <AboutPage />
       </Suspense>
     ),
   },

@@ -72,6 +72,7 @@ const LoginPage: React.FC = () => {
   // redux dispatch, 유저 객체 사용
   const dispatch = useDispatch<AppDispatch>();
 
+
   
   // 페이지 처음 로드 시, 리프레시 토큰이 있는지 확인
   const refreshCheck = async ():Promise<void> => {
@@ -120,6 +121,18 @@ const LoginPage: React.FC = () => {
   }
 
   useEffect(() => {
+    
+    // 유저가 about페이지를 본적이 있는지 체크하는 함수
+    const checkViewAbout = () => {
+      if(!localStorage.getItem("viewAbout")){
+        // window.location.href='/about';
+        navigate('about', { replace: true});
+      }
+    }
+
+    // about페이지를 본 적이 없으면 about으로 보냄
+    checkViewAbout();
+
     // URL 파라미터에서 토큰 확인
     const params = new URLSearchParams(window.location.search);
     const accessToken = params.get("accessToken");

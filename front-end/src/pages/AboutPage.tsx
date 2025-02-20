@@ -1,37 +1,74 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GrDocumentConfig } from "react-icons/gr";
 import { FaShapes } from "react-icons/fa6";
 import { GrGroup } from "react-icons/gr";
-import onboarding from "../assets/onboarding.png";
+import onboarding from "../assets/about_background.png";
+import { useNavigate } from "react-router-dom";
+import TxtRotate from "../app/TxtRotate";
+import "../shared/widgets/Shake.css";
 
-const Mainpage = () => {
+const AboutPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  localStorage.setItem("viewAbout", "true");
+  const navigate = useNavigate();
+
+  const toLogin = () => {
+    navigate('/');
+  }
 
   // 2번 섹션 박스들의 페이드인 효과를 위한 IntersectionObserver
   useEffect(() => {
     const boxes = containerRef.current?.querySelectorAll(".box");
+  
+    if (!boxes) return;
+  
     const boxObserver = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
+        entries.forEach((entry, index) => {
           if (entry.isIntersecting) {
-            // 등장 시 opacity/translate 클래스 제거 -> 페이드인
-            entry.target.classList.remove("opacity-0", "translate-y-5");
-            boxObserver.unobserve(entry.target);
+            const targetElement = entry.target as HTMLElement; // 명시적 캐스팅
+  
+            if (targetElement) {
+              // 등장 애니메이션 지연 시간 적용
+              targetElement.style.transitionDelay = `${100  + (index * 200)}ms`;
+  
+              // 등장 효과 적용 (opacity/translate 제거)
+              setTimeout(() => {
+                targetElement.classList.remove("opacity-0", "translate-y-5");
+              }, 100  + (index * 200));
+  
+              // 한 번 등장한 요소는 다시 감지하지 않도록 unobserve
+              boxObserver.unobserve(targetElement);
+            }
           }
         });
       },
       { threshold: 0.2 }
     );
-
-    boxes?.forEach((box) => boxObserver.observe(box));
-
+  
+    boxes.forEach((box) => boxObserver.observe(box));
+  
     return () => boxObserver.disconnect();
   }, []);
+  
 
   // 특정 섹션으로 스크롤 이동
   const scrollToSection = (index: number) => {
     containerRef.current?.children[index].scrollIntoView({ behavior: "smooth" , block: "start", inline: "nearest" });
   };
+
+  // 
+  const [isShaking, setIsShaking] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 600); // 애니메이션 지속 시간(0.6s) 후 제거
+    }, 5000); // 5초마다 실행
+
+    return () => clearInterval(interval); // 컴포넌트 언마운트 시 정리
+  }, []);
 
   return (
     <div className="relative">
@@ -53,7 +90,6 @@ const Mainpage = () => {
           <div
             className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
             style={{
-              // 실제 이미지는 아래 부분 교체
               backgroundImage: `url("${onboarding}")`,
             }}
           />
@@ -63,11 +99,19 @@ const Mainpage = () => {
           {/* 메인 콘텐츠 */}
           <div className="z-10 text-center relative">
             <h1 className="text-[4rem] font-bold mb-4">Coding with Pading</h1>
-            <p className="text-[2rem] mb-6">추운 겨울 사무실에 출근해야하나? 그냥 패딩하자</p>
+            <div className="mb-20">
+              <TxtRotate
+                texts={["추운 겨울 사무실에 출근해야하나? 그냥 패딩하자!"]}
+                className="text-[2rem]"
+                period={5000}
+                singleLoop={true}
+                speedMultiplier={3}
+              />
+            </div>
             <a
-            href="LoginPage로 이동하는 주소"
-            className="inline-block px-6 py-3 bg-[#3B82F6] rounded-md text-white font-bold mb-8 
-                        transition duration-300 ease-in-out hover:brightness-95"
+            onClick={toLogin}
+            className="inline-block px-6 py-3 bg-[#3B82F6] rounded-md text-white font-bold mb-8 cursor-pointer
+                        transition duration-300 ease-in-out hover:brightness-75"
             >
                 Get Started
             </a>
@@ -105,21 +149,21 @@ const Mainpage = () => {
         {/* 2번 섹션: 3개의 박스(사이트 소개) */}
         <div
           data-index={1}
-          className="section h-screen flex flex-col text-gray-800 px-4 relative"
-          style={{ scrollSnapAlign: "start", backgroundColor: "#f8f9fa" }}
+          className="section h-screen flex flex-col text-gray-800"
+          style={{ scrollSnapAlign: "start", backgroundColor: "#E9ECEF" }}
         >
-            <div className="relative top-5 left-[calc(100% - 30px)]">
+            <div className="flex justify-end pt-5 pr-5">
                 <a
-                href="LoginPage로 이동하는 주소"
-                className="inline-block px-6 py-3 bg-[#3B82F6] rounded-md text-white font-bold mb-8 
-                            transition duration-300 ease-in-out hover:brightness-95"
+                onClick={toLogin}
+                className={`inline-block px-6 py-3 bg-[#3B82F6] rounded-md text-white font-mono font-bold cursor-pointer 
+                  transition duration-300 ease-in-out hover:brightness-[85%] ${isShaking ? "shake" : ""}`}
                 >
                     Get Started
                 </a>
             </div>
             <div className="flex flex-col items-center justify-center h-[50%]">
                 <div className="flex flex-wrap justify-center gap-12">
-                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-md p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
+                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-lg p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
                         {/* 아이콘 배경 원형 영역 */}
                         <div className="w-16 h-16 flex items-center justify-center bg-[#C6E2FF] rounded-full mb-4">
                             <GrDocumentConfig className="text-blue-500 text-4xl" />
@@ -129,11 +173,11 @@ const Mainpage = () => {
                         <h3 className="text-xl font-semibold text-gray-900">효율적인 관리</h3>
 
                         {/* 설명 */}
-                        <p className="text-gray-500 text-sm mt-2">
+                        <p className="text-gray-700 text-sm mt-2">
                             여러 프로젝트를 생성하고 각 구성원을 실시간으로 관리할 수 있습니다.
                         </p>
                     </div>
-                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-md p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
+                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-lg p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
                         {/* 아이콘 배경 원형 영역 */}
                         <div className="w-16 h-16 flex items-center justify-center bg-[#F8DFFE] rounded-full mb-4">
                             <FaShapes className="text-purple-500 text-4xl" />
@@ -143,11 +187,11 @@ const Mainpage = () => {
                         <h3 className="text-xl font-semibold text-gray-900">다양한 환경 제공</h3>
 
                         {/* 설명 */}
-                        <p className="text-gray-500 text-sm mt-2">
+                        <p className="text-gray-700 text-sm mt-2">
                             다양한 언어, 사양등을 지원하고 강력한 가상 개발 환경을 제공합니다.
                         </p>
                     </div>
-                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-md p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
+                    <div className="box w-72 bg-[#F8F9FF] flex items-center justify-center rounded-lg flex flex-col shadow-lg p-6 text-center opacity-0 transform translate-y-5 transition-all duration-700">
                         {/* 아이콘 배경 원형 영역 */}
                         <div className="w-16 h-16 flex items-center justify-center bg-[#D7FFD4] rounded-full mb-4">
                             <GrGroup className="text-green-500 text-4xl" />
@@ -157,7 +201,7 @@ const Mainpage = () => {
                         <h3 className="text-xl font-semibold text-gray-900">실시간 협업 환경</h3>
 
                         {/* 설명 */}
-                        <p className="text-gray-500 text-sm mt-2">
+                        <p className="text-gray-700 text-sm mt-2">
                             화상연결과 채팅, 코드 공동 편집 환경을 제공합니다.
                         </p>
                     </div>
@@ -217,4 +261,4 @@ const Mainpage = () => {
   );
 };
 
-export default Mainpage;
+export default AboutPage;
