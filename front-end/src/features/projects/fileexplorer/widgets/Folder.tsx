@@ -9,7 +9,7 @@ import {
   VscEdit,
   VscTrash,
 } from "react-icons/vsc";
-import { FileNode, FileType } from "../type/directoryTypes";
+import { FileNode, FileType, Payload, PayloadAction } from "../type/directoryTypes";
 import toast, { Toaster } from 'react-hot-toast';
 import Modal from 'react-modal';
 
@@ -18,8 +18,8 @@ interface FolderProps {
   explorerData: FileNode;
   selectedId: number | null;
   sendActionRequest: (
-    action: "LIST" | "CREATE" | "DELETE" | "RENAME" | "CONTENT" | "SAVE",
-    payload: any
+    action: PayloadAction,
+    payload: Payload,
   ) => void;
   handleNodeSelect: (nodeId: number) => void;
   checkDuplicateName: (path: string, name: string) => boolean;
@@ -83,7 +83,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload = {
         action: "CREATE",
         type: createType,
         path: getFullPath(),
@@ -106,7 +106,7 @@ const Folder: React.FC<FolderProps> = ({
         return;
       }
 
-      const payload = {
+      const payload:Payload  = {
         action: "RENAME",
         type: explorerData.type,
         path: explorerData.parent,
@@ -119,7 +119,7 @@ const Folder: React.FC<FolderProps> = ({
   };
 
   const handleDelete = () => {
-    const payload = {
+    const payload: Payload  = {
       action: "DELETE",
       type: explorerData.type,
       path: explorerData.parent,
@@ -130,7 +130,7 @@ const Folder: React.FC<FolderProps> = ({
 
   const getFileContent = () => {
     if(explorerData.type==="DIRECTORY") return;
-    const payload = {
+    const payload: Payload = {
       action: "CONTENT",
       type: explorerData.type,
       path: explorerData.parent,
@@ -144,7 +144,7 @@ const Folder: React.FC<FolderProps> = ({
       <Toaster />
       <div
         className={`flex items-center text-xs mt-0.5 hover:bg-gray-800 ${selectedId === explorerData.id ? "bg-[rgba(59,130,246,0.3)] border border-[#3B82F6]" : ""
-          } ${explorerData.type==="FILE"?'ml-4':null}`}
+          } ${explorerData.type==="FILE"?'ml-3':null}`}
         onClick={toggleExpand}
         onDoubleClick={getFileContent}
         onContextMenu={handleContextMenu}
@@ -169,12 +169,12 @@ const Folder: React.FC<FolderProps> = ({
             className="h-4 bg-gray-800 border rounded p-1 outline-none focus:border-[#3B82F6] focus:shadow-[0_0_0_1px_#3B82F6]"
           />
         ) : (
-          <span className="select-none ml-[6px] overflow-hidden whitespace-nowrap text-ellipsis">{explorerData.name==="/"?"App":explorerData.name}</span>
+          <span className="select-none ml-[6px] overflow-hidden whitespace-nowrap text-ellipsis">{explorerData.name==="/"?"app":explorerData.name}</span>
         )}
       </div>
 
       {isCreating && (
-        <div className="flex items-center gap-2 my-1 ml-4">
+        <div className="flex items-center gap-2 my-1 ml-4 text-xs">
           <span className="flex items-center text-white">
             {createType === 'DIRECTORY' ? <VscFolder /> : <VscFile />}
           </span>
@@ -221,21 +221,21 @@ const Folder: React.FC<FolderProps> = ({
           {explorerData.type === "DIRECTORY" && (
             <>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("DIRECTORY"); closeModal(); }}>
-                <VscNewFolder className="w-4 h-4 text-white" />
+                <VscNewFolder className="w-4 h-4 text-white text-xs" />
                 <span>New Folder</span>
               </div>
               <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleCreate("FILE"); closeModal(); }}>
-                <VscNewFile className="w-4 h-4 text-white" />
+                <VscNewFile className="w-4 h-4 text-white text-xs" />
                 <span>New File</span>
               </div>
             </>
           )}
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleRenameStart(); closeModal(); }}>
-            <VscEdit className="w-4 h-4 text-white" />
+            <VscEdit className="w-4 h-4 text-white text-xs" />
             <span>Rename</span>
           </div>
           <div className="flex items-center px-4 py-1 gap-3 cursor-pointer text-xs text-white hover:bg-[#3B82F6]" onClick={() => { handleDelete(); closeModal(); }}>
-            <VscTrash className="w-4 h-4 text-white" />
+            <VscTrash className="w-4 h-4 text-white text-xs" />
             <span>Delete</span>
           </div>
         </div>
