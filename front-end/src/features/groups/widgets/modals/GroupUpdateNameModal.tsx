@@ -103,7 +103,7 @@ const GroupUpdateModal: React.FC<GroupUpdateModalProps> = ({
     try {
       const success = await updateGroupName(groupId, newName);
       if (success) {
-        toast.error("그룹 이름이 성공적으로 수정되었습니다!");
+        // toast.error("그룹 이름이 성공적으로 수정되었습니다!");
         onUpdate(newName);
         onClose();
         window.location.href = `/projectlist/${groupId}`;
