@@ -12,6 +12,10 @@ import { useCallSocket } from "../../../projects/projectpage/components/CallSock
 import { FaPowerOff } from "react-icons/fa";
 import useProjectAxios from "../../../../shared/apis/useProjectAxios";
 
+// 토스트
+import { toast } from "react-hot-toast"; 
+import { confirmToast } from "../../../../shared/widgets/toastConfirm";
+
 interface ProjectCardProps {
   groupId: number;
   project: ProjectListItem; // 전체 item: { project: {...}, users: [...] }
@@ -127,27 +131,29 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     );
   };
 
-  // 버튼 테스트
+  // 프로젝트를 끄는 함수
   const closeProject = async () => {
-    if (cardStatus){
-      if(await turnProjectOff(groupId, id)){
-        projectData.status = false;
-        setCardStatus(false);
-        console.log("프로젝트 닫았음");
-        console.log("projectData", projectData);
-      }
-    }else{
-      if(await turnProjectOn(groupId, id)){
-        projectData.status = true;
-        setCardStatus(true);
-        console.log("프로젝트 열었음");
-        console.log("projectData", projectData);
-      }
+    if(onlineCount > 0){
+      toast.error("참여중인 멤버가 있을 경우 프로젝트를 닫을 수 없습니다.");
+      return
+    }
+
+    if(await confirmToast("프로젝트를 정지하시겠습니까?")){
+      await turnProjectOff(groupId, id)
+      .catch((error) => {
+        if(!error.response || (error.response.status !== 400)){
+          toast.error("접근 권한이 없습니다. 그룹 오너(매니저)에게 문의하세요.");
+          return
+        }
+      })
+      setCardStatus(false);
+      toast.success("프로젝트를 정지했습니다.");
     }
   };
 
   return (
     <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 z-10 hover:shadow-xl">
+
       {/* 알림 */}
       {hasCall==="active" && (
         <div>
@@ -161,8 +167,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <p className="font-inter text-base font-semibold text-[#68687b]">{name}</p>
         <div className="flex gap-2">
           <button 
-            onClick={closeProject}
-            className={`m-auto ${ cardStatus ? 'text-[#FF484B] cursor-pointer transition-colors hover:text-[#CC3A3C] hover:bg-gray-300 p-1 rounded-full focus:outline-none' : 'text-[#999] p-1 '}`}
+            onClick={cardStatus ? closeProject : undefined}
+            className={`m-auto ${ cardStatus ? 'text-[#FF484B] transition-colors hover:text-[#CC3A3C] hover:bg-gray-300 p-1 rounded-full focus:outline-none' : 'text-[#999] p-1 cursor-default'}`}
           >
             <FaPowerOff />
           </button>
