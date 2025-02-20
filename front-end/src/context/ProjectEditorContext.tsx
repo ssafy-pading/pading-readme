@@ -12,8 +12,8 @@ interface ProjectEditorContextType {
   user: any; // 추후에 수정 예정정
   sendActionRequest: ((action: PayloadAction, payload: Payload) => void) | null;
   setSendActionRequest: (fn: (action: PayloadAction, payload: Payload) => void) => void;
-  currentFile: Payload | null;
-  setCurrentFile: (currentFile: Payload | null) => void;
+  // currentFile: Payload | null;
+  // setCurrentFile: (currentFile: Payload | null) => void;
 }
 
 const ProjectEditorContext = createContext<
@@ -24,7 +24,7 @@ export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => 
   const [activeFile, setActiveFile] = useState<string | null>(null);
   const [fileTap, setFileTap] = useState<FileTapType[]>([])
   const [sendActionRequest, setSendActionRequest] = useState<((action: PayloadAction, payload: Payload) => void) | null>(null);
-  const [currentFile, setCurrentFile] = useState<Payload | null>(null);
+  // const [currentFile, setCurrentFile] = useState<Payload | null>(null);
 
   const { user } = useSelector((state: RootState) => state.user);
   return (
@@ -37,8 +37,8 @@ export const ProjectEditorProvider = ({ children }: { children: ReactNode }) => 
         setFileTap,
         sendActionRequest,
         setSendActionRequest,
-        currentFile,
-        setCurrentFile,
+        // currentFile,
+        // setCurrentFile,
       }}
     >
       {children}
