@@ -137,7 +137,7 @@ function ParticipantsButton() {
         </div>
         {/* 참가자 수 */}
         <div className="text-xs text-[#A1A1AF] font-bold ml-2">
-          {members.length} participants
+          참여자 {members.length}명
         </div>
       </button>
       {/* 참가자 목록 드롭다운 */}
