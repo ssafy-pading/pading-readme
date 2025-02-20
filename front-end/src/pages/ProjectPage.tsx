@@ -3,10 +3,8 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
-import {
-  ProjectEditorProvider,
-  useProjectEditor,
-} from "../context/ProjectEditorContext"; // useContext
+import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
+
 
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
@@ -236,7 +234,7 @@ function ProjectPage() {
       <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
         <div className="flex items-center h-[25px] text-white text-sm">
           <p className="font-semibold text-center">
-            PROJECT : {projectDetail?.project?.name}
+            프로젝트 이름 : {projectDetail?.project?.name}
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />

@@ -72,7 +72,6 @@ function ParticipantsButton() {
           async (messageData) => {
             try {
               const data = JSON.parse(messageData.body);
-              console.log("ParticipantsButton 메시지 데이터:", data);
               // 메시지 예시: { projectId: "1", status: "member" }
               if (data.status === "member") {
                 await fetchMembers();
@@ -138,7 +137,7 @@ function ParticipantsButton() {
         </div>
         {/* 참가자 수 */}
         <div className="text-xs text-[#A1A1AF] font-bold ml-2">
-          {members.length} participants
+          참여자 {members.length}명
         </div>
       </button>
       {/* 참가자 목록 드롭다운 */}

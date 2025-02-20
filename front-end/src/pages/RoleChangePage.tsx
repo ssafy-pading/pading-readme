@@ -9,6 +9,9 @@ import "../features/groups/widgets/css/CustomSelect.css";
 import useGroupAxios from "../shared/apis/useGroupAxios";
 import { GetGroupMembersResponse } from "../shared/types/groupApiResponse";
 
+// css
+import "../shared/widgets/ScrollBar.css";
+
 // 토스트
 import { Toaster, toast } from 'react-hot-toast';
 import { confirmToast } from "../shared/widgets/toastConfirm";
@@ -134,74 +137,82 @@ const handleMemberExpel = async (userId: number) => {
 
 
   return (
-    <div className={`transition-all duration-700 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>
-      <Toaster />
-      <div className="pl-8 pr-12 pb-6 transition-all duration-1000 ml-32 mt-20 z-0">
-        <h1 className="text-[#4D4650] text-xl font-bold mb-3">유저 설정</h1>
-        <hr className="mb-5" />
-        <table className="w-full table-auto border-collapse border-spacing-0 text-sm">
-          <thead className="text-[#888888]">
-            <tr className="border-b-2 border-[#D4D4D4]">
-              <th className="px-4 py-2 text-left min-w-[120px] w-[30%]">이름</th>
-              <th className="px-4 py-2 text-left min-w-[180px] w-[30%]">이메일</th>
-              <th className="px-4 py-2 text-right min-w-[100px] w-[20%]">권한</th>
-              <th className="px-4 py-2 min-w-[140px] w-[20%]">관리</th>
-            </tr>
-          </thead>
-          <tbody className="text-[#4D4650]">
-            {groupUsers.map((groupUser) => (
-              <tr key={groupUser.id} className="border-b border-[#D4D4D4] text-xs">
-                <td className="px-4 py-2 text-left">{groupUser.name}</td>
-                <td className="px-4 py-2 text-left">{groupUser.email}</td>
-                <td className="px-4 py-2 text-right">
-                  <CustomSelect
-                    options={roleOptions}
-                    value={selectedRoles[groupUser.id] || groupUser.role}
-                    onChange={(newRole) => handleRoleChange(groupUser.id, newRole)}
-                    disabled={currentUserRole !== "OWNER" || groupUser.role === "OWNER"}
-                  />
-                </td>
-                <td className="px-4 py-2 flex justify-center gap-2">
-                  {currentUserRole === "OWNER" && (
-                    <button
-                      className={`text-xs font-bold px-2 py-1 rounded border ${
-                        groupUser.role === "OWNER" ||
-                        (selectedRoles[groupUser.id] || groupUser.role) === groupUser.role
-                          ? "text-gray-400 border-gray-300 bg-gray-100"
-                          : "text-[#888888] border-[#888888] hover:bg-[#888888] hover:text-white cursor-pointer"
-                      }`}
-                      onClick={() => handleRoleUpdate(groupUser.id)}
-                      disabled={
-                        groupUser.role === "OWNER" ||
-                        (selectedRoles[groupUser.id] || groupUser.role) === groupUser.role
-                      }
-                    >
-                      변경
-                    </button>
-                  )}
-                  {(currentUserRole === "OWNER" || currentUserRole === "MANAGER") && (
-                    <button
-                      className={`text-xs font-bold px-2 py-1 rounded border ${
-                        groupUser.role === "OWNER" || currentUserRole === groupUser.role
-                          ? "text-gray-400 border-gray-300 bg-gray-100"
-                          : "text-[#FA060A] border-[#FA060A] hover:bg-[#FA060A] hover:text-white cursor-pointer"
-                      }`}
-                      onClick={() => handleMemberExpel(groupUser.id)}
-                      disabled={groupUser.role === "OWNER" || currentUserRole === groupUser.role}
-                    >
-                      제외
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className={`transition-all duration-1000 ${isProfileNavOpen ? "ml-64" : "ml-0"}`}>
+      <div className="mt-20 ml-32">
+        <Toaster />
+
+        {/* 내부 컨텐츠: 불필요한 `overflow-y-auto` 제거 */}
+        <div className="pl-8 pr-12 pb-6 transition-all duration-1000 z-0">
+          <h1 className="text-[#4D4650] text-xl font-bold mb-3">유저 설정</h1> 
+          <hr className="mb-5" />
+
+          {/* 스크롤이 필요한 부분을 테이블을 감싸는 div로 조정 */}
+          <div className="scroll overflow-y-auto max-h-[calc(100vh-200px)]">  
+            <table className="w-full table-auto border-collapse border-spacing-0 text-sm">
+              <thead className="text-[#888888] bg-[#fff] sticky top-0 z-10 border-b-2 border-[#D4D4D4]">
+                <tr>
+                  <th className="px-4 py-2 text-left min-w-[120px] w-[30%]">이름</th>
+                  <th className="px-4 py-2 text-left min-w-[180px] w-[30%]">이메일</th>
+                  <th className="px-4 py-2 text-right min-w-[100px] w-[20%]">권한</th>
+                  <th className="px-4 py-2 min-w-[140px] w-[20%]">관리</th>
+                </tr>
+              </thead>
+              <tbody className="text-[#4D4650]">
+                {groupUsers.map((groupUser) => (
+                  <tr key={groupUser.id} className="border-b border-[#D4D4D4] text-xs">
+                    <td className="px-4 py-2 text-left">{groupUser.name}</td>
+                    <td className="px-4 py-2 text-left">{groupUser.email}</td>
+                    <td className="px-4 py-2 text-right">
+                      <CustomSelect
+                        options={roleOptions}
+                        value={selectedRoles[groupUser.id] || groupUser.role}
+                        onChange={(newRole) => handleRoleChange(groupUser.id, newRole)}
+                        disabled={currentUserRole !== "OWNER" || groupUser.role === "OWNER"}
+                      />
+                    </td>
+                    <td className="px-4 py-2 flex justify-center gap-2">
+                      {currentUserRole === "OWNER" && (
+                        <button
+                          className={`text-xs font-bold px-2 py-1 rounded border ${
+                            groupUser.role === "OWNER" ||
+                            (selectedRoles[groupUser.id] || groupUser.role) === groupUser.role
+                              ? "text-gray-400 border-gray-300 bg-gray-100"
+                              : "text-[#888888] border-[#888888] hover:bg-[#888888] hover:text-white cursor-pointer"
+                          }`}
+                          onClick={() => handleRoleUpdate(groupUser.id)}
+                          disabled={
+                            groupUser.role === "OWNER" ||
+                            (selectedRoles[groupUser.id] || groupUser.role) === groupUser.role
+                          }
+                        >
+                          변경
+                        </button>
+                      )}
+                      {(currentUserRole === "OWNER" || currentUserRole === "MANAGER") && (
+                        <button
+                          className={`text-xs font-bold px-2 py-1 rounded border ${
+                            groupUser.role === "OWNER" || currentUserRole === groupUser.role
+                              ? "text-gray-400 border-gray-300 bg-gray-100"
+                              : "text-[#FA060A] border-[#FA060A] hover:bg-[#FA060A] hover:text-white cursor-pointer"
+                          }`}
+                          onClick={() => handleMemberExpel(groupUser.id)}
+                          disabled={groupUser.role === "OWNER" || currentUserRole === groupUser.role}
+                        >
+                          제외
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+        </div>
       </div>
       {/* 네비게이션 바 */}
       <ProfileNavigationBar />
       <GroupNavigationBar />
     </div>
+  </div>
   );
 };
 
