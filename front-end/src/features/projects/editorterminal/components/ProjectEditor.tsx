@@ -28,7 +28,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   userName,
   content
 }) => {
-  const { sendActionRequest, activeFile, setCurrentFile } = useProjectEditor();
+  const { sendActionRequest, activeFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
@@ -45,13 +45,13 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
 
-  setCurrentFile({
-    action: "SAVE",
-    name: fileName,
-    type: 'FILE',
-    path: fileRoute!,
-    content: value,
-  });
+  // setCurrentFile({
+  //   action: "SAVE",
+  //   name: fileName,
+  //   type: 'FILE',
+  //   path: fileRoute!,
+  //   content: value,
+  // });
   
   useEffect(() => {
     setLanguage(extension)
