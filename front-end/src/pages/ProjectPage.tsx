@@ -52,7 +52,7 @@ function ProjectPage() {
     groupId?: string;
     projectId?: string;
   }>();
-  const { getProjectDetails } = useProjectAxios();
+  const { getProjectDetails, turnProjectOn } = useProjectAxios();
 
   // 배포 링크 주소
   const [deployedLink, setDeployedLink] = useState<string>("");
@@ -61,11 +61,25 @@ function ProjectPage() {
   const [projectDetail, setProjectDetail] =
     useState<GetProjectDetailsResponse | null>(null);
   useEffect(() => {
+    
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
-        setIsLoading(false);
-        setDeployedLink(`https://${response.project.deploymentUrl}`);
+        if(!response.project.status){
+          // 프로젝트가 꺼진 상태일 때, 프로젝트를 키는 api를 호출
+          turnProjectOn(Number(groupId), Number(projectId))
+          .catch((error) => {
+            // 400에러(이미 켜져있다는 오류)를 제외하고 프로젝트 페이지로 되돌리기
+            if(!error.response || (error.response.status !== 400)){
+              toast.error(
+                "프로젝트 실행중 오류가 발생하였습니다."
+              );
+              navigate(`/projectlist/${groupId}`);
+            }
+          })
+        }
         setProjectDetail(response);
+        setDeployedLink(`https://${response.project.deploymentUrl}`);
+        setIsLoading(false);
       })
       .catch((error) => {
         console.error("프로젝트 상세 정보 호출 오류: ", error);
