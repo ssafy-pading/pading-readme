@@ -43,15 +43,18 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     arrows: false,
   };
 
-  useEffect(() => {
-    if (localParticipant?.videoTrack) {
-      if (isVideoOff) {
-        localParticipant.videoTrack.stop();
-      } else {
-        startVideo();
-      }
-    }
-  }, [isVideoOff]);
+  // useEffect(() => {
+  //   if (localParticipant?.videoTrack?.isMuted) {
+  //     // if (isVideoOff) {
+  //     //   localParticipant.videoTrack.stop();
+  //     // } else {
+  //     //   startVideo();
+  //     // }
+  //     localParticipant?.videoTrack?.detach();
+  //   } else {
+  //     localParticipant?.videoTrack?.attach();
+  //   }
+  // }, [isVideoOff]);
 
   useEffect(() => {
     if (localParticipant?.audioTrack) {
@@ -116,9 +119,6 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
         </>
       ) : (
         <div className="flex flex-col justify-center h-full">
-          <div className="h-[25px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4 border-b border-[#666871] border-opacity-50">
-            Video
-          </div>
           <div className="flex flex-1 justify-center items-center">
             <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-2 rounded-md hover:scale-110 transition-transform duration-200 ease-in-out">
               <p className="text-xs">화상회의 참여하기</p>
