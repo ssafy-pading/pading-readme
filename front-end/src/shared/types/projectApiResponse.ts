@@ -111,6 +111,7 @@ export type AccessProjectResponse = {
 export type FileTapType = {
   fileName: string;
   fileRouteAndName: string;
+  fileRoute: string,
   content: string;
 }
 

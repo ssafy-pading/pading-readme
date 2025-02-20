@@ -14,13 +14,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import Modal from 'react-modal';
 
 Modal.setAppElement('#root');
-
-// useContext
-import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
-
-
-
 interface FolderProps {
   explorerData: FileNode;
   selectedId: number | null;

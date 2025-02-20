@@ -22,7 +22,6 @@ const ResourceMonitorBar = ({ monitoringDataList }: MonitoringDataProps) => {
       if (monitoringDataRef.current?.rateTime !== lastData.rateTime) {
         setMonitoringData(lastData);
         monitoringDataRef.current = lastData; // 최신 값 업데이트
-        // console.log("Updated monitoring data:", lastData); // 확인용 로그
       }
     }
   }, [monitoringDataList]);

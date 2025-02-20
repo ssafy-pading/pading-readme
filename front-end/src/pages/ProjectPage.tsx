@@ -3,10 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
-import {
-  ProjectEditorProvider,
-  useProjectEditor,
-} from "../context/ProjectEditorContext"; // useContext
+import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
 
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
@@ -40,6 +37,8 @@ import { ResourceData } from "../features/projects/monitoring/types/monitoringTy
 import { GetProjectDetailsResponse } from "../shared/types/projectApiResponse";
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
 import MonitoringDashboard from "../features/projects/monitoring/components/MonitoringDashboard";
+import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
+import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
 function ProjectPage() {
   // 로딩 상태 체크
@@ -158,12 +157,14 @@ function ProjectPage() {
   const [activePanel, setActivePanel] = useState<
     "terminal" | "run" | "resource"
   >("terminal");
+  const [isRunTabInitialized, setIsRunTabInitialized] = useState<boolean>(false)
   // 터미널 실행 버튼이 눌러졌는지에 대한 상태 관리
   const [executeRunCommand, setExecuteRunCommand] = useState<boolean>(false);
   // 파일 실행 버튼 클릭시 호출 되는 함수
   const handleFileExecution = async () => {
     setActivePanel("run"); // 실행 결과 탭으로 전환
     setExecuteRunCommand(true); // 버튼을 누른 상태로 전환
+    setIsRunTabInitialized(true)
   };
 
   {
@@ -232,10 +233,17 @@ function ProjectPage() {
       <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
         <div className="flex items-center h-[25px] text-white text-sm">
           <p className="font-semibold text-center">
-            PROJECT : {projectDetail?.project?.name}
+            프로젝트 이름 : {projectDetail?.project?.name}
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
+          </div>
+        <div>
+            <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
+              <div className="flex items-center space-x-4">
+                <CallButton />
+              </div>
+            </CallSocketProvider>
           </div>
         </div>
         <div className="flex items-center justify-center gap-20">
@@ -340,6 +348,8 @@ function ProjectPage() {
                       groupId={groupId}
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
+                      fileName={file.fileName}
+                      fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
                       userName={user.name}
                       content={file.content}
@@ -382,6 +392,17 @@ function ProjectPage() {
                   {/* 상단 탭과 + 버튼 */}
                   <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
                     <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
+                      {/* Resource 탭 */}
+                      <button
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
+                          activePanel === "resource"
+                            ? "border-b-2 border-b-[#3B82F6] text-white"
+                            : "text-[#858595] hover:text-white"
+                        } cursor-pointer`}
+                        onClick={() => setActivePanel("resource")}
+                      >
+                        Resource
+                      </button>
                       {/* Run 탭 */}
                       <button
                         className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
@@ -396,21 +417,10 @@ function ProjectPage() {
                         Run
                       </button>
 
-                      {/* Resource 탭 */}
-                      <button
-                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                          activePanel === "resource"
-                            ? "border-b-2 border-b-[#3B82F6] text-white"
-                            : "text-[#858595] hover:text-white"
-                        } cursor-pointer`}
-                        onClick={() => setActivePanel("resource")}
-                      >
-                        Resource
-                      </button>
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button
-                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-white cursor-pointer`}
+                          className={`items-center inline-flex justify-center h-full whitespace-nowrap text-[#858595] hover:text-white cursor-pointer`}
                           onClick={() => setActivePanel("terminal")}
                         >
                           Terminal
@@ -488,8 +498,8 @@ function ProjectPage() {
                         groupId={groupId}
                         projectId={projectId}
                         runCommand={projectDetail?.project.runCommand}
-                        mode="run"
                         executeRunCommand={executeRunCommand}
+                        isRunTabInitialized={isRunTabInitialized}
                         onRunCommandExecuted={() => setExecuteRunCommand(false)}
                       />
                     </div>
@@ -504,6 +514,8 @@ function ProjectPage() {
                       <MonitoringDashboard
                         data={monitoringDataList}
                         height={terminalHeight - 30}
+                        cpuDescription={projectDetail?.project.performance.cpuDescription}
+                        memoryDescription={projectDetail?.project.performance.memoryDescription}
                       />
                     </div>
                     {/* 터미널 패널 */}

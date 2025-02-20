@@ -184,14 +184,6 @@ const LoginPage: React.FC = () => {
       console.error(error);
     }
   }
-  const naverLoginClick = async () => {
-    try{
-        await loginWith('naver');
-      }catch(error){
-        toast.error('로그인 실패')
-      console.error(error);
-    }
-  }
   const kakaoLoginClick = async () => {
     try{
         await loginWith('kakao');
@@ -218,10 +210,13 @@ const LoginPage: React.FC = () => {
       </div>
 
       {/* Right Section */}
-      <div className="flex-[1] bg-white rounded-l-xl justify-center relative">
-        <div className="relative w-full top-[25%] flex flex-col items-center">
-          <h1 className="text-5xl font-bold mb-8">Pading</h1>
-          <div className="flex flex-col gap-4 w-1/2 max-w-sm">
+      <div className="flex-[1] bg-white rounded-l-xl relative">
+        <div className="relative w-full top-[35%] flex flex-col items-center">
+          <div className="flex flex-col gap-4 w-[50%] max-w-sm">
+            <h1 className="text-5xl font-bold">Login</h1>
+            <h4 className="relative text-lg font-semibold whitespace-nowrap overflow-visible text-ellipsis pr-3 max-w-[calc(100vw-1.5rem)] mb-2">
+              소셜 로그인으로 간편하게 참여하세요
+            </h4>
             <div className="flex flex-col gap-4 max-w-sm">
               <button className="flex items-center font-semibold justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-gray-100 pl-4" onClick={googleLoginClick}>
                 <svg xmlns="https://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 40 48" aria-hidden="true">
@@ -232,14 +227,6 @@ const LoginPage: React.FC = () => {
                 </svg>
                 <div>
                   <span>Google</span> <span>로그인</span>
-                </div>
-              </button>
-            </div>
-            <div className="flex flex-col gap-4 max-w-sm bg-[#2DB400] rounded-lg">
-              <button className="flex text-white font-semibold items-center justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-[#259600] pl-4" onClick={naverLoginClick}>
-                <img src={naver_logo} alt="naver" className="w-5 h-8" />
-                <div>
-                  <span>Naver</span> <span>로그인</span>
                 </div>
               </button>
             </div>

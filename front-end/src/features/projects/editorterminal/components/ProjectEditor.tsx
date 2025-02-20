@@ -4,13 +4,15 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
+import fileTransformer from "../FileTransFormer";
+import { Payload } from "../../fileexplorer/type/directoryTypes";
 
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
   framework?: string;
   fileName?: string;
+  fileRoute?: string,
   fileRouteAndName?: string;
   userName?: string;
   content?: any
@@ -21,22 +23,17 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   projectId,
   framework,
   fileName,
+  fileRoute,
   fileRouteAndName,
   userName,
   content
 }) => {
-  // ctr+s 눌렀을 때 saveFIle 실행
-  // example:
-  function saveExample(
-    fileName: string, fileRouteAndName: string, value: string
-  ): void {
-     // file.content = value 
-  }
-  const { saveFile } = useProjectEditor();
+  const { sendActionRequest, activeFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
-  const [value, setvalue] = useState<string>("CONTENT");
+  const contentRef = useRef<string>(content)
+  const [value, setvalue] = useState<string>("");
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
@@ -44,19 +41,20 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     ? "ws://localhost:4444"
     : "wss://i12c202.p.ssafy.io:4444";
 
+  const extension:string = fileTransformer(fileName)
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
 
+  // setCurrentFile({
+  //   action: "SAVE",
+  //   name: fileName,
+  //   type: 'FILE',
+  //   path: fileRoute!,
+  //   content: value,
+  // });
+  
   useEffect(() => {
-    switch (framework) {
-      case "NodeJS":
-        setLanguage("javascript");
-        break;
-      case "SpringBoot":
-        setLanguage("java");
-        break;
-    }
-    
+    setLanguage(extension)
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
@@ -84,7 +82,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             return;
           }
           const update = new Uint8Array(arrayBuffer);
-          Y.applyUpdate(doc, update);
+          Y.applyUpdate(doc, update);         
         } catch (error) {
           console.error("⚠️ Error processing Yjs update:", error);
         }
@@ -126,10 +124,29 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   }
 
   // Editor 열릴 때 초기 셋팅
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any, monaco:any) => {
     editorRef.current = editor;
-    editor.focus();
-    setvalue(content)
+    editor.focus(); 
+
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      () => {
+        if (typeof sendActionRequest !== 'function') {
+          console.error('sendActionRequest is not initialized');
+          return;
+        }
+        
+        const currentValue: Payload = {
+          action: 'SAVE',
+          type: "FILE",
+          path: fileRoute!,
+          name: fileName,
+          content: editor.getValue(),
+        };
+        sendActionRequest('SAVE', currentValue);
+      }
+    );
+
     // provider가 아직 생성되지 않은 경우에만 생성
     if (!providerRef.current) {
       providerRef.current = new WebrtcProvider(room, doc, {
@@ -142,7 +159,12 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         providerRef.current.awareness
       );
     }
-  };
+    setTimeout(() => {
+
+      setvalue(content)
+      // 여기서 원하는 추가 로직을 작성하세요.
+    }, 1000); 
+  } ;
 
   return (
     <div className="h-full w-full">

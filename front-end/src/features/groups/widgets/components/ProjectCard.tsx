@@ -143,7 +143,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                       <button
                         className="w-full flex items-center text-left px-4 py-2 text-xs text-gray-500 hover:bg-gray-100"
                         onClick={() => {
-                          console.log('Edit clicked');
                           setIsDropdownOpen(false);
                         }}
                         role="menuitem"
