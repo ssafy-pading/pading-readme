@@ -96,8 +96,8 @@ public class NginxConfigUtil {
     channel.disconnect();
   }
 
-  public String createSubdomain(String podName) {
-    return SUBDOMAIN_PREFIX + podName;
+  public String createSubdomain(String deploymentName) {
+    return SUBDOMAIN_PREFIX + deploymentName;
   }
 
   public void createNginxConfig(String subdomain, int nodePort) {

@@ -1,5 +1,6 @@
 package site.paircoding.paircoding.service;
 
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import site.paircoding.paircoding.entity.Project;
+import site.paircoding.paircoding.entity.enums.LabelKey;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,20 @@ public class TerminalService {
       throws Exception {
 
     Project project = projectService.getProject(groupId, projectId);
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
+
+    // Deployment에서 Pod 목록 가져오기
+    List<Pod> pods = kubernetesClient.pods()
+        .inNamespace(namespace)
+        .withLabel(LabelKey.DEPLOYMENT_NAME.getKey(), deploymentName)
+        .list()
+        .getItems();
+
+    if (pods.isEmpty()) {
+      throw new RuntimeException("해당 Deployment에서 실행 중인 Pod가 없습니다.");
+    }
+
+    String podName = pods.get(0).getMetadata().getName(); // 첫 번째 Pod 선택
 
     ExecWatch execWatch = kubernetesClient.pods()
         .inNamespace(namespace)

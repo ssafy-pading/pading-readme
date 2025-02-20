@@ -30,7 +30,7 @@ public class DirectoryService {
   private final ProjectService projectService;
 
   // todo pod 확인
-  // todo list 조회 시 디렉토리 우선 정렬
+  // todo 메서드 호출마다 pod 찾는 로직 -> 찾아놓은 pod 이용하기
 
 
   public DirectoryListDto get(Integer groupId, Integer projectId, DirectoryListDto dto) {
@@ -40,10 +40,10 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
     String command = "ls -al /app" + dto.getPath();
 
-    String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
+    String[] lines = kubernetesUtil.executeCommand(deploymentName, command).split("\n");
     List<DirectoryChildren> directoryList = new ArrayList<>();
     List<DirectoryChildren> fileList = new ArrayList<>();
 
@@ -87,10 +87,10 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
     String command = "ls -al /app" + dto.getPath() + " | grep " + dto.getName();
 
-    String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
+    String[] lines = kubernetesUtil.executeCommand(deploymentName, command).split("\n");
 
     for (String line : lines) {
       String[] parts = line.split("\\s+");
@@ -108,7 +108,7 @@ public class DirectoryService {
     String path = "/app" + dto.getPath() + "/" + dto.getName();
     command = dto.getType() == DirectoryType.DIRECTORY ? "mkdir " + path : "touch " + path;
 
-    kubernetesUtil.executeCommand(podName, command);
+    kubernetesUtil.executeCommand(deploymentName, command);
 
     return dto;
   }
@@ -120,10 +120,10 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
     String command1 = "ls -al /app" + dto.getPath() + " | grep " + dto.getName();
 
-    String[] lines = kubernetesUtil.executeCommand(podName, command1).split("\n");
+    String[] lines = kubernetesUtil.executeCommand(deploymentName, command1).split("\n");
 
     for (String line : lines) {
       String[] parts = line.split("\\s+");
@@ -142,7 +142,7 @@ public class DirectoryService {
         String path = "/app" + dto.getPath() + "/" + dto.getName();
         String command = "rm -rf " + path;
 
-        kubernetesUtil.executeCommand(podName, command);
+        kubernetesUtil.executeCommand(deploymentName, command);
 
         return dto;
       }
@@ -157,10 +157,10 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
 
     String command = "ls -al /app" + dto.getPath() + " | grep " + dto.getNewName();
-    String[] lines = kubernetesUtil.executeCommand(podName, command).split("\n");
+    String[] lines = kubernetesUtil.executeCommand(deploymentName, command).split("\n");
 
     for (String line : lines) {
       String[] parts = line.split("\\s+");
@@ -176,7 +176,7 @@ public class DirectoryService {
     }
 
     command = "ls -al /app" + dto.getPath() + " | grep " + dto.getOldName();
-    lines = kubernetesUtil.executeCommand(podName, command).split("\n");
+    lines = kubernetesUtil.executeCommand(deploymentName, command).split("\n");
 
     for (String line : lines) {
       String[] parts = line.split("\\s+");
@@ -196,7 +196,7 @@ public class DirectoryService {
         String newPath = "/app" + dto.getPath() + "/" + dto.getNewName();
         command = "mv " + oldPath + " " + newPath;
 
-        kubernetesUtil.executeCommand(podName, command);
+        kubernetesUtil.executeCommand(deploymentName, command);
         break;
       }
     }
@@ -215,10 +215,10 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
     String command = "cat /app" + dto.getPath() + "/" + dto.getName();
 
-    dto.setContent(kubernetesUtil.executeCommand(podName, command));
+    dto.setContent(kubernetesUtil.executeCommand(deploymentName, command));
 
     return dto;
   }
@@ -235,11 +235,11 @@ public class DirectoryService {
 
     Project project = projectService.getProject(groupId, projectId);
 
-    String podName = project.getContainerId();
+    String deploymentName = project.getContainerId();
     String path = "/app" + dto.getPath() + "/" + dto.getName();
     String command = String.format("echo '%s' > %s", dto.getContent().replace("'", "'\\''"), path);
 
-    kubernetesUtil.executeCommand(podName, command);
+    kubernetesUtil.executeCommand(deploymentName, command);
 
     return dto;
   }
