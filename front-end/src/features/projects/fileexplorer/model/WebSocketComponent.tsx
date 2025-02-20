@@ -120,33 +120,14 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
         console.error("STOMP client is not connected");
         return;
       }
-      const personalDestination = `/pub/groups/${groupId}/projects/${projectId}/users/${Number(decoded?.sub)}/directory/${action.toLowerCase()}`;
-      const publicDestination = `/pub/groups/${groupId}/projects/${projectId}/users/all/directory/${action.toLowerCase()}`;
-      
-      let destination;
-      switch(action) {
-        case "LIST":
-        case "CONTENT":
-          destination = personalDestination;
-          break;
-        case "CREATE":
-        case "DELETE":
-        case "RENAME":
-        case "SAVE":
-          destination = publicDestination;
-          break;
-        default:
-          console.error("Unknown action:", action);
-          return;
-      }
-  
+      const destination = `/pub/groups/${groupId}/projects/${projectId}/users/${Number(decoded?.sub)}/directory/${action.toLowerCase()}`;
       clientRef.current.publish({
         destination,
         headers: { Authorization: `Bearer ${access}` },
         body: JSON.stringify({ action, ...payload }),
       });
     },
-    [groupId, projectId, access, decoded]
+    [groupId, projectId, access]
   );
 
   const updateNodesMapWithList = useCallback(
