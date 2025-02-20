@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { GrDocumentConfig } from "react-icons/gr";
 import { FaShapes } from "react-icons/fa6";
 import { GrGroup } from "react-icons/gr";
-import onboarding from "../assets/about_background.png";
+import aboutBackground from "../assets/about_background.png";
 import { useNavigate } from "react-router-dom";
 import TxtRotate from "../app/TxtRotate";
 import "../shared/widgets/Shake.css";
@@ -90,7 +90,7 @@ const AboutPage = () => {
           <div
             className="absolute top-0 left-0 w-full h-full bg-cover bg-center"
             style={{
-              backgroundImage: `url("${onboarding}")`,
+              backgroundImage: `url("${aboutBackground}")`,
             }}
           />
           {/* 반투명 오버레이 */}
