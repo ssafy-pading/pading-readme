@@ -38,7 +38,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
-  const [value, setvalue] = useState<string>("CONTENT");
+  const contentRef = useRef<string>(content)
+  const [value, setvalue] = useState<string>("");
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
@@ -47,10 +48,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     : "wss://i12c202.p.ssafy.io:4444";
 
   const extension:string = fileTransformer(fileName)
-
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
-
+  
   useEffect(() => {
     setLanguage(extension)
     // ✅ WebSocket이 없을 때만 생성
@@ -80,7 +80,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             return;
           }
           const update = new Uint8Array(arrayBuffer);
-          Y.applyUpdate(doc, update);
+          Y.applyUpdate(doc, update);         
         } catch (error) {
           console.error("⚠️ Error processing Yjs update:", error);
         }
@@ -124,11 +124,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   // Editor 열릴 때 초기 셋팅
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
-    editor.focus();
-    if (!value) {
-      setvalue(content)
-    
-    }
+    editor.focus();  
     // provider가 아직 생성되지 않은 경우에만 생성
     if (!providerRef.current) {
       providerRef.current = new WebrtcProvider(room, doc, {
@@ -141,7 +137,12 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         providerRef.current.awareness
       );
     }
-  };
+    setTimeout(() => {
+
+      setvalue(content)
+      // 여기서 원하는 추가 로직을 작성하세요.
+    }, 1000); 
+  } ;
 
   return (
     <div className="h-full w-full">
