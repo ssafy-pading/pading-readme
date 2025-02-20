@@ -125,7 +125,10 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
     editor.focus();
-    setvalue(content)
+    if (!value) {
+      setvalue(content)
+    
+    }
     // provider가 아직 생성되지 않은 경우에만 생성
     if (!providerRef.current) {
       providerRef.current = new WebrtcProvider(room, doc, {
