@@ -249,6 +249,10 @@ public class KubernetesUtil {
           .inNamespace(namespace)
           .withLabel(labelKey.getKey(), labelValue)
           .delete();
+
+      kubernetesClient.persistentVolumes()
+          .withLabel(labelKey.getKey(), labelValue)
+          .delete();
     } catch (Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e);
