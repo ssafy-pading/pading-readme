@@ -83,7 +83,7 @@ interface EditorLanguageMapping {
     yml: "yaml"                 // YAML – .yml
   };
   
-  const fileTransformer = (fileName: string): string => {
+  const fileTransformer = (fileName: string | undefined): string => {
     if (!fileName) return "plaintext";
   
     const extension = fileName.substring(fileName.lastIndexOf('.') + 1);
