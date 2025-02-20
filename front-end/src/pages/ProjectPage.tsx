@@ -5,7 +5,6 @@ import { ResizableBox } from "react-resizable";
 import { VscChromeClose, VscAdd } from "react-icons/vsc";
 import { useProjectEditor } from "../context/ProjectEditorContext"; // useContext
 
-
 // Widgets
 import ProjectLeaveButton from "../features/projects/projectpage/widgets/buttons/ProjectLeaveButton";
 import ParticipantsButton from "../features/projects/projectpage/widgets/buttons/ProjectParticipants";
