@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import site.paircoding.paircoding.entity.Project;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.entity.dto.GroupUserResponse;
 import site.paircoding.paircoding.entity.dto.ProjectCreateRequest;
+import site.paircoding.paircoding.entity.dto.ProjectStatusDto;
 import site.paircoding.paircoding.entity.dto.ProjectWithUsersResponse;
 import site.paircoding.paircoding.entity.enums.Role;
 import site.paircoding.paircoding.global.ApiResponse;
@@ -75,5 +77,29 @@ public class ProjectController {
   public ApiResponse<?> getProjectUserStatus(@LoginUser User user,
       @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
     return ApiResponse.success(projectService.getProjectUserIds(groupId, projectId));
+  }
+
+  @GroupRoleCheck(Role.MEMBER)
+  @GetMapping("/{projectId}/project-status")
+  public ApiResponse<?> getProjectStatus(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
+    return ApiResponse.success(
+        new ProjectStatusDto(projectService.getProjectStatus(groupId, projectId)));
+  }
+
+  @GroupRoleCheck(Role.MEMBER)
+  @PostMapping("/{projectId}/project-status")
+  public ApiResponse<?> turnOnProjectStatus(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
+    projectService.turnOnProjectStatus(groupId, projectId);
+    return ApiResponse.success();
+  }
+
+  @GroupRoleCheck(Role.MEMBER)
+  @PutMapping("/{projectId}/project-status")
+  public ApiResponse<?> turnOffProjectStatus(@LoginUser User user,
+      @PathVariable("groupId") Integer groupId, @PathVariable("projectId") Integer projectId) {
+    projectService.turnOffProjectStatus(groupId, projectId);
+    return ApiResponse.success();
   }
 }

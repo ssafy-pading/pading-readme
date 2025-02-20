@@ -329,4 +329,33 @@ public class KubernetesUtil {
       throw new KubernetesClientException("Unexpected error executing command", e);
     }
   }
+
+  public void scaleDeployment(String deploymentName, int replicas) {
+    try {
+      Deployment deployment = kubernetesClient.apps().deployments()
+          .inNamespace(namespace)
+          .withName(deploymentName)
+          .get();
+
+      if (deployment == null) {
+        throw new RuntimeException("해당 이름의 Deployment를 찾을 수 없습니다: " + deploymentName);
+      }
+
+      // Replica 개수 설정
+      deployment.getSpec().setReplicas(replicas);
+
+      // Deployment 업데이트
+      kubernetesClient.apps().deployments()
+          .inNamespace(namespace)
+          .withName(deploymentName)
+          .replace(deployment);
+
+      System.out.println(
+          "Deployment " + deploymentName + "의 replica 수를 " + replicas + "로 변경하였습니다.");
+    } catch (KubernetesClientException e) {
+      e.printStackTrace();
+      throw new RuntimeException("Deployment replica 조정 중 오류 발생");
+    }
+  }
+
 }
