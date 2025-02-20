@@ -354,6 +354,7 @@ function ProjectPage() {
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
                       fileName={file.fileName}
+                      fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
                   userName={user.name}
                       content={file.content}

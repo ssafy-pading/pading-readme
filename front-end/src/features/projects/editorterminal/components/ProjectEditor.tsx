@@ -11,6 +11,7 @@ interface ProjectEditorProps {
   projectId?: string;
   framework?: string;
   fileName?: string;
+  fileRoute?: string,
   fileRouteAndName?: string;
   userName?: string;
   content?: any
@@ -21,6 +22,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   projectId,
   framework,
   fileName,
+  fileRoute,
   fileRouteAndName,
   userName,
   content
