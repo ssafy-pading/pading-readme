@@ -12,6 +12,7 @@ import {
   GetProjectDetailsResponse,
   GetProjectListResponse,
   GetProjectMemberStatusResponse,
+  GetProjectStatus,
 } from '../types/projectApiResponse';
 
 let isRefreshing = false; // 토큰 갱신 플래그
@@ -220,6 +221,48 @@ const useProjectAxios = () => {
     [baseURL, withAuthHeader, apiRequest]
   );
 
+  /**
+   * 프로젝트 상태 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 멤버 상태 데이터
+   */
+  const getProjectStatus = useCallback((groupId: number, projectId: number): Promise<GetProjectStatus> => {
+      const request = () => axios.get(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/project-status`, withAuthHeader()).then((res) => res.data.data);
+
+      return apiRequest(request, () => getProjectStatus(groupId, projectId));
+    },
+    [baseURL, withAuthHeader, apiRequest]
+  );
+
+  /**
+   * 프로젝트 멤버 상태 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 멤버 상태 데이터
+   */
+  const turnProjectOn = useCallback((groupId: number, projectId: number): Promise<boolean> => {
+    
+      const request = () => axios.post(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/project-status`, null, withAuthHeader()).then(() => true);
+      return apiRequest(request, () => turnProjectOn(groupId, projectId));
+    },
+    [baseURL, withAuthHeader, apiRequest]
+  );
+
+  /**
+   * 프로젝트 멤버 상태 조회 요청 함수
+   * @param groupId - 그룹 ID
+   * @param projectId - 프로젝트 ID
+   * @returns 프로젝트 멤버 상태 데이터
+   */
+  const turnProjectOff = useCallback((groupId: number, projectId: number): Promise<boolean> => {
+      const request = () => axios.put(`${baseURL}/v1/groups/${groupId}/projects/${projectId}/project-status`, null, withAuthHeader()).then(()  => true);
+
+      return apiRequest(request, () => turnProjectOff(groupId, projectId));
+    },
+    [baseURL, withAuthHeader, apiRequest]
+  );
+
   return {
     projectAxios,
     getLanguages,
@@ -233,6 +276,9 @@ const useProjectAxios = () => {
     updateProject,
     deleteProject,
     getProjectMemberStatus,
+    getProjectStatus,
+    turnProjectOn,
+    turnProjectOff,
   };
 };
 
