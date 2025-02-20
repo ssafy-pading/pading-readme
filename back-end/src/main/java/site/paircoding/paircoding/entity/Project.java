@@ -59,6 +59,7 @@ public class Project extends BaseEntity {
   @Column(nullable = false)
   private String runCommand;
 
+  @Setter
   @Column(nullable = false)
   private Boolean status;
 

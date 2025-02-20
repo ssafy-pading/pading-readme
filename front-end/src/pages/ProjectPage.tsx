@@ -182,7 +182,7 @@ function ProjectPage() {
 
   useEffect(() => {
     if (!projectDetail?.project?.containerId) return;
-    // 모니터링 데이터 불러오기
+
     const fetchMonitoringData = async () => {
       try {
         const monitoringData = await getMonitoringResource(
@@ -233,12 +233,12 @@ function ProjectPage() {
       <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
         <div className="flex items-center h-[25px] text-white text-sm">
           <p className="font-semibold text-center">
-            PROJECT : {projectDetail?.project?.name}
+            프로젝트 이름 : {projectDetail?.project?.name}
           </p>
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
           </div>
-          <div>
+        <div>
             <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
               <div className="flex items-center space-x-4">
                 <CallButton />
@@ -307,15 +307,13 @@ function ProjectPage() {
                 {fileTap.map((file) => (
                   <div
                     key={file.fileRouteAndName}
-                    title={file.fileRouteAndName}
-                    className={`flex flex-row items-center 
-                      ${activeFile !== file.fileRouteAndName? "hover:bg-gray-600": ""}`}
+                    className="flex flex-row items-center"
                   >
                     <div
                       className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
                         activeFile === file.fileRouteAndName
                           ? "text-white"
-                          : "text-[#858595]"
+                          : "text-[#858595] hover:text-white"
                       }`}
                       onClick={() => setActiveFile(file.fileRouteAndName)}
                     >
@@ -326,7 +324,7 @@ function ProjectPage() {
                         e.stopPropagation();
                         deleteFile(file.fileRouteAndName);
                       }}
-                      className="text-[#858595] hover:text-white"
+                      className="text-[#858595] hover:text-white ml-1"
                     >
                       <VscChromeClose />
                     </button>
@@ -351,10 +349,11 @@ function ProjectPage() {
                       projectId={projectId}
                       framework={projectDetail?.project.projectImage.language}
                       fileName={file.fileName}
+                      fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
-                  userName={user.name}
+                      userName={user.name}
                       content={file.content}
-                />
+                    />
                   </div>
                 ))
               ) : (
@@ -417,6 +416,7 @@ function ProjectPage() {
                       >
                         Run
                       </button>
+
                       {/* Terminal 탭 */}
                       {activePanel !== "terminal" && (
                         <button

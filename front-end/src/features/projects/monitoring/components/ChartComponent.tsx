@@ -43,17 +43,17 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
     yaxis: {
       min: 0,
       max: 100,
-      tickAmount: 1, // ✅ y축 눈금 개수를 0과 100으로 제한
+      tickAmount: 5, // ✅ y축 눈금 개수를 0과 100으로 제한
       tickPlacement: 'on', // ✅ 눈금 위치를 축 위에 정확히 표시
       opposite: true, // ✅ y축을 오른쪽에 배치
       labels: { 
         show: true, // ✅ y축 숫자 라벨 표시
         align: 'right',
-        offsetX: 20,
-        formatter: (value:any) => { // 디버깅용 콘솔 로그 추가
-          return value.toFixed(0); // 반드시 정수로 변환해서 반환
-        }
-        , // ✅ 무조건 정수 형태로 숫자 반환
+        offsetX: 40,
+        formatter: (value:any) => {
+          // 0과 100일 때만 숫자를 표시, 그 외에는 빈 문자열 반환
+          return value === 0 || value === 100 ? value.toFixed(0) : '';
+        }, // ✅ 무조건 정수 형태로 숫자 반환
         style: {
           colors: '#fff', // ✅ 숫자 색상 설정
           fontSize: '12px',
@@ -62,7 +62,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
         },
       },
       axisTicks: { 
-        show: true, // ✅ y축 눈금 표시
+        show: false, // 
         color: '#fff', // ✅ 눈금 색상 (보이도록 설정)
         width: 2, // ✅ 눈금 두께 설정 (더 잘 보이도록)
       },
@@ -122,17 +122,19 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
   // 최신 데이터 포인트 표시 (value가 1000 이상이면 1024로 나누고 bUnit 표시)
   const lastDataPoint = data[data.length - 1];
   const displayValue = lastDataPoint
-    ? lastDataPoint.value > 1000
-      ? (lastDataPoint.value / 1024).toFixed(2)
-      : lastDataPoint.value.toFixed(2)
-    : '0.00';
+    ? title === 'CPU Usage' 
+      ? (lastDataPoint.value * 1000).toFixed(2)
+      : lastDataPoint.value > 1000
+        ? (lastDataPoint.value / 1024).toFixed(2)
+        : lastDataPoint.value.toFixed(2)
+      : '0.00';
 
   const displayMaxValue = lastDataPoint 
   ? title === 'Memory Usage'
     ? lastDataPoint.value > 1000 
       ? maxValue
       : maxValue * 1024
-    : maxValue
+    : maxValue * 1000
   : '0.00';
 
   const displayUnit = lastDataPoint
@@ -142,12 +144,8 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ title, unit, bUnit, max
     : unit;
   return (
     <div className="w-full pt-[15px] px-[5px] bg-[#141617] rounded-md relative" style={{ height: `${height - 5}px` }}>
-      <h4 className="text-white font-semibold mb-2">{title}</h4>
-      <div className="absolute top-[40px] left-2 text-white text-sm">
-        <p>{displayValue} {displayUnit} / {displayMaxValue} {displayUnit}</p>
-        <p>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</p>
-      </div>
-      <Chart options={chartOptions} series={series} type="area" height={height - 50} />
+      <h4 className="text-white font-semibold mb-2">{title} : <span className={`${data.length > 0 ? (data[data.length - 1].percentage < 80 ? 'text-[#1EC84E]' : 'text-[#FF0000]'): '0%' } `}>{data.length > 0 ? `${data[data.length - 1].percentage}%` : '0%'}</span> | {displayValue} / {displayMaxValue} {displayUnit}</h4>
+      <Chart options={chartOptions} series={series} type="area" height={height - 30} />
     </div>
   );
 };
