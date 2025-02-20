@@ -152,7 +152,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div className="w-full h-[200px] bg-white border border-[#d0d0d7] shadow-md rounded-lg p-4 relative transform transition-transform duration-300 z-10 hover:shadow-xl">
+    <div 
+      className={`${cardStatus ? 'border border-[#bdbdc3] border-2 ' : 'border border-[#d0d0d7] '} 
+        w-full h-[200px] bg-white shadow-md rounded-lg p-4 relative transform transition-transform duration-300 z-10 hover:shadow-xl`}
+    >
 
       {/* 알림 */}
       {hasCall==="active" && (
@@ -168,7 +171,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex gap-2">
           <button 
             onClick={cardStatus ? closeProject : undefined}
-            className={`m-auto ${ cardStatus ? 'text-[#FF484B] transition-colors hover:text-[#CC3A3C] hover:bg-gray-300 p-1 rounded-full focus:outline-none' : 'text-[#999] p-1 cursor-default'}`}
+            className={`m-auto ${ cardStatus ? 'text-green-500 transition-colors hover:text-green-700 hover:bg-gray-300 p-1 rounded-full focus:outline-none' : 'text-[#999] p-1 cursor-default'}`}
           >
             <FaPowerOff />
           </button>
