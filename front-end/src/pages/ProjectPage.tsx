@@ -251,8 +251,6 @@ function ProjectPage() {
           <div className="flex items-center justify-center gap-4 mr-16">
             <RunButton onExecute={handleFileExecution} />
             <DeployedLinkButton link={deployedLink} />
-            <MuteButton />
-            <VideoButton />
           </div>
           <div className="flex">
             <ProjectLeaveButton />
