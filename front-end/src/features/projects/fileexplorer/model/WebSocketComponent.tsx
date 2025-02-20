@@ -37,7 +37,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       fileName: file.fileName,
       fileRouteAndName: file.fileRouteAndName,
       content: file.content
-    }; 
+    };
   
     setFileTap(prevFileTap => {
       if (prevFileTap.some(tapFile => tapFile.fileRouteAndName === newFile.fileRouteAndName)) {
