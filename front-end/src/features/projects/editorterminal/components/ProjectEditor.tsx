@@ -5,6 +5,7 @@ import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 import fileTransformer from "../FileTransFormer";
+import { Payload } from "../../fileexplorer/type/directoryTypes";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -27,14 +28,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   userName,
   content
 }) => {
-  // ctr+s 눌렀을 때 saveFIle 실행
-  // example:
-  function saveExample(
-    fileName: string, fileRouteAndName: string, value: string
-  ): void {
-     // file.content = value 
-  }
-  const { saveFile } = useProjectEditor();
+  const { sendActionRequest, activeFile, setCurrentFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
@@ -50,6 +44,14 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const extension:string = fileTransformer(fileName)
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
+
+  setCurrentFile({
+    action: "SAVE",
+    name: fileName,
+    type: 'FILE',
+    path: fileRoute!,
+    content: value,
+  });
   
   useEffect(() => {
     setLanguage(extension)
@@ -122,9 +124,29 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   }
 
   // Editor 열릴 때 초기 셋팅
-  const handleEditorDidMount = (editor: any) => {
+  const handleEditorDidMount = (editor: any, monaco:any) => {
     editorRef.current = editor;
-    editor.focus();  
+    editor.focus(); 
+
+    editor.addCommand(
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      () => {
+        if (typeof sendActionRequest !== 'function') {
+          console.error('sendActionRequest is not initialized');
+          return;
+        }
+        
+        const currentValue: Payload = {
+          action: 'SAVE',
+          type: "FILE",
+          path: fileRoute!,
+          name: fileName,
+          content: editor.getValue(),
+        };
+        sendActionRequest('SAVE', currentValue);
+      }
+    );
+
     // provider가 아직 생성되지 않은 경우에만 생성
     if (!providerRef.current) {
       providerRef.current = new WebrtcProvider(room, doc, {

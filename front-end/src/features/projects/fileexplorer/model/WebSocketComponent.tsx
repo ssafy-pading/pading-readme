@@ -30,6 +30,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
   const {
     setActiveFile,
     setFileTap,
+    setSendActionRequest,
   } = useProjectEditor();
 
   const addNewFile = (file: FileTapType) => {
@@ -41,9 +42,17 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
     };
   
     setFileTap((prevFileTap) => {
+      // 이미 열린 파일인지 확인
+      const isFileOpen = prevFileTap.some(f => f.fileRouteAndName === newFile.fileRouteAndName);
+  
+      if (isFileOpen) {
+        setActiveFile(newFile.fileRouteAndName);
+        return prevFileTap; // 기존 상태 유지
+      }
+  
       const updatedFileTap = [...prevFileTap, newFile];
       setActiveFile(newFile.fileRouteAndName); // 새 파일을 활성 파일로 설정
-      
+  
       return updatedFileTap;
     });
   };
@@ -96,7 +105,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
         body: JSON.stringify({ action, ...payload }),
       });
     },
-    [groupId, projectId, access]
+    [groupId, projectId, access, decoded?.sub]
   );
 
   const updateNodesMapWithList = useCallback(
@@ -144,8 +153,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       connectHeaders: { Authorization: `Bearer ${access}` },
-      onConnect: () => {
-        console.log(decoded);
+      onConnect: () => { 
         clientRef.current = client;
         const personalTopic = `/sub/groups/${groupId}/projects/${projectId}/users/${Number(decoded?.sub)}/directory`;
         const publicTopic = `/sub/groups/${groupId}/projects/${projectId}/users/all/directory`;
@@ -172,7 +180,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
           try {
             const data = JSON.parse(message.body);
             if (["CREATE", "DELETE", "RENAME", "SAVE"].includes(data.action)) {
-              sendActionRequest("LIST", { path: "/" });
+              sendActionRequest("LIST", { path: data.path });
             }
           } catch (error) {
             console.error("Error processing public message:", error);
@@ -202,7 +210,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
     };
     nodesMapRef.current.set(1, initialNode);
     setTreeData(buildTreeFromMap());
-    // setSendActionRequest(sendActionRequest);
+    setSendActionRequest(() => sendActionRequest);
 
     const client = initializeWebSocket();
 
@@ -210,7 +218,7 @@ const WebSocketComponent = forwardRef<RefreshWebSocket>((_, ref) => {
       client.deactivate();
       nodesMapRef.current.clear();
     };
-  }, [buildTreeFromMap, initializeWebSocket]); // setSendActionRequest, 
+  }, [buildTreeFromMap, initializeWebSocket, setSendActionRequest]);
 
   // RefreshWebSocket implementation
   const refreshWebSocket = useCallback(() => {
