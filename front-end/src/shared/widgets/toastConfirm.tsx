@@ -12,9 +12,9 @@ export const confirmToast = (message: string): Promise<boolean> => {
         >
           <div className="flex items-center mb-4">
             <AiOutlineWarning className="text-red-600 w-8 h-8 mr-3 animate-pulse" />
-            <h2 className="text-red-800 font-extrabold text-xl">Warning</h2>
+            <h2 className="font-extrabold text-xl">Warning</h2>
           </div>
-          <p className="text-red-700 font-semibold text-lg mb-4">{message}</p>
+          <p className="font-semibold text-lg mb-4">{message}</p>
           <div className="flex justify-end space-x-2">
             <button
               onClick={() => {
@@ -23,7 +23,7 @@ export const confirmToast = (message: string): Promise<boolean> => {
               }}
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
             >
-              Cancel
+              취소
             </button>
             <button
               onClick={() => {
@@ -32,7 +32,7 @@ export const confirmToast = (message: string): Promise<boolean> => {
               }}
               className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-bold"
             >
-              Confirm
+              확인
             </button>
           </div>
         </div>
