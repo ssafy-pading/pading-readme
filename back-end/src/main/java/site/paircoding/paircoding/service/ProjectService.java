@@ -122,6 +122,7 @@ public class ProjectService {
         .performance(performance)
         .name(request.getName())
         .containerId(deploymentName)
+        .status(true)
         .build();
 
     // 유효한 유저들을 필터링 (해당 유저가 그룹에 속한 유저인지 확인)
@@ -277,6 +278,43 @@ public class ProjectService {
     nginxConfigUtil.deleteNginxConfig(project.getContainerId());
 
     redisUtil.delete(CALL_STATUS_KEY.formatted(projectId));
+  }
+
+  public boolean getProjectStatus(Integer groupId, Integer projectId) {
+    Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+
+    return project.getStatus();
+  }
+
+  @Transactional
+  public void turnOnProjectStatus(Integer groupId, Integer projectId) {
+    Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+
+    if (project.getStatus()) {
+      throw new BadRequestException("Project is already on");
+    }
+
+    project.setStatus(true);
+    projectRepository.save(project);
+
+    kubernetesUtil.scaleDeployment(project.getContainerId(), 1);
+  }
+
+  @Transactional
+  public void turnOffProjectStatus(Integer groupId, Integer projectId) {
+    Project project = projectRepository.findByGroupIdAndProjectId(groupId, projectId)
+        .orElseThrow(() -> new BadRequestException("Project not found"));
+
+    if (!project.getStatus()) {
+      throw new BadRequestException("project is not on");
+    }
+
+    project.setStatus(false);
+    projectRepository.save(project);
+
+    kubernetesUtil.scaleDeployment(project.getContainerId(), 0);
   }
 
   public List<GroupUserResponse> getProjectUserIds(Integer groupId, Integer projectId) {
