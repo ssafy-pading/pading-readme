@@ -267,7 +267,9 @@ const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
           // 상위 컴포넌트에 전달할 최종 객체
           const projectListItem: ProjectListItem = {
             project: newProject,
-            users: transformedUsers,
+            users: transformedUsers,           
+            callStatus: "inactive",
+
           };
 
           // 상위 컴포넌트에 새로운 프로젝트 정보를 전달합니다.

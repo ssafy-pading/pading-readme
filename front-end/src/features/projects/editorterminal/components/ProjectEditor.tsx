@@ -4,7 +4,7 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
-import { FileTapType } from "../../../../shared/types/projectApiResponse";
+import fileTransformer from "../FileTransFormer";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -46,19 +46,13 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     ? "ws://localhost:4444"
     : "wss://i12c202.p.ssafy.io:4444";
 
+  const extension:string = fileTransformer(fileName)
+
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
 
   useEffect(() => {
-    switch (framework) {
-      case "NodeJS":
-        setLanguage("javascript");
-        break;
-      case "SpringBoot":
-        setLanguage("java");
-        break;
-    }
-    
+    setLanguage(extension)
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
