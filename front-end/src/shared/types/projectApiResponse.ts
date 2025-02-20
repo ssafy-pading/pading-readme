@@ -124,3 +124,8 @@ export type GetProjectMemberStatusResponse = {
   role: string;
   status: boolean | null;
 }[];
+
+// 프로젝트 스테이터스 api 반환값
+export type GetProjectStatus = {
+  status: boolean;
+}
