@@ -14,6 +14,9 @@ import {
 import { HiBadgeCheck } from "react-icons/hi";
 import profileImage from "../../../assets/profile_image.png";
 
+// css
+import "../../groups/widgets/css/NavScrollBar.css";
+
 // 상태관리 및 토스트
 import ProjectSpinner from '../../projects/projectpage/widgets/spinners/ProjectSpinner';
 import { Toaster, toast } from 'react-hot-toast';
@@ -450,7 +453,7 @@ const ProfileNavigationBar: React.FC = () => {
 
             {toggleStates.isMemberOpen && (
               <div
-                className="ml-10 mb-2 overflow-y-auto"
+                className="nav-scroll ml-10 mb-2 overflow-y-auto"
                 style={{
                   height: isProfileNavOpen ? "calc(100vh - 200px)" : "calc(100vh - 350px)",
                 }}
