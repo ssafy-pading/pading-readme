@@ -124,8 +124,8 @@ const LoginPage: React.FC = () => {
     // 유저가 about페이지를 본적이 있는지 체크하는 함수
     const checkViewAbout = () => {
       if(!localStorage.getItem("viewAbout")){
-        // window.location.href='/about';
-        navigate('about', { replace: true});
+        window.location.href='/about';
+        // navigate('about', { replace: true});
       }
     }
 
