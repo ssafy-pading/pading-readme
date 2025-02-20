@@ -108,6 +108,7 @@ const RoleChangePage: React.FC = () => {
         users.map((user) => (user.id === userId ? { ...user, role: newRole } : user))
     );
     toast.success("권한 변경에 성공했습니다.");
+    window.location.reload();
   } catch (error: any) {
     if (error.response && error.response.status === 403) {
       toast.error("권한이 부족합니다. 그룹 오너에게 문의하세요")};
@@ -122,13 +123,14 @@ const RoleChangePage: React.FC = () => {
 // 멤버 제외
 const handleMemberExpel = async (userId: number) => {
   if (!groupId) return;
-  const confirmDelete = window.confirm("정말 이 멤버를 제외하시겠습니까?");
+  const confirmDelete = await confirmToast("정말 이 멤버를 제외하시겠습니까?");
   if (!confirmDelete) return;
     try {
       const success = await expelMember(groupId, userId);
       if (success) {
         setGroupUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
         toast.success("멤버가 성공적으로 제외되었습니다.");
+        window.location.reload();
       }
     } catch (error) {
       console.error(`Error expelling user ${userId}:`, error);
@@ -147,7 +149,7 @@ const handleMemberExpel = async (userId: number) => {
           <hr className="mb-5" />
 
           {/* 스크롤이 필요한 부분을 테이블을 감싸는 div로 조정 */}
-          <div className="scroll overflow-y-auto max-h-[calc(100vh-200px)]">  
+          <div className="scroll overflow-y-auto min-h-[300px] max-h-[calc(100vh-200px)]">  
             <table className="w-full table-auto border-collapse border-spacing-0 text-sm">
               <thead className="text-[#888888] bg-[#fff] sticky top-0 z-10 border-b-2 border-[#D4D4D4]">
                 <tr>
