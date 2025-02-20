@@ -17,7 +17,6 @@ import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/Pr
 
 // 로그인 이미지
 import kakao_logo from "../assets/kakao_logo.svg"
-import naver_logo from "../assets/naver_logo.svg"
 
 declare global {
   interface Window {

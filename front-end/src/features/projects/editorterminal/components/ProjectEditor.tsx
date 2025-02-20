@@ -12,11 +12,23 @@ interface ProjectEditorProps {
   projectId?: string;
   framework?: string;
   fileName?: string;
-  fileRoute?: string,
+  fileRoute?: string;
   fileRouteAndName?: string;
   userName?: string;
-  content?: any
+  content?: any;
 }
+
+// 자동저장 디바운스 함수
+// function debounce(func: Function, delay: number) {
+//   let timer: NodeJS.Timeout;
+
+//   return (...args: any[]) => {
+//     if (timer) clearTimeout(timer);
+//     timer = setTimeout(() => {
+//       func(...args);
+//     }, delay);
+//   };
+// }
 
 const ProjectEditor: React.FC<ProjectEditorProps> = ({
   groupId,
@@ -26,13 +38,13 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   fileRoute,
   fileRouteAndName,
   userName,
-  content
+  content,
 }) => {
   const { sendActionRequest, activeFile } = useProjectEditor();
-  const room: string = `${groupId}-${projectId}-${fileRouteAndName}`
+  const room: string = `${groupId}-${projectId}-${fileRouteAndName}`;
   const editorRef = useRef<any>(null);
   const providerRef = useRef<WebrtcProvider | null>(null); // provider ref 추가
-  const contentRef = useRef<string>(content)
+  const contentRef = useRef<string>(content);
   const [value, setvalue] = useState<string>("");
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
@@ -41,9 +53,37 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
     ? "ws://localhost:4444"
     : "wss://i12c202.p.ssafy.io:4444";
 
-  const extension:string = fileTransformer(fileName)
+  const extension: string = fileTransformer(fileName);
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
+
+  ///////////////////////// 자동완성 기능 /////////////////////////
+  // const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
+  //// 자동완성 함수: Monaco의 기본 자동완성(Trigger Suggest) 호출
+  // const autoComplete = () => {
+  //   if (editorRef.current) {
+  //     setIsSaving(true);
+  //     const currentValue: Payload = {
+  //       action: "SAVE",
+  //       type: "FILE",
+  //       path: fileRoute!,
+  //       name: fileName,
+  //       content: editorRef.current.getValue(),
+  //     };
+
+  //     if (typeof sendActionRequest !== "function") {
+  //       console.error("sendActionRequest is not initialized");
+  //       return;
+  //     }
+  //     sendActionRequest("SAVE", currentValue);
+  //     setTimeout(() => {
+  //       setIsSaving(false);
+  //     }, 2000);
+  //   }
+  // };
+
+  // 코드 칠 때마다 디바운싱 적용 (2000ms 후 실행)
+  // const debouncedAutoComplete = useRef(debounce(autoComplete, 2000)).current;
 
   // setCurrentFile({
   //   action: "SAVE",
@@ -52,9 +92,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   //   path: fileRoute!,
   //   content: value,
   // });
-  
+  ////////////////////////////////////////////////////////////////
   useEffect(() => {
-    setLanguage(extension)
+    // 확장자에 따른 모나코 에디터 언어 설정정
+    setLanguage(extension);
+
     // ✅ WebSocket이 없을 때만 생성
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
@@ -64,7 +106,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
           JSON.stringify({
             type: "subscribe",
             topics: [room],
-            userName
+            userName,
           })
         );
       };
@@ -82,7 +124,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             return;
           }
           const update = new Uint8Array(arrayBuffer);
-          Y.applyUpdate(doc, update);         
+          Y.applyUpdate(doc, update);
         } catch (error) {
           console.error("⚠️ Error processing Yjs update:", error);
         }
@@ -91,7 +133,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       doc.on("update", (update) => {
         sendYjsUpdate(update);
       });
-    } 
+    }
 
     // ✅ 컴포넌트가 언마운트될 때 기존 WebSocket 연결 해제
     return () => {
@@ -117,35 +159,35 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
             type: "Buffer",
             data: Array.from(update), // Uint8Array -> JSON 배열 변환
           },
-          userName
+          userName,
         })
       );
     }
   }
 
   // Editor 열릴 때 초기 셋팅
-  const handleEditorDidMount = (editor: any, monaco:any) => {
+  const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
-    editor.focus(); 
+    editor.focus();
 
-    editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-      () => {
-        if (typeof sendActionRequest !== 'function') {
-          console.error('sendActionRequest is not initialized');
-          return;
-        }
-        
-        const currentValue: Payload = {
-          action: 'SAVE',
-          type: "FILE",
-          path: fileRoute!,
-          name: fileName,
-          content: editor.getValue(),
-        };
-        sendActionRequest('SAVE', currentValue);
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      if (typeof sendActionRequest !== "function") {
+        console.error("sendActionRequest is not initialized");
+        return;
       }
-    );
+      // setIsSaving(true);
+      const currentValue: Payload = {
+        action: "SAVE",
+        type: "FILE",
+        path: fileRoute!,
+        name: fileName,
+        content: editor.getValue(),
+      };
+      sendActionRequest("SAVE", currentValue);
+      setTimeout(() => {
+        // setIsSaving(false);
+      }, 2000);
+    });
 
     // provider가 아직 생성되지 않은 경우에만 생성
     if (!providerRef.current) {
@@ -159,12 +201,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         providerRef.current.awareness
       );
     }
+    // 파일 열고 에디터 첫 마운팅 시 파일 값 렌더링!
     setTimeout(() => {
-
-      setvalue(content)
-      // 여기서 원하는 추가 로직을 작성하세요.
-    }, 1000); 
-  } ;
+      setvalue(content);
+    }, 1000);
+  };
 
   return (
     <div className="h-full w-full">
@@ -175,16 +216,18 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         language={language}
         onMount={handleEditorDidMount} // Editor 초기화
         value={value}
-        onChange={(value) => 
-          {
-            setvalue(value || "")  
-          }
-        }
+        onChange={(value) => {
+          setvalue(value || "");
+          // debouncedAutoComplete();
+        }}
         options={{
           mouseWheelZoom: true, // 마우스 휠로 줌
           smoothScrolling: true, // 부드러운 스크롤
         }}
       />
+      {/* {isSaving && (
+        <div className="autosave-indicator top-4 left-1/2">Saving...</div>
+      )} */}
     </div>
   );
 };
