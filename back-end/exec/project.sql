@@ -1,0 +1,4 @@
+insert into pading.project (id, created_at, updated_at, auto_stop, container_id, deployment_url, is_deleted, name, node_port, run_command, status, group_id, performance_id, image_tag)
+values  (9, '2025-02-20 16:21:20.991709', '2025-02-20 16:21:25.035149', false, 'springboot-project-yoml', 'deploy-springboot-project-yoml.pair-coding.site', false, 'springboot-project', 30200, './gradlew bootrun', true, 1, 2, 'ubuntu-spring'),
+        (10, '2025-02-20 16:49:50.406961', '2025-02-20 23:30:32.074870', false, 'nodejs-project-oygu', 'deploy-nodejs-project-oygu.pair-coding.site', false, 'nodejs-project', 30201, 'npm start', true, 1, 1, 'ubuntu-nodejs'),
+        (13, '2025-02-20 22:06:53.531997', '2025-02-20 22:06:54.467620', false, 'team1-yhhx', 'deploy-team1-yhhx.pair-coding.site', false, 'team1', 30202, 'npm start', true, 8, 1, 'ubuntu-nodejs');
