@@ -29,14 +29,10 @@ const CodeReviewComponent: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-[#212426] text-white">
-      {/* 선택된 파일 표시 */}
-      <div className="h-[30px] bg-[#2F3336] flex items-center font-bold text-white text-xs px-4">
-        
-      </div>
 
       {/* 코드 리뷰 결과 영역 */}
       <div className="custom-scrollbar flex-1 overflow-y-auto p-3 flex flex-col space-y-4 relative">
-        <p className="sticky">선택된 파일 : {fileName || "파일 없음"}</p>
+        <p className="sticky">선택된 파일 : {fileName || "없음"}</p>
         {status === 'failed' && error && (
           <p className="text-red-500">에러 발생: {error}</p>
         )}
