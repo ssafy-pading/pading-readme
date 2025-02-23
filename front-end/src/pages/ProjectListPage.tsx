@@ -81,6 +81,15 @@ const ProjectListPage: React.FC = () => {
   const [projectList, setProjectList] = useState<ProjectListItem[]>([]); // 프로젝트 목록록
   const [onlineProjectMembers, setOnlineProjectMembers] = useState<{ [projectId: number]: GetProjectMemberStatusResponse }>({});
   const [projectCall, setProjectCall] = useState<Record<number, string>>({});
+  
+  // 상태 추가: 각 데이터 로딩 여부를 관리
+  const [groupMembersLoaded, setGroupMembersLoaded] = useState(false);
+  const [groupDetailsLoaded, setGroupDetailsLoaded] = useState(false);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
+  
+    // 전체 로딩 상태: 세 값이 모두 true일 때 데이터가 모두 로드된 것으로 판단
+    const isDataLoaded = groupMembersLoaded && groupDetailsLoaded && projectsLoaded;
+
 
   // ───── 유저 역할, 그룹 멤버 가져오기 ─────
   useEffect(() => {
@@ -93,6 +102,8 @@ const ProjectListPage: React.FC = () => {
         if (user) {
           setUserRole(user.role);
         }
+        // 데이터 로드 완료 처리
+        setGroupMembersLoaded(true);
       } catch (error:any) {
         console.error("그룹 멤버 조회 중 오류:", error);
       }
@@ -111,6 +122,8 @@ const ProjectListPage: React.FC = () => {
       try {
         const data = await getGroupDetails(groupId);
         setGroupName(data.name);
+        // 데이터 로드 완료 처리
+        setGroupDetailsLoaded(true);
       } catch (error) {
         console.error('그룹 상세 정보 조회 중 오류:', error);
       }
@@ -134,6 +147,8 @@ const ProjectListPage: React.FC = () => {
           callStatusMap[projectItem.project.id] = projectItem.callStatus; // "active" 또는 "inactive"
         });
         setProjectCall(callStatusMap);
+        // 데이터 로드 완료 처리
+        setProjectsLoaded(true);
       } catch (err) {
         console.error('프로젝트 목록을 불러오는 데 실패했습니다:', err);
       }
@@ -278,6 +293,10 @@ const ProjectListPage: React.FC = () => {
   const handleProjectCreate = (newProjectItem: ProjectListItem) => {
     setProjectList((prev) => [newProjectItem, ...prev]);
   };
+
+  if (!isDataLoaded) {
+    return <div>Loading...</div>;
+  }
 
   return (
     

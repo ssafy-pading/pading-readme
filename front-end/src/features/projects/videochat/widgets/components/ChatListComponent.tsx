@@ -21,12 +21,8 @@ interface ChatMessage {
   createdAt: string;
 }
 
-interface ChatRoomProps {
-  isChatOpen: boolean;
-  onOpenStateChange: (state: boolean) => void;
-}
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) => {
+const ChatRoom: React.FC = () => {
     const [chatList, setChatList] = useState<ChatMessage[]>([]);
     const [message, setMessage] = useState<string>('');
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
@@ -146,10 +142,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
     setMessage(e.target.value);
   };
 
-  const toggleState = () => {
-    onOpenStateChange(!isChatOpen);
-  };
-
   // 시간 변환 함수
   const formatTime = (dateString: string): string => {
     const date = new Date(dateString);
@@ -179,13 +171,9 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
 
   return (
     <div className="flex flex-col h-full bg-[#212426] text-white">
-      <div className={`${isChatOpen ? '' : 'hidden'} h-[30px] bg-[#2F3336] flex items-center justify-between font-bold text-white text-xs px-4`}>
-        Chat
-        {isChatOpen ? <button onClick={toggleState}>▼</button> : null}
-      </div>
       {/* 메시지 목록 영역 */}
       <div
-        className={`custom-scrollbar ${isChatOpen ? '' : 'hidden'} flex-1 overflow-y-auto p-1 flex flex-col space-y-4`}
+        className='custom-scrollbar flex-1 overflow-y-auto p-1 flex flex-col space-y-4'
         ref={chatContainerRef}
       >
         {chatList.map((chat, index) => {
@@ -250,19 +238,12 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
       </div>
 
       {/* 채팅 입력창 + 전송 버튼 */}
-      <div className={`${isChatOpen ? 'bg-[#212426]' : 'bg-[#2F3336]'} w-full h-[50px]`}>
+      <div className='bg-[#212426] w-full h-[50px]'>
         <form
-          onSubmit={
-            isChatOpen
-              ? handleSendChat
-              : (e) => {
-                  e.preventDefault();
-                  toggleState();
-                }
-          }
+          onSubmit={handleSendChat}
           className="flex w-full justify-between px-1.5 py-2"
         >
-          <div className={`${isChatOpen ? '' : 'hidden'} mx-1`}>
+          <div className='mx-1'>
             <input
               type="text"
               name="message"
@@ -273,7 +254,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ isChatOpen, onOpenStateChange }) =>
               className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
-          <div className={`${isChatOpen ? 'hidden' : ''} font-bold text-white text-md pl-1.5`}>Chat</div>
           <div className="ml-1">
             <button
               type="submit"

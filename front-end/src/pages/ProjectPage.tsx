@@ -40,7 +40,14 @@ import MonitoringDashboard from "../features/projects/monitoring/components/Moni
 import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
 import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
+// 코드리뷰 redux
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from "../app/redux/store";
+import { setCode, setFileName } from "../app/redux/codeSlice";
+
 function ProjectPage() {
+  const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
+
   // 로딩 상태 체크
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -61,21 +68,21 @@ function ProjectPage() {
   const [projectDetail, setProjectDetail] =
     useState<GetProjectDetailsResponse | null>(null);
   useEffect(() => {
-    
+
     getProjectDetails(Number(groupId), Number(projectId))
       .then((response) => {
-        if(!response.project.status){
+        if (!response.project.status) {
           // 프로젝트가 꺼진 상태일 때, 프로젝트를 키는 api를 호출
           turnProjectOn(Number(groupId), Number(projectId))
-          .catch((error) => {
-            // 400에러(이미 켜져있다는 오류)를 제외하고 프로젝트 페이지로 되돌리기
-            if(!error.response || (error.response.status !== 400)){
-              toast.error(
-                "프로젝트 실행중 오류가 발생하였습니다."
-              );
-              navigate(`/projectlist/${groupId}`);
-            }
-          })
+            .catch((error) => {
+              // 400에러(이미 켜져있다는 오류)를 제외하고 프로젝트 페이지로 되돌리기
+              if (!error.response || (error.response.status !== 400)) {
+                toast.error(
+                  "프로젝트 실행중 오류가 발생하였습니다."
+                );
+                navigate(`/projectlist/${groupId}`);
+              }
+            })
         }
         setProjectDetail(response);
         setDeployedLink(`https://${response.project.deploymentUrl}`);
@@ -226,6 +233,22 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleTabChange = (fileRouteAndName: string) => {
+    setActiveFile(fileRouteAndName);
+  
+    // ✅ 현재 선택된 파일 정보 가져오기
+    const selectedFile = fileTap.find((file) => file.fileRouteAndName === fileRouteAndName);
+  
+    // ✅ 선택된 파일이 존재하면 Redux 상태 업데이트
+    if (selectedFile) {
+      dispatch(setCode(selectedFile.content || ""));
+      dispatch(setFileName(selectedFile.fileName || ""));
+    }
+  };
+  
   if (isLoading) {
     return (
       <div>
@@ -252,7 +275,7 @@ function ProjectPage() {
           <div className="flex items-center justify-center text-[#d4d4d4] ml-5">
             <ParticipantsButton />
           </div>
-        <div>
+          <div>
             <CallSocketProvider groupId={Number(groupId)} projectId={Number(projectId)}>
               <div className="flex items-center space-x-4">
                 <CallButton />
@@ -265,8 +288,6 @@ function ProjectPage() {
           <div className="flex items-center justify-center gap-4 mr-16">
             <RunButton onExecute={handleFileExecution} />
             <DeployedLinkButton link={deployedLink} />
-            <MuteButton />
-            <VideoButton />
           </div>
           <div className="flex">
             <ProjectLeaveButton />
@@ -290,11 +311,10 @@ function ProjectPage() {
           }}
           handle={
             <span
-              className={`absolute right-0 top-0 h-full ${
-                isHorizontalDragging
-                  ? "w-[3px] bg-[#3B82F6] cursor-col-resize"
-                  : "w-[2px] bg-[#666871] opacity-50"
-              }
+              className={`absolute right-0 top-0 h-full ${isHorizontalDragging
+                ? "w-[3px] bg-[#3B82F6] cursor-col-resize"
+                : "w-[2px] bg-[#666871] opacity-50"
+                }
               hover:w-[2px] hover:bg-[#3B82F6] cursor-col-resize`}
             />
           }
@@ -318,18 +338,18 @@ function ProjectPage() {
             {/* 파일 탭 자리 */}
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
-                {fileTap.map((file) => (
+              {fileTap.filter((file) => file !== null).map((file) => (
+                <div key={file.fileRouteAndName} className="flex flex-row items-center">
                   <div
                     key={file.fileRouteAndName}
                     className="flex flex-row items-center"
                   >
                     <div
-                      className={`cursor-pointer px-2 py-1 whitespace-nowrap ${
-                        activeFile === file.fileRouteAndName
-                          ? "text-white"
-                          : "text-[#858595] hover:text-white"
-                      }`}
-                      onClick={() => setActiveFile(file.fileRouteAndName)}
+                      className={`cursor-pointer px-2 py-1 whitespace-nowrap ${activeFile === file.fileRouteAndName
+                        ? "text-white"
+                        : "text-[#858595] hover:text-white"
+                        }`}
+                      onClick={() => handleTabChange(file.fileRouteAndName)}
                     >
                       {file.fileName}
                     </div>
@@ -343,11 +363,17 @@ function ProjectPage() {
                       <VscChromeClose />
                     </button>
                   </div>
-                ))}
+                </div>
+              ))}
               </div>
             </div>
             {/* 코드 편집기 자리 */}
             <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
+              <div>
+                {isSaving && (
+                  <div className="autosave-indicator absolute top-1/3 left-2/4 transform -translate-x-1/2 z-10">Code is Saving...</div>
+                )}
+              </div>
               {fileTap.length > 0 ? (
                 fileTap.map((file) => (
                   <div
@@ -365,8 +391,10 @@ function ProjectPage() {
                       fileName={file.fileName}
                       fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
-                      userName={user.name}
+                      userName={user?.name || "Unknown"}
                       content={file.content}
+                      isSaving={isSaving}
+                      setIsSaving={setIsSaving}
                     />
                   </div>
                 ))
@@ -374,6 +402,7 @@ function ProjectPage() {
                 <div className="text-3xl font-bold text-center mt-40 text-[#2F3336] select-none">
                   <p>Pading IDE</p>
                 </div>
+
               )}
             </div>
 
@@ -387,11 +416,10 @@ function ProjectPage() {
                 resizeHandles={["n"]}
                 handle={
                   <span
-                    className={`absolute top-0 left-0 w-full ${
-                      isVerticalDragging
-                        ? "h-[3px] bg-[#3B82F6] cursor-row-resize"
-                        : "h-[2px] bg-[#666871] opacity-50"
-                    }
+                    className={`absolute top-0 left-0 w-full ${isVerticalDragging
+                      ? "h-[3px] bg-[#3B82F6] cursor-row-resize"
+                      : "h-[2px] bg-[#666871] opacity-50"
+                      }
                     cursor-row-resize hover:h-[2px] hover:bg-[#3B82F6]`}
                   />
                 }
@@ -408,22 +436,20 @@ function ProjectPage() {
                     <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
                       {/* Resource 탭 */}
                       <button
-                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                          activePanel === "resource"
-                            ? "border-b-2 border-b-[#3B82F6] text-white"
-                            : "text-[#858595] hover:text-white"
-                        } cursor-pointer`}
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${activePanel === "resource"
+                          ? "border-b-2 border-b-[#3B82F6] text-white"
+                          : "text-[#858595] hover:text-white"
+                          } cursor-pointer`}
                         onClick={() => setActivePanel("resource")}
                       >
                         Resource
                       </button>
                       {/* Run 탭 */}
                       <button
-                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                          activePanel === "run"
-                            ? "border-b-2 border-b-[#3B82F6] text-white"
-                            : "text-[#858595] hover:text-white"
-                        } cursor-pointer`}
+                        className={`items-center inline-flex justify-center h-full whitespace-nowrap ${activePanel === "run"
+                          ? "border-b-2 border-b-[#3B82F6] text-white"
+                          : "text-[#858595] hover:text-white"
+                          } cursor-pointer`}
                         onClick={() => {
                           setActivePanel("run");
                         }}
@@ -450,12 +476,11 @@ function ProjectPage() {
                         {terminalIds.map((id, index) => (
                           <div key={id} className="flex flex-row items-center">
                             <div
-                              className={`items-center inline-flex justify-center h-full whitespace-nowrap ${
-                                activePanel === "terminal" &&
+                              className={`items-center inline-flex justify-center h-full whitespace-nowrap ${activePanel === "terminal" &&
                                 activeTerminal === index
-                                  ? "border-b-2 border-b-[#3B82F6] text-white"
-                                  : "text-[#858595] hover:text-white"
-                              } cursor-pointer`}
+                                ? "border-b-2 border-b-[#3B82F6] text-white"
+                                : "text-[#858595] hover:text-white"
+                                } cursor-pointer`}
                               onClick={() => {
                                 setActivePanel("terminal");
                                 setActiveTerminal(index);
