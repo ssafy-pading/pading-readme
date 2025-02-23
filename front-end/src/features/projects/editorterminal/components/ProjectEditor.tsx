@@ -57,6 +57,25 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const doc = useRef(new Y.Doc()).current;
   const type = doc.getText("monaco");
 
+  // 커서 WebSocket
+  const [cursorPositions, setCursorPositions] = useState({});
+  const [cursorDecorations, setCursorDecorations] = useState<string[]>([])
+  // 커서 스타일을 위한 CSS 추가
+  const cursorStyles = `
+    .remote-cursor {
+      background-color: #0088ff;
+      width: 2px !important;
+    }
+    .remote-cursor-text {
+      background-color: #0088ff;
+      color: white;
+      padding: 2px 5px;
+      border-radius: 3px;
+      position: absolute;
+      white-space: nowrap;
+    }
+  `;
+
   ///////////////////////// 자동완성 기능 /////////////////////////
   const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
   //// 자동완성 함수: Monaco의 기본 자동완성(Trigger Suggest) 호출
@@ -112,21 +131,36 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       };
       ws.current.onclose = () => console.log("❌ YJS WebSocket Disconnected");
       // 웹소켓 서버의 바이너리 코드 받기기
+      // WebSocket 메시지 수신 처리 추가
       ws.current.onmessage = async (event) => {
         try {
-          let arrayBuffer;
-          if (event.data instanceof Blob) {
-            arrayBuffer = await event.data.arrayBuffer();
-          } else if (event.data instanceof ArrayBuffer) {
-            arrayBuffer = event.data;
-          } else {
-            console.error("⚠️ Received unexpected data type:", event.data);
-            return;
+          // 기존의 바이너리 데이터 처리
+          if (event.data instanceof Blob || event.data instanceof ArrayBuffer) {
+            let arrayBuffer;
+            if (event.data instanceof Blob) {
+              arrayBuffer = await event.data.arrayBuffer();
+            } else {
+              arrayBuffer = event.data;
+            }
+            const update = new Uint8Array(arrayBuffer);
+            Y.applyUpdate(doc, update);
           }
-          const update = new Uint8Array(arrayBuffer);
-          Y.applyUpdate(doc, update);
+          // 커서 업데이트 처리 추가
+          else {
+            const data = JSON.parse(event.data);
+            if (data.type === "cursor-update") {
+              setCursorPositions(prev => ({
+                ...prev,
+                [data.userName]: {
+                  lineNumber: data.position.lineNumber,
+                  column: data.position.column,
+                  color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+                }
+              }));
+            }
+          }
         } catch (error) {
-          console.error("⚠️ Error processing Yjs update:", error);
+          console.error("⚠️ Error processing WebSocket message:", error);
         }
       };
       // yjs문서 변경 감지
@@ -201,14 +235,70 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         providerRef.current.awareness
       );
     }
+    editor.onDidChangeCursorPosition((event) => {
+      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify({
+          type: "cursor-update",
+          room: room,
+          userName: userName,
+          position: {
+            lineNumber: event.position.lineNumber,
+            column: event.position.column
+          }
+        }));
+      }
+    });
     // 파일 열고 에디터 첫 마운팅 시 파일 값 렌더링!
     setTimeout(() => {
       setvalue(content);
     }, 1000);
   };
+  // 커서 데코레이션 렌더링
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    const decorations = Object.entries(cursorPositions).map(([name, pos]) => {
+      // pos가 유효한지 확인
+      if (!pos || !pos.lineNumber || !pos.column) return null;
+
+      try {
+        return {
+          range: {
+            startLineNumber: pos.lineNumber,
+            startColumn: pos.column,
+            endLineNumber: pos.lineNumber,
+            endColumn: pos.column
+          },
+          options: {
+            className: 'remote-cursor',
+            afterContentClassName: 'remote-cursor-text',
+            after: {
+              content: name,
+              color: pos.color || '#0088ff'
+            }
+          }
+        };
+      } catch (error) {
+        console.error('Error creating decoration:', error);
+        return null;
+      }
+    }).filter(Boolean); // null 값 제거
+
+    try {
+      // 이전 데코레이션 제거 후 새로운 데코레이션 적용
+      const newDecorations = editorRef.current.deltaDecorations(
+        cursorDecorations,
+        decorations
+      );
+      setCursorDecorations(newDecorations);
+    } catch (error) {
+      console.error('Error applying decorations:', error);
+    }
+  }, [cursorPositions]);
 
   return (
     <div className="h-full w-full">
+      <style>{cursorStyles}</style>
       <Editor
         height="100%"
         width="100%"
