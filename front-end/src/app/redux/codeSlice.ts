@@ -25,15 +25,22 @@ export const fetchCodeReview = createAsyncThunk<
   string,
   { rejectValue: string }
 >(
-  'code/fetchCodeReview',
+  'code/fetchCodeReviewDirect',
   async (code, thunkAPI) => {
     try {
-      const response = await fetch('http://localhost:8080/api/chatgpt-review', { // ✅ 백엔드 서버로 요청
+      // API 키는 보안상 노출되지 않도록 환경변수 등 안전한 방식으로 관리하세요.
+      const apiKey = import.meta.env.VITE_APP_GPT_API_KEY;
+      if (!apiKey) {
+        return thunkAPI.rejectWithValue("API 키가 설정되지 않았습니다.");
+      }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
+          model: "gpt-3.5-turbo",
           messages: [
             {
               role: 'system',
@@ -57,7 +64,7 @@ Provide a structured review with **examples of suggested improvements** and **ex
 🔹 **All responses must be written in Korean.**
 🔹 **If there are typographical errors or syntax issues, return the corrected version inside a JavaScript code block (\`\`\`js ... \`\`\`).**
 🔹 **Please provide your review in a structured format, using clear and professional Korean language.**
-`,
+`
             },
             {
               role: 'user',
@@ -69,11 +76,10 @@ Provide a structured review with **examples of suggested improvements** and **ex
       });
 
       if (!response.ok) {
-        return thunkAPI.rejectWithValue('ChatGPT API 요청에 실패하였습니다.');
+        return thunkAPI.rejectWithValue('OpenAI API 요청에 실패하였습니다.');
       }
-
       const data = await response.json();
-      const review = data.review; // ✅ 서버에서 반환된 review 사용
+      const review = data.choices?.[0]?.message?.content;
       if (!review) {
         return thunkAPI.rejectWithValue('리뷰 결과를 가져오지 못했습니다.');
       }
@@ -84,20 +90,16 @@ Provide a structured review with **examples of suggested improvements** and **ex
   }
 );
 
-
 const codeSlice = createSlice({
   name: 'code',
   initialState,
   reducers: {
-    // 모나코 에디터에서 받아온 코드를 저장합니다.
     setCode: (state, action: PayloadAction<string>) => {
       state.code = action.payload;
     },
-    // 파일 이름을 저장하는 액션
     setFileName: (state, action: PayloadAction<string>) => {
       state.fileName = action.payload;
     },
-    // 리뷰 결과를 초기화하는 액션
     clearReview: (state) => {
       state.review = '';
       state.status = 'idle';
