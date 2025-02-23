@@ -1,5 +1,6 @@
 package site.paircoding.paircoding.util;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -53,5 +54,13 @@ public class RedisUtil {
 
   public long getExpire(String key) {
     return redisTemplate.getExpire(key, TimeUnit.SECONDS);
+  }
+
+  public boolean hasKey(String key) {
+    return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+  }
+  
+  public Set<String> keys(String pattern) {
+    return redisTemplate.keys(pattern);
   }
 }

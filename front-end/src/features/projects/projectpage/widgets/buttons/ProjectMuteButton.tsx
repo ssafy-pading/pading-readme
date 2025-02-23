@@ -1,24 +1,30 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleMute } from '../../../../../app/redux/videoConferenceSlice';
+import { RootState } from '../../../../../app/redux/store';
 import { BsFillMicFill, BsFillMicMuteFill } from 'react-icons/bs';
 
-function MuteButton() {
-    const [isMute, setIsMute] = useState<boolean>(false);
-    const [isClicked, setIsClicked] = useState<boolean>(false);
+const MuteButton = () => {
+  const [isPressed, setIsPressed] = useState<boolean>(false);
+  const dispatch = useDispatch();
+  const isMute = useSelector((state: RootState) => state.videoConference.isMute);
 
-    return (
-        <button onClick={() => setIsMute(!isMute)} className='text-white'>
-            <div
-                className={`cursor-pointer transition-transform duration-200 ease-in-out ${isClicked ? "scale-75" : "scale-100"
-                    }`}
-                onClick={() => setIsMute(!isMute)}
-                onMouseDown={() => setIsClicked(true)}
-                onMouseUp={() => setIsClicked(false)} 
-                onMouseLeave={() => setIsClicked(false)}
-            >
-                {isMute ? <BsFillMicMuteFill className="text-md" /> : <BsFillMicFill className="text-md" />}
-            </div>
-        </button>
-    )
-}
+  const handleMuteToggle = () => {
+    dispatch(toggleMute());
+  };
+
+  return (
+    <button
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
+      onClick={handleMuteToggle}
+      className={`text-white cursor-pointer transition-transform duration-200 ease-in-out ${isPressed ? "scale-75" : "scale-100"
+      }`}
+    >
+      {isMute ? <BsFillMicMuteFill /> : <BsFillMicFill />}
+    </button>
+  );
+};
 
 export default MuteButton;

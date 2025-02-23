@@ -4,7 +4,9 @@ import AudioComponent from "./AudioComponent";
 import VideoComponent from "./VideoComponent";
 import { TiArrowSortedUp, TiArrowSortedDown } from "react-icons/ti";
 import "./VerticalCarousel.css";
-import { VerticalCarouselProps } from '../type/VideoConferenceTypes'
+import { VerticalCarouselProps, RemoteParticipant } from "../../type/VideoConferenceTypes";
+import { useSelector } from 'react-redux';
+import { RootState } from "../../../../../app/redux/store";
 
 const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   isChatOpen,
@@ -12,29 +14,17 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
   remoteParticipants,
   hasJoined,
   onJoin,
+  startVideo
 }) => {
   const sliderRef = useRef<Slider>(null);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const slideHeight = isChatOpen
-        ? `calc(var(--carousel-container-height) / 2)`
-        : `calc(var(--carousel-container-height) / 4)`;
-
-      document.documentElement.style.setProperty("--slide-height", slideHeight);
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isChatOpen]);
+  const isVideoOff = useSelector((state: RootState) => state.videoConference.isVideoOff);
+  const isMute = useSelector((state: RootState) => state.videoConference.isMute);
 
   const getSlideCount = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
     const maxSlides = isChatOpen ? 2 : 4;
     return Math.min(participantCount, maxSlides);
   };
-
 
   const shouldShowCarouselButtons = () => {
     const participantCount = (localParticipant ? 1 : 0) + remoteParticipants.length;
@@ -53,27 +43,47 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
     arrows: false,
   };
 
+  // useEffect(() => {
+  //   if (localParticipant?.videoTrack?.isMuted) {
+  //     // if (isVideoOff) {
+  //     //   localParticipant.videoTrack.stop();
+  //     // } else {
+  //     //   startVideo();
+  //     // }
+  //     localParticipant?.videoTrack?.detach();
+  //   } else {
+  //     localParticipant?.videoTrack?.attach();
+  //   }
+  // }, [isVideoOff]);
+
+  useEffect(() => {
+    if (localParticipant?.audioTrack) {
+      const track = localParticipant.audioTrack.mediaStreamTrack;
+      track.enabled = !isMute;
+    }
+  }, [isMute, localParticipant]);
+
   return (
     <div className="relative w-full h-full flex flex-col bg-[#212426] overflow-hidden">
       {hasJoined ? (
         <>
           <Slider ref={sliderRef} {...settings}>
             {localParticipant && localParticipant.videoTrack && (
-              <div key={localParticipant.id} className="relative p-2">
+              <div key={localParticipant.id} className="relative p-2 pb-0">
                 <VideoComponent
                   videoTrack={localParticipant.videoTrack}
                   participantIdentity={localParticipant.identity}
                   muted={true}
                 />
-                <div className="absolute top-0 left-4 mt-2 text-sm text-white">
+                <div className="absolute top-0 left-4 mt-2 text-xs text-white font-bold">
                   {localParticipant.identity && "(You)"}
                 </div>
               </div>
             )}
 
-            {remoteParticipants.map((participant) =>
+            {remoteParticipants.map((participant: RemoteParticipant) =>
               participant.videoTrack ? (
-                <div key={participant.id} className="relative p-2">
+                <div key={participant.id} className="relative p-2 pt-1 pb-0">
                   {participant.videoTrack && (
                     <VideoComponent
                       videoTrack={participant.videoTrack}
@@ -83,8 +93,8 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
                   {participant.audioTrack && (
                     <AudioComponent audioTrack={participant.audioTrack} />
                   )}
-                  <div className="absolute top-0 left-4 mt-2 text-sm text-white">
-                    {participant.identity}
+                  <div className="absolute top-0 left-4 mt-2 text-xs text-white font-bold">
+                    {participant.name}
                   </div>
                 </div>
               ) : null)}
@@ -109,12 +119,9 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({
         </>
       ) : (
         <div className="flex flex-col justify-center h-full">
-          <div className="h-[25px] bg-[#2F3336] flex items-center font-bold text-white text-xs pl-4 border-b border-[#666871] border-opacity-50">
-            Video
-          </div>
           <div className="flex flex-1 justify-center items-center">
-            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-3 rounded-lg">
-              <p className="text-sm">화상회의 참여하기</p>
+            <button onClick={onJoin} className="join-btn bg-blue-500 text-white p-2 rounded-md hover:scale-110 transition-transform duration-200 ease-in-out">
+              <p className="text-xs">화상회의 참여하기</p>
             </button>
           </div>
         </div>

@@ -28,7 +28,7 @@ const LeaveModal: React.FC<LeaveModalProps> = ({
       navigate('/');
 
     }catch(error){
-      console.log(error);
+      console.error(error);
     }
   }
 

@@ -18,10 +18,10 @@ const useAuthAxios = () => {
    * 기존에는 axiosInstance와 인터셉터를 사용했지만,
    * 여기서는 단순히 OAuth2 엔드포인트로 리다이렉션 합니다.
    */
-  const loginWithGoogle = useCallback(async (): Promise<void> => {
+  const loginWith = useCallback(async (domain:string): Promise<void> => {
     try {
       // 구글 로그인 요청은 리다이렉션으로 처리되므로, 별도의 axios 호출 없이 URL 변경
-      window.location.href = `${baseURL}/oauth2/authorization/google`;
+      window.location.href = `${baseURL}/oauth2/authorization/${domain}`;
     } catch (error) {
       console.error('Error during Google login:', error);
       throw error;
@@ -51,7 +51,7 @@ const useAuthAxios = () => {
   // }, [baseURL, withAuthHeader]);
 
   return {
-    loginWithGoogle,
+    loginWith,
     // loginWithKakao,
     // validateJwt,
   };

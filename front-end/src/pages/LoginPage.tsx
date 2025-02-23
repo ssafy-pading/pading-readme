@@ -1,9 +1,3 @@
-// 1. 맨 처음 페이지 로딩 시 리프레시 토큰 확인
-// 1-1. 리프레시 토큰이 있다면 로그인 처리 하는 로직 만들기
-// 2. 로그인을 하면 현재 페이지로 리다이렉트, params에 토큰을 확인하여 클라이언트에서 로그인 처리 진행
-// 3. 1, 2번 처리 후 context에 프로필도 넣어줘야 함
-
-// src/pages/LoginPage.tsx
 import React, { useEffect, useState } from 'react';
 import TxtRotate from '../app/TxtRotate';
 import useAuthAxios from '../shared/apis/useAuthAxios';
@@ -20,6 +14,9 @@ import { Toaster, toast } from 'react-hot-toast';
 
 // 스피너
 import ProjectSpinner from "../features/projects/projectpage/widgets/spinners/ProjectSpinner";
+
+// 로그인 이미지
+import kakao_logo from "../assets/kakao_logo.svg"
 
 declare global {
   interface Window {
@@ -61,7 +58,7 @@ interface ParticlesOptions {
 }
 
 const LoginPage: React.FC = () => {
-  const { loginWithGoogle } = useAuthAxios();
+  const { loginWith } = useAuthAxios();
   const { getGroups } = useGroupAxios();
 
   // 스피너 체크
@@ -74,12 +71,12 @@ const LoginPage: React.FC = () => {
   // redux dispatch, 유저 객체 사용
   const dispatch = useDispatch<AppDispatch>();
 
+
   
   // 페이지 처음 로드 시, 리프레시 토큰이 있는지 확인
   const refreshCheck = async ():Promise<void> => {
     // 여기에 리프레시 토큰 확인 후 로그인 처리하는 로직
     if(localStorage.getItem("refreshToken")){
-      console.log("리프레시 토큰 이씀");
       
       // 기존 사용자 정보와 상태 초기화
       dispatch(resetUserState());
@@ -87,7 +84,6 @@ const LoginPage: React.FC = () => {
       try{
         // 그룹 정보 가져오기
         const groupData = await getGroups();
-        console.log(groupData);
         if (groupData.groups.length > 0) {
           const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
           navigate(`/projectlist/${groupId}`);
@@ -95,7 +91,7 @@ const LoginPage: React.FC = () => {
           navigate(`/nogroup`);
         }
       }catch(error){
-        console.log(error);
+        console.error(error);
         setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
       }
     }else{
@@ -111,7 +107,6 @@ const LoginPage: React.FC = () => {
     try{
       // 그룹 정보 가져오기
       const groupData = await getGroups();
-      console.log(groupData);
       if (groupData.groups.length > 0) {
         const groupId = groupData.groups[0].id; // 첫 번째 그룹의 id 사용
         navigate(`/projectlist/${groupId}`);
@@ -119,81 +114,94 @@ const LoginPage: React.FC = () => {
         navigate(`/nogroup`);
       }
     }catch(error){
-      console.log(error);
+      console.error(error);
       setIsLoading(false); // 오류 없으면 로그인 화면 렌더링
     }
   }
 
   useEffect(() => {
     
+    // 유저가 about페이지를 본적이 있는지 체크하는 함수
+    const checkViewAbout = () => {
+      if(!localStorage.getItem("viewAbout")){
+        window.location.href='/about';
+        // navigate('about', { replace: true});
+      }
+    }
 
-    refreshCheck();
+    // about페이지를 본 적이 없으면 about으로 보냄
+    checkViewAbout();
 
+    // URL 파라미터에서 토큰 확인
+    const params = new URLSearchParams(window.location.search);
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+  
+    // 토큰 파라미터가 있으면 로그인 로직을 먼저 처리하고 refreshCheck는 호출하지 않음
+    if (accessToken && refreshToken) {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      const redirectPath = sessionStorage.getItem("redirectPath");
+      if (redirectPath) {
+        sessionStorage.removeItem("redirectPath");
+        navigate(redirectPath);
+      } else {
+        redirectDefault();
+      }
+    } else {
+      // URL에 토큰 파라미터가 없을 경우에만 refreshCheck 호출
+      refreshCheck();
+    }
+  
     // Particles.js 로드
-    const particle = ():void => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/particles.js';
+    const particle = (): void => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/particles.js";
       script.onload = () => {
-        // Particles.js 설정
-        (window).particlesJS('particles-js', {
+        window.particlesJS("particles-js", {
           particles: {
             number: { value: 100 },
-            color: { value: '#ffffff' },
-            shape: { type: 'edge' },
+            color: { value: "#ffffff" },
+            shape: { type: "edge" },
             opacity: { value: 0.8, random: true },
             size: { value: 2 },
-            move: { enable: true, speed: 1, direction: 'top', straight: true, random: true },
+            move: { enable: true, speed: 1, direction: "top", straight: true, random: true },
             line_linked: { enable: false },
           },
-          interactivity: { 
-            detect_on: 'canvas',
-            events:{
-              onhover: { enable: false }, 
-              onclick: { enable: false }, 
-            },
-            resize:true 
+          interactivity: {
+            detect_on: "canvas",
+            events: { onhover: { enable: false }, onclick: { enable: false } },
+            resize: true,
           },
           modes: {
-            grab: { "distance": 0 },
-            bubble: { "distance": 0 },
-            repulse: { "distance": 0 },
-            push: { "particles_nb": 0 },
-            remove: { "particles_nb": 0 }
-          }
+            grab: { distance: 0 },
+            bubble: { distance: 0 },
+            repulse: { distance: 0 },
+            push: { particles_nb: 0 },
+            remove: { particles_nb: 0 },
+          },
         });
       };
       document.body.appendChild(script);
-    }
-
-    // 파라미터 체크
-    const params = new URLSearchParams(location.search);
-    const accessToken:string|null = params.get("accessToken");
-    const refreshToken:string|null = params.get("refreshToken");
-
-    // 파라미터가 있을 경우, 컨텍스트와 로컬에 담아주기
-    const tokenCheck = () => {
-      if(accessToken&&refreshToken){
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        const redirectPath = sessionStorage.getItem("redirectPath");
-        if(redirectPath){
-          sessionStorage.removeItem("redirectPath");
-          navigate(redirectPath);
-        }else{
-          redirectDefault();
-        }
-      }
-    }
-    tokenCheck();
+    };
+  
     particle();
-  }, [isLoading]);
+  }, []);
 
   const googleLoginClick = async () => {
     try{
-        await loginWithGoogle();
+        await loginWith('google');
       }catch(error){
         toast.error('로그인 실패')
-      console.log(error);
+      console.error(error);
+    }
+  }
+  const kakaoLoginClick = async () => {
+    try{
+        await loginWith('kakao');
+      }catch(error){
+        toast.error('로그인 실패')
+      console.error(error);
     }
   }
 
@@ -209,22 +217,43 @@ const LoginPage: React.FC = () => {
         {/* <div className="absolute w-[50%] h-[70%]"> */}
         <div className="absolute w-[50%] h-[50%]">
           <h1 className="text-5xl font-bold mb-[3rem]">Pading</h1>
-          <TxtRotate className="text-lg" texts={["서비스 소개", "최고의 페어 프로그래밍 경험"]} period={2000} />
+          <TxtRotate className="text-lg" texts={["최고의 페어 프로그래밍 경험"]} period={2000} />
         </div>
       </div>
 
       {/* Right Section */}
-      <div className="flex-[1] bg-white rounded-l-xl justify-center relative">
-        <div className="relative w-full top-[25%] flex flex-col items-center">
-          <h1 className="text-5xl font-bold mb-8">Pading</h1>
-          <div className="flex flex-col gap-4 w-3/4 max-w-sm">
-            <button className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg py-2 px-4 hover:bg-gray-100" onClick={googleLoginClick}>
-            <svg xmlns="https://www.w3.org/2000/svg" width="20" height="24" viewBox="0 0 40 48" aria-hidden="true"><path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path><path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path><path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path><path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path></svg>
-              <span>Google로 로그인</span>
-            </button>
+      <div className="flex-[1] bg-white rounded-l-xl relative">
+        <div className="relative w-full top-[35%] flex flex-col items-center">
+          <div className="flex flex-col gap-4 w-[50%] max-w-sm">
+            <h1 className="text-5xl font-bold">Login</h1>
+            <h4 className="relative text-lg font-semibold whitespace-nowrap overflow-visible text-ellipsis pr-3 max-w-[calc(100vw-1.5rem)] mb-2">
+              소셜 로그인으로 간편하게 참여하세요
+            </h4>
+            <div className="flex flex-col gap-4 max-w-sm">
+              <button className="flex items-center font-semibold justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-gray-100 pl-4" onClick={googleLoginClick}>
+                <svg xmlns="https://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 40 48" aria-hidden="true">
+                  <path fill="#4285F4" d="M39.2 24.45c0-1.55-.16-3.04-.43-4.45H20v8h10.73c-.45 2.53-1.86 4.68-4 6.11v5.05h6.5c3.78-3.48 5.97-8.62 5.97-14.71z"></path>
+                  <path fill="#34A853" d="M20 44c5.4 0 9.92-1.79 13.24-4.84l-6.5-5.05C24.95 35.3 22.67 36 20 36c-5.19 0-9.59-3.51-11.15-8.23h-6.7v5.2C5.43 39.51 12.18 44 20 44z"></path>
+                  <path fill="#FABB05" d="M8.85 27.77c-.4-1.19-.62-2.46-.62-3.77s.22-2.58.62-3.77v-5.2h-6.7C.78 17.73 0 20.77 0 24s.78 6.27 2.14 8.97l6.71-5.2z"></path>
+                  <path fill="#E94235" d="M20 12c2.93 0 5.55 1.01 7.62 2.98l5.76-5.76C29.92 5.98 25.39 4 20 4 12.18 4 5.43 8.49 2.14 15.03l6.7 5.2C10.41 15.51 14.81 12 20 12z"></path>
+                </svg>
+                <div>
+                  <span>Google</span> <span>로그인</span>
+                </div>
+              </button>
+            </div>
+            <div className="flex flex-col gap-4 max-w-sm bg-[#f9e000] rounded-lg">
+              <button className="flex items-center font-semibold justify-around gap-2 border border-gray-400 rounded-lg py-1 px-4 hover:bg-[#D6C000] pl-4" onClick={kakaoLoginClick}>
+                <img src={kakao_logo} alt="kakao" className="w-5 h-8" />
+                <div>
+                  <span>Kakao</span> <span>로그인</span>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

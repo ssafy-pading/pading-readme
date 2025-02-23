@@ -26,14 +26,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
   public OAuth2User loadUser(OAuth2UserRequest userRequest) {
     OAuth2User oAuth2User = super.loadUser(userRequest);
     String provider = userRequest.getClientRegistration().getRegistrationId();
-    String providerId = oAuth2User.getName();
-    Map<String, Object> attributes = oAuth2User.getAttributes();
-    String email = (String) attributes.get("email");
-    String name = (String) attributes.get("name");
+    User user = socialLogin(provider, oAuth2User);
 
-    User user = getOrSave(provider, providerId, email, name);
-
-    return new CustomUserDetails(user, attributes);
+    return new CustomUserDetails(user, null);
   }
 
   /**
@@ -60,4 +55,57 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
     return user.get();
   }
+
+  private User socialLogin(String provider, OAuth2User oAuth2User) {
+    switch (provider) {
+      case "google":
+        return google(provider, oAuth2User);
+      case "kakao":
+        return kakao(provider, oAuth2User);
+      case "naver":
+        return naver(provider, oAuth2User);
+      default:
+        throw new RuntimeException("Unsupported provider: " + provider);
+    }
+  }
+
+  private User google(String provider, OAuth2User oAuth2User) {
+    String providerId = oAuth2User.getName();
+
+    Map<String, Object> attributes = oAuth2User.getAttributes();
+    String email = (String) attributes.get("email");
+    String name = (String) attributes.get("name");
+
+    return getOrSave(provider, providerId, email, name);
+  }
+
+  private User kakao(String provider, OAuth2User oAuth2User) {
+    String providerId = oAuth2User.getName();
+
+    Map<String, Object> kakaoAccount = oAuth2User.getAttribute("kakao_account");
+    Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+    String email = (String) kakaoAccount.get("email");
+    String name = (String) profile.get("nickname");
+
+    return getOrSave(provider, providerId, email, name);
+  }
+
+  private User naver(String provider, OAuth2User oAuth2User) {
+    Map<String, Object> attributes = oAuth2User.getAttributes();
+    String providerId = (String) ((Map) attributes.get("response")).get("id");
+    String email = (String) ((Map) attributes.get("response")).get("email");
+    String name = (String) ((Map) attributes.get("response")).get("name");
+
+    return getOrSave(provider, providerId, email, name);
+  }
 }
+
+
+
+
+
+
+
+
+
+

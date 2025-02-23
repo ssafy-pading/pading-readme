@@ -8,6 +8,7 @@ import {
     RemoteVideoTrack,
     RemoteAudioTrack,
 } from "livekit-client";
+import { useParams } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import VerticalCarousel from './VerticalCarousel';
 import Modal from "react-modal";
@@ -15,9 +16,13 @@ import VideoComponent from "./VideoComponent";
 import { IoClose } from "react-icons/io5";
 import { FiInfo } from "react-icons/fi";
 import { PulseLoader } from "react-spinners";
-import { Participant } from "../../type/VideoConferenceTypes"
+import { Participant, RemoteParticipant } from "../../type/VideoConferenceTypes"
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from "../../../../../app/redux/store";
+import MuteButton from "../../../projectpage/widgets/buttons/ProjectMuteButton";
+import { BsFillCameraVideoFill, BsCameraVideoOffFill } from 'react-icons/bs';
 
-const APPLICATION_SERVER_URL = import.meta.env.VITE_APPLICATION_SERVER_URL;
+const APPLICATION_SERVER_URL = import.meta.env.VITE_APP_API_BASE_URL;
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
 type TrackInfo = {
@@ -25,24 +30,32 @@ type TrackInfo = {
     participantIdentity: string;
 };
 
-const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) => {
+const OpenViduComponent: React.FC<{
+    isChatOpen: boolean;
+}> = ({ isChatOpen }) => {
     const [room, setRoom] = useState<Room | undefined>(undefined);
     const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack | undefined>(undefined);
     const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack | undefined>(undefined);
     const [remoteTracks, setRemoteTracks] = useState<TrackInfo[]>([]);
     const [localParticipant, setLocalParticipant] = useState<Participant | null>(null);
-    const [remoteParticipants, setRemoteParticipants] = useState<Participant[]>([]);
+    const [remoteParticipants, setRemoteParticipants] = useState<RemoteParticipant[]>([]);
     const [hasJoined, setHasJoined] = useState<boolean>(false);
+    const [isMute, setIsMute] = useState<boolean>(false);
+    const [isPressed, setIsPressed] = useState<boolean>(false);
 
     const [isPreviewOpen, setIsPreviewOpen] = useState<boolean>(false);
 
     const [previewVideoTrack, setPreviewVideoTrack] = useState<LocalVideoTrack | undefined>(undefined);
-    const [previewAudioTrack, setPreviewAudioTrack] = useState<LocalAudioTrack | undefined>(undefined);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [volume, setVolume] = useState<number>(0);
     const [showPermissionModal, setShowPermissionModal] = useState<boolean>(false);
 
     const [joiningRoom, setJoiningRoom] = useState<boolean>(false);
+
+    const { groupId, projectId } = useParams();
+
+    const dispatch = useDispatch();
+    const onLeave = useSelector((state: RootState) => state.videoConference.onLeave);
 
     useEffect(() => {
         if (localVideoTrack || localAudioTrack) {
@@ -74,7 +87,15 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                 remoteMap[participantIdentity].audioTrack = trackPublication.track as RemoteAudioTrack;
             }
         });
-        setRemoteParticipants(Object.values(remoteMap));
+        const newRemoteParticipants = Object.values(remoteMap).map((participant) => {
+            const remoteParticipant = room?.remoteParticipants.get(participant.id);
+            return {
+                ...participant,
+                name: remoteParticipant?.name || participant.identity
+            };
+        });
+        // console.log("newRemoteParticipants: ", newRemoteParticipants);
+        setRemoteParticipants(newRemoteParticipants);
     }, [localVideoTrack, localAudioTrack, remoteTracks]);
 
     const openPreview = async () => {
@@ -83,15 +104,25 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
             const videoTrack = tracks.find((t) => t.kind === "video") as LocalVideoTrack;
             const audioTrack = tracks.find((t) => t.kind === "audio") as LocalAudioTrack;
             setPreviewVideoTrack(videoTrack);
-            setPreviewAudioTrack(audioTrack);
 
-            if (!audioRef.current) {
-                audioRef.current = new Audio();
-            }
-            audioTrack.attach(audioRef.current);
-            await audioRef.current.play();
+            // 오디오 컨텍스트 생성
+            const audioContext = new AudioContext();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(new MediaStream([audioTrack.mediaStreamTrack]));
+            microphone.connect(analyser);
 
+            // 볼륨 레벨 모니터링
+            const checkVolume = () => {
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                analyser.getByteFrequencyData(dataArray);
+                const volumeLevel = Math.max(...dataArray);
+                setVolume(volumeLevel);
+                requestAnimationFrame(checkVolume);
+            };
+
+            checkVolume();
             setIsPreviewOpen(true);
+
         } catch (error) {
             console.error("Preview error:", error);
             setShowPermissionModal(true);
@@ -100,10 +131,10 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
 
     const closePreview = () => {
         previewVideoTrack?.stop();
-        previewAudioTrack?.stop();
         setPreviewVideoTrack(undefined);
-        setPreviewAudioTrack(undefined);
         setIsPreviewOpen(false);
+        audioRef.current?.remove();
+        audioRef.current = null;
     };
 
     // 룸에 실제로 입장
@@ -111,7 +142,7 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         setJoiningRoom(true);
         const room = new Room();
         setRoom(room);
-        console.log("room", room);
+        // console.log("room", room);
 
         room.on(RoomEvent.TrackSubscribed, (_track, publication, participant) => {
             setRemoteTracks((prev) => [
@@ -129,13 +160,15 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         try {
             const token = await getToken();
             await room.connect(LIVEKIT_URL, token);
+            // console.log("token: ", token);
 
             await room.localParticipant.enableCameraAndMicrophone();
             const videoPublication = Array.from(room.localParticipant.videoTrackPublications.values())[0];
             const audioPublication = Array.from(room.localParticipant.audioTrackPublications.values())[0];
             setLocalVideoTrack(videoPublication?.track as LocalVideoTrack);
             setLocalAudioTrack(audioPublication?.track as LocalAudioTrack);
-            console.log("room.localParticipant", room.localParticipant)
+            // console.log("room.localParticipant", room.localParticipant)
+            // console.log("room.remoteParticipants", room.remoteParticipants)
 
             setHasJoined(true);
             setJoiningRoom(!false);
@@ -147,18 +180,46 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
     };
 
     const leaveRoom = async () => {
-        if (room) {
+        if (!room) return;
+
+        try {
+            // 1. 로컬 비디오, 오디오 트랙 중지
+            localVideoTrack?.stop();
+            localAudioTrack?.stop();
+
+            localVideoTrack?.mute();
+            localAudioTrack?.mute();
+
+            // 2. 화면에서 트랙 제거
+            localVideoTrack?.detach();
+            localAudioTrack?.detach();
+
+            // 3. 이벤트 리스너 제거
+            room.localParticipant.removeAllListeners();
+
+            // 4. 원격 참가자의 리스너 정리
+            room.remoteParticipants.forEach((participant) => {
+                participant.removeAllListeners();
+            });
+
+            // 5. 룸 연결 해제
             await room.disconnect();
+
+            // 6. 상태 초기화
             setRoom(undefined);
             setLocalVideoTrack(undefined);
             setLocalAudioTrack(undefined);
             setRemoteTracks([]);
             setHasJoined(false);
+
+            console.log("LiveKit resources cleaned up successfully.");
+        } catch (error) {
+            console.error("Error while leaving the room:", error);
         }
     };
 
     const getToken = async () => {
-        const response = await fetch(`${APPLICATION_SERVER_URL}/v1/openvidu/token/groups/8/projects/1`, {
+        const response = await fetch(`${APPLICATION_SERVER_URL}/v1/openvidu/token/groups/${groupId}/projects/${projectId}`, {
             method: 'POST',
             headers: {
                 "Authorization": "Bearer " + localStorage.getItem("accessToken"),
@@ -177,14 +238,84 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
         return data.token;
     };
 
+    const startVideo = async () => {
+        try {
+            const tracks = await createLocalTracks({ video: true });
+            const videoTrack = tracks.find((t) => t.kind === "video") as LocalVideoTrack;
+            setLocalVideoTrack(videoTrack);
+        } catch (error) {
+            console.error("Failed to start video:", error);
+        }
+    };
+
+    useEffect(() => {
+        dispatch({ type: 'videoConference/setOnLeave', payload: leaveRoom });
+        console.log("leaveRoom");
+        return () => {
+            dispatch({ type: 'videoConference/setOnLeave', payload: null });
+        };
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (onLeave === null) {
+            leaveRoom();
+        }
+    }, [onLeave]);
+
+    // 페이지 새로고침 시 리소스 정리
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            leaveRoom();
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            leaveRoom();
+        };
+    }, []);
+
+    const muteVideo = () => {
+        if (!isMute) {
+            localVideoTrack?.mute();
+            setIsMute(true);
+        } else {
+            localVideoTrack?.unmute();
+            setIsMute(false);
+        }
+    }
+
     return (
-        <div className="h-full w-full flex flex-1">
+        <div className="h-full w-full flex flex-1 flex-col">
+            <div className="h-[27px] w-full bg-[#2F3336] flex items-center font-bold text-white text-xs px-4 border-b border-[#666871] border-opacity-50 justify-between">
+                <div>Video</div>
+                <div className="flex gap-3">
+                    <MuteButton />
+                    <button
+                        onMouseDown={() => setIsPressed(true)}
+                        onMouseUp={() => setIsPressed(false)}
+                        onMouseLeave={() => setIsPressed(false)}
+                        onClick={muteVideo}
+                        className={`text-white cursor-pointer transition-transform duration-200 ease-in-out ${isPressed ? "scale-75" : "scale-100"}`}
+                    >
+                        {!isMute ? <BsFillCameraVideoFill className="text-md" /> : <BsCameraVideoOffFill className="text-md" />}
+                    </button>
+                </div>
+            </div>
+            {/* <button onClick={muteVideo}>버 튼</button> */}
             <VerticalCarousel
                 isChatOpen={isChatOpen}
                 localParticipant={localParticipant || undefined}
                 remoteParticipants={remoteParticipants}
                 hasJoined={hasJoined}
                 onJoin={openPreview}
+                startVideo={startVideo}
+                isVideoOff={isMute}
             />
 
             {showPermissionModal && (
@@ -250,16 +381,16 @@ const OpenViduComponent: React.FC<{ isChatOpen: boolean }> = ({ isChatOpen }) =>
                         <div className="flex justify-center mt-4">
                             {joiningRoom ? (
                                 <div className="flex text-sm w-1/4 h-8 bg-blue-500 rounded-md justify-center items-center">
-                                    <PulseLoader 
+                                    <PulseLoader
                                         size={8}
                                         margin={4}
                                         color={"#ffffff"}
                                     />
                                 </div>
-                            ):(
+                            ) : (
                                 <button onClick={joinRoom} className="text-sm w-1/4 h-8 bg-blue-500 text-white rounded-md">
                                     참여하기
-                                </button>    
+                                </button>
                             )}
                         </div>
                     </div>

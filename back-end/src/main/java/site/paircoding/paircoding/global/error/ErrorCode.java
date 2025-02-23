@@ -14,8 +14,9 @@ public enum ErrorCode {
   UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "C004", "Unauthorized"),
   CONFLICT_EXCEPTION(HttpStatus.CONFLICT, "C005", "Conflict occurred"),
   EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "C006", "Token expired"),
-  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "C007", "Invalid token");
- 
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "C007", "Invalid token"),
+  INVALID_REQUEST(HttpStatus.BAD_REQUEST, "C008", "Invalid request");
+
   private final HttpStatus status;
   private final String code;
   private final String message;

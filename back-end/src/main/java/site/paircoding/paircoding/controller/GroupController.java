@@ -1,5 +1,6 @@
 package site.paircoding.paircoding.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +49,7 @@ public class GroupController {
   @PostMapping
   public ApiResponse<GroupDto> createGroup(
       @LoginUser User user,
-      @RequestBody CreateGroupRequest createGroupRequest) {
+      @Valid @RequestBody CreateGroupRequest createGroupRequest) {
     return ApiResponse.success(groupService.createGroup(user, createGroupRequest.getName(),
         createGroupRequest.getCapacity()));
   }
@@ -67,7 +68,7 @@ public class GroupController {
   @GroupRoleCheck(Role.OWNER)
   @PatchMapping("{groupId}")
   public ApiResponse<Group> updateGroup(@PathVariable("groupId") Integer groupId,
-      @RequestBody UpdateGroupRequest updateGroupRequest) {
+      @Valid @RequestBody UpdateGroupRequest updateGroupRequest) {
     return ApiResponse.success(
         groupService.updateGroup(groupId, updateGroupRequest.getName()));
   }
@@ -109,7 +110,7 @@ public class GroupController {
   @PostMapping("{groupId}/join")
   public ApiResponse<Object> joinGroup(@LoginUser User user,
       @PathVariable("groupId") Integer groupId,
-      @RequestBody GroupInvitationDto groupInvitationDto) {
+      @Valid @RequestBody GroupInvitationDto groupInvitationDto) {
     return ApiResponse.success(groupService.joinGroup(user, groupId, groupInvitationDto.getCode()));
   }
 
@@ -119,7 +120,7 @@ public class GroupController {
   public ApiResponse<GroupUserResponse> updateGroupUserRole(
       @LoginUser User user, @PathVariable("groupId") Integer groupId,
       @PathVariable("userId") Integer userId,
-      @RequestBody UpdateGroupRoleRequest updateGroupRoleRequest) {
+      @Valid @RequestBody UpdateGroupRoleRequest updateGroupRoleRequest) {
     return ApiResponse.success(groupService.updateGroupUserRole(user, groupId, userId,
         updateGroupRoleRequest.getRole()));
   }
