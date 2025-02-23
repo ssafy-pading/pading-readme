@@ -349,7 +349,7 @@ function ProjectPage() {
                         ? "text-white"
                         : "text-[#858595] hover:text-white"
                         }`}
-                      onClick={() => setActiveFile(file.fileRouteAndName)}
+                      onClick={() => handleTabChange(file.fileRouteAndName)}
                     >
                       {file.fileName}
                     </div>
