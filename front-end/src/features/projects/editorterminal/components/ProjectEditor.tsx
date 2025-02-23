@@ -6,6 +6,9 @@ import { MonacoBinding } from "y-monaco";
 import { useProjectEditor } from "../../../../context/ProjectEditorContext";
 import fileTransformer from "../FileTransFormer";
 import { Payload } from "../../fileexplorer/type/directoryTypes";
+// Redux 관련 임포트
+import { useDispatch } from "react-redux";
+import { setCode, setFileName } from "../../../../app/redux/codeSlice";
 
 interface ProjectEditorProps {
   groupId?: string;
@@ -40,6 +43,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   userName,
   content,
 }) => {
+  const dispatch = useDispatch();
   const { sendActionRequest, activeFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`;
   const editorRef = useRef<any>(null);
@@ -94,10 +98,15 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   // });
   ////////////////////////////////////////////////////////////////
   useEffect(() => {
-    // 확장자에 따른 모나코 에디터 언어 설정정
+    // 확장자에 따른 모나코 에디터 언어 설정
     setLanguage(extension);
 
-    // ✅ WebSocket이 없을 때만 생성
+    // 파일을 불러왔을 때 Redux에 파일내용과 파일이름 저장
+    if (content) {
+      dispatch(setCode(content));
+      dispatch(setFileName(fileName || ""));
+    }
+
     if (!ws.current) {
       ws.current = new WebSocket(signalingServer);
       ws.current.onopen = () => {
@@ -111,7 +120,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         );
       };
       ws.current.onclose = () => console.log("❌ YJS WebSocket Disconnected");
-      // 웹소켓 서버의 바이너리 코드 받기기
+      // 웹소켓 서버의 바이너리 코드 받기
       ws.current.onmessage = async (event) => {
         try {
           let arrayBuffer;
@@ -187,6 +196,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       setTimeout(() => {
         // setIsSaving(false);
       }, 2000);
+      // 파일 저장 시 Redux에 최신 코드와 파일 이름 업데이트
+      dispatch(setCode(editor.getValue()));
+      dispatch(setFileName(fileName || ""));
     });
 
     // provider가 아직 생성되지 않은 경우에만 생성
@@ -206,7 +218,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       setvalue(content);
     }, 1000);
   };
-
+  
   return (
     <div className="h-full w-full">
       <Editor
