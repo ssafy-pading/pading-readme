@@ -40,6 +40,11 @@ import MonitoringDashboard from "../features/projects/monitoring/components/Moni
 import { CallSocketProvider } from "../features/projects/projectpage/components/CallSocket";
 import CallButton from "../features/projects/projectpage/widgets/buttons/CallButton";
 
+// 코드리뷰 redux
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from "../app/redux/store";
+import { setCode, setFileName } from "../app/redux/codeSlice";
+
 function ProjectPage() {
   const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
 
@@ -228,6 +233,22 @@ function ProjectPage() {
   {
     /*//////////////////////////////// Monitoring Resource State or Function  ////////////////////////////////////////*/
   }
+
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleTabChange = (fileRouteAndName: string) => {
+    setActiveFile(fileRouteAndName);
+  
+    // ✅ 현재 선택된 파일 정보 가져오기
+    const selectedFile = fileTap.find((file) => file.fileRouteAndName === fileRouteAndName);
+  
+    // ✅ 선택된 파일이 존재하면 Redux 상태 업데이트
+    if (selectedFile) {
+      dispatch(setCode(selectedFile.content || ""));
+      dispatch(setFileName(selectedFile.fileName || ""));
+    }
+  };
+  
   if (isLoading) {
     return (
       <div>
@@ -317,7 +338,8 @@ function ProjectPage() {
             {/* 파일 탭 자리 */}
             <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
-                {fileTap.map((file) => (
+              {fileTap.filter((file) => file !== null).map((file) => (
+                <div key={file.fileRouteAndName} className="flex flex-row items-center">
                   <div
                     key={file.fileRouteAndName}
                     className="flex flex-row items-center"
@@ -341,7 +363,17 @@ function ProjectPage() {
                       <VscChromeClose />
                     </button>
                   </div>
-                ))}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteFile(file.fileRouteAndName);
+                    }}
+                      className="text-[#858595] hover:text-white ml-1"
+                  >
+                    <VscChromeClose />
+                  </button>
+                </div>
+              ))}
               </div>
             </div>
             {/* 코드 편집기 자리 */}
@@ -368,7 +400,7 @@ function ProjectPage() {
                       fileName={file.fileName}
                       fileRoute={file.fileRoute}
                       fileRouteAndName={file.fileRouteAndName}
-                      userName={user.name}
+                      userName={user?.name || "Unknown"}
                       content={file.content}
                       isSaving={isSaving}
                       setIsSaving={setIsSaving}
