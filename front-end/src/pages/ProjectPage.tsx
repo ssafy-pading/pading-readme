@@ -363,15 +363,6 @@ function ProjectPage() {
                       <VscChromeClose />
                     </button>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteFile(file.fileRouteAndName);
-                    }}
-                      className="text-[#858595] hover:text-white ml-1"
-                  >
-                    <VscChromeClose />
-                  </button>
                 </div>
               ))}
               </div>
