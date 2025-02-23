@@ -22,7 +22,7 @@ const MuteButton = () => {
       className={`text-white cursor-pointer transition-transform duration-200 ease-in-out ${isPressed ? "scale-75" : "scale-100"
       }`}
     >
-      {isMute ? <BsFillMicMuteFill className="text-md" /> : <BsFillMicFill className="text-md" />}
+      {isMute ? <BsFillMicMuteFill /> : <BsFillMicFill />}
     </button>
   );
 };

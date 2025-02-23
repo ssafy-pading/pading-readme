@@ -21,6 +21,7 @@ export interface VerticalCarouselProps {
     hasJoined: boolean;
     onJoin: () => void;
     startVideo: () => void;
+    isVideoOff: boolean;
 }
 
 export interface VideoComponentProps {

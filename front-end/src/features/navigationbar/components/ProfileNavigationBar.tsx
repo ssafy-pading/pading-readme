@@ -265,7 +265,7 @@ const ProfileNavigationBar: React.FC = () => {
     try {
       const success = await deleteGroup(groupId);
       if (success) {
-        toast.success("그룹이 삭제되었습니다.");
+        // toast.success("그룹이 삭제되었습니다.");
         const groupsResponse = await getGroups();
         if (groupsResponse.groups && groupsResponse.groups.length > 0) {
           window.location.href = `/projectlist/${groupsResponse.groups[0].id}`;
