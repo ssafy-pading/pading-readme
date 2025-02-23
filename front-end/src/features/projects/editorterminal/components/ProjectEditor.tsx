@@ -19,6 +19,9 @@ interface ProjectEditorProps {
   fileRouteAndName?: string;
   userName?: string;
   content?: any;
+  isSaving: boolean;
+  setIsSaving: (isSaving: boolean) => void;
+
 }
 
 // 자동저장 디바운스 함수
@@ -42,6 +45,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   fileRouteAndName,
   userName,
   content,
+  isSaving,
+  setIsSaving
 }) => {
   const dispatch = useDispatch();
   const { sendActionRequest, activeFile } = useProjectEditor();
@@ -220,7 +225,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   };
   
   return (
-    <div className="h-full w-full">
+      <div className={`h-full w-full editor-wrapper ${isSaving ? "blur-effect" : ""}`}>
       <Editor
         height="100%"
         width="100%"
@@ -237,10 +242,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
           smoothScrolling: true, // 부드러운 스크롤
         }}
       />
-      {/* {isSaving && (
-        <div className="autosave-indicator top-4 left-1/2">Saving...</div>
-      )} */}
-    </div>
+      </div>
   );
 };
 

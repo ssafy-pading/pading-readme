@@ -171,6 +171,7 @@ public class ProjectService {
       List<ProjectUser> projectUsers = projectUserRepository.findByUser(user);
       projects = projectUsers.stream()
           .map(ProjectUser::getProject)
+          .filter(project -> project.getGroup().getId().equals(groupId))
           .toList();
     } else {
       projects = projectRepository.findByGroupId(groupId);
