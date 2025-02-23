@@ -16,6 +16,9 @@ interface ProjectEditorProps {
   fileRouteAndName?: string;
   userName?: string;
   content?: any;
+  isSaving: boolean;
+  setIsSaving: (isSaving: boolean) => void;
+
 }
 
 // 자동저장 디바운스 함수
@@ -39,6 +42,8 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   fileRouteAndName,
   userName,
   content,
+  isSaving,
+  setIsSaving
 }) => {
   const { sendActionRequest, activeFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`;
@@ -58,11 +63,10 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const type = doc.getText("monaco");
 
   ///////////////////////// 자동완성 기능 /////////////////////////
-  const [isSaving, setIsSaving] = useState<boolean>(false); // 자동 저장 중일 때때
   //// 자동완성 함수: Monaco의 기본 자동완성(Trigger Suggest) 호출
   const autoComplete = () => {
     if (editorRef.current) {
-      setIsSaving(true);
+      // setIsSaving(true);
       const currentValue: Payload = {
         action: "SAVE",
         type: "FILE",
@@ -77,7 +81,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       }
       sendActionRequest("SAVE", currentValue);
       setTimeout(() => {
-        setIsSaving(false);
+        // setIsSaving(false);
       }, 2000);
     }
   };
@@ -208,7 +212,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   };
 
   return (
-    <div className="h-full w-full">
+      <div className={`h-full w-full editor-wrapper ${isSaving ? "blur-effect" : ""}`}>
       <Editor
         height="100%"
         width="100%"
@@ -225,10 +229,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
           smoothScrolling: true, // 부드러운 스크롤
         }}
       />
-      {isSaving && (
-        <div className="autosave-indicator top-4 left-1/2">Saving...</div>
-      )}
-    </div>
+      </div>
   );
 };
 
