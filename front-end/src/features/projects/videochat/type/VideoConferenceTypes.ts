@@ -5,6 +5,7 @@ export interface Participant {
   id: string
   identity: string
   isLocal: boolean
+  image: string | null
   videoTrack: LocalVideoTrack | RemoteVideoTrack | undefined
   audioTrack?: LocalAudioTrack | RemoteAudioTrack | undefined
 }
