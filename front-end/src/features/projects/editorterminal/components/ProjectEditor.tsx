@@ -127,6 +127,10 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       ws.current.onclose = () => console.log("❌ YJS WebSocket Disconnected");
       // 웹소켓 서버의 바이너리 코드 받기
       ws.current.onmessage = async (event) => {
+        if (event.data == "new") {
+          setvalue(content);
+        return
+      }
         try {
           let arrayBuffer;
           if (event.data instanceof Blob) {
@@ -219,9 +223,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       );
     }
     // 파일 열고 에디터 첫 마운팅 시 파일 값 렌더링!
-    setTimeout(() => {
-      setvalue(content);
-    }, 1000);
+    // setTimeout(() => {
+    //   setvalue(content);
+    // }, 1000);
   };
   
   return (
