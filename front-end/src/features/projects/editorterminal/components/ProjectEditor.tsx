@@ -94,6 +94,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const [language, setLanguage] = useState<string>("java");
   const isLocal = window.location.hostname === "localhost";
   const ws = useRef<WebSocket | null>(null);
+  const [users, setUsers] = useState<string[]>([]);
   const signalingServer: string | null = isLocal
     ? "ws://localhost:4444"
     : "wss://i12c202.p.ssafy.io:4444";
@@ -232,7 +233,10 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
                     `#${Math.floor(Math.random() * 16777215).toString(16)}`
                 }
               }));
+            } else if (data.type === "user-list") {
+              setUsers(data.users);
             }
+
           }
         } catch (error) {
           console.error("⚠️ Error processing WebSocket message:", error);
@@ -396,6 +400,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   return (
     <div className="h-full w-full">
       <style>{cursorStyles}</style>
+      <div className="absolute top-2 right-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-md shadow">
+        {fileName} 편집 유저: {users.length > 0 ? users.join(", ") : "없음"}
+      </div>
       <Editor
         height="100%"
         width="100%"
