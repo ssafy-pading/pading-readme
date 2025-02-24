@@ -207,7 +207,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       ws.current.onclose = () => console.log("❌ YJS WebSocket Disconnected");
       ws.current.onmessage = async (event) => {
         if (event.data == "new") {
-          setvalue(content);
+          setTimeout(() => {
+            setvalue(content);
+          }, 1000)
         return
       }
         try {
