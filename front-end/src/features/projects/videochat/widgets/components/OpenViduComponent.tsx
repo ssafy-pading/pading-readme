@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "../../../../../app/redux/store"
 import MuteButton from "../../../projectpage/widgets/buttons/ProjectMuteButton"
 import { BsFillCameraVideoFill, BsCameraVideoOffFill } from "react-icons/bs"
+import useProjectAxios from "../../../../../shared/apis/useProjectAxios"
 
 const APPLICATION_SERVER_URL = import.meta.env.VITE_APP_API_BASE_URL
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL
@@ -43,51 +44,74 @@ const OpenViduComponent: React.FC<{
 
   const [joiningRoom, setJoiningRoom] = useState<boolean>(false)
 
-  const { groupId, projectId } = useParams()
+  const { groupId, projectId } = useParams<{ groupId: string; projectId: string }>()
 
+  const { getProjectMemberStatus } = useProjectAxios();
   const dispatch = useDispatch()
   const onLeave = useSelector((state: RootState) => state.videoConference.onLeave)
 
-  useEffect(() => {
-    if (localVideoTrack || localAudioTrack) {
-      setLocalParticipant({
-        id: "local",
-        identity: "You",
-        isLocal: true,
-        videoTrack: localVideoTrack,
-        audioTrack: localAudioTrack,
-      })
-    } else {
-      setLocalParticipant(null)
-    }
+  useEffect(()=>{
+    console.log("localParticipant: ", localParticipant);
+    console.log("grouId: ", groupId)
+  }, [localParticipant])
 
-    const remoteMap: { [key: string]: Participant } = {}
-    remoteTracks.forEach(({ trackPublication, participantIdentity }) => {
-      if (!remoteMap[participantIdentity]) {
-        remoteMap[participantIdentity] = {
-          id: participantIdentity,
-          identity: participantIdentity,
-          isLocal: false,
-          videoTrack: undefined,
-          audioTrack: undefined,
+  useEffect(() => {
+    const fetchMembersAndUpdateParticipants = async () => {
+      try {
+        const onlineMembers = await getProjectMemberStatus(groupId ?? '', projectId ?? '');
+  
+        if (localVideoTrack || localAudioTrack) {
+          const localMember = onlineMembers.find(member => member.id.toString() === room?.localParticipant.identity);
+          setLocalParticipant({
+            id: room?.localParticipant.identity || '',
+            identity: "You",
+            isLocal: true,
+            image: localMember?.image || null,
+            videoTrack: localVideoTrack,
+            audioTrack: localAudioTrack,
+          });
+        } else {
+          setLocalParticipant(null);
         }
+  
+        const remoteMap: { [key: string]: Participant } = {};
+        remoteTracks.forEach(({ trackPublication, participantIdentity }) => {
+          if (!remoteMap[participantIdentity]) {
+            const remoteMember = onlineMembers.find(member => member.id.toString() === participantIdentity);
+            remoteMap[participantIdentity] = {
+              id: participantIdentity,
+              identity: participantIdentity,
+              isLocal: false,
+              image: remoteMember?.image || null,
+              videoTrack: undefined,
+              audioTrack: undefined,
+            };
+          }
+          if (trackPublication.kind === "video") {
+            remoteMap[participantIdentity].videoTrack = trackPublication.track as RemoteVideoTrack;
+          } else if (trackPublication.kind === "audio") {
+            remoteMap[participantIdentity].audioTrack = trackPublication.track as RemoteAudioTrack;
+          }
+        });
+  
+        const newRemoteParticipants = Object.values(remoteMap).map((participant) => {
+          const remoteParticipant = room?.remoteParticipants.get(participant.id);
+          return {
+            ...participant,
+            name: remoteParticipant?.name || participant.identity,
+          };
+        });
+  
+        console.log("newRemoteParticipants: ", newRemoteParticipants);
+        setRemoteParticipants(newRemoteParticipants);
+      } catch (error) {
+        console.error("Error fetching project member status:", error);
       }
-      if (trackPublication.kind === "video") {
-        remoteMap[participantIdentity].videoTrack = trackPublication.track as RemoteVideoTrack
-      } else if (trackPublication.kind === "audio") {
-        remoteMap[participantIdentity].audioTrack = trackPublication.track as RemoteAudioTrack
-      }
-    })
-    const newRemoteParticipants = Object.values(remoteMap).map((participant) => {
-      const remoteParticipant = room?.remoteParticipants.get(participant.id)
-      return {
-        ...participant,
-        name: remoteParticipant?.name || participant.identity,
-      }
-    })
-    // console.log("newRemoteParticipants: ", newRemoteParticipants);
-    setRemoteParticipants(newRemoteParticipants)
-  }, [localVideoTrack, localAudioTrack, remoteTracks])
+    };
+  
+    fetchMembersAndUpdateParticipants();
+  }, [localVideoTrack, localAudioTrack, remoteTracks, room, groupId, projectId, getProjectMemberStatus]);
+  
 
   const openPreview = async () => {
     try {
@@ -135,7 +159,7 @@ const OpenViduComponent: React.FC<{
     setJoiningRoom(true)
     const room = new Room()
     setRoom(room)
-    // console.log("room", room);
+    console.log("room", room);
 
     room.on(RoomEvent.TrackSubscribed, (_track, publication, participant) => {
       setRemoteTracks((prev) => [...prev, { trackPublication: publication, participantIdentity: participant.identity }])

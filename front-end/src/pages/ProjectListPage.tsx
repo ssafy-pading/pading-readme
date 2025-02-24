@@ -294,9 +294,10 @@ const ProjectListPage: React.FC = () => {
     setProjectList((prev) => [newProjectItem, ...prev]);
   };
 
-  if (!isDataLoaded) {
-    return <div>Loading...</div>;
-  }
+  // root의 loading으로 대체
+  // if (!isDataLoaded) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     

@@ -32,7 +32,7 @@ const routes: RouteObject[] = [
   {
     path: "/",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <LoginPage />
       </Suspense>
     ),
@@ -58,7 +58,7 @@ const routes: RouteObject[] = [
   {
     path: "nogroup",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <NoGroupPage />
       </Suspense>
     ),
@@ -66,7 +66,7 @@ const routes: RouteObject[] = [
   {
     path: "invite/:groupId/:inviteCode",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <InvitePage />
       </Suspense>
     ),
@@ -74,7 +74,7 @@ const routes: RouteObject[] = [
   {
     path: "rolechange/:groupId",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <RoleChangePage />
       </Suspense>
     ),
@@ -82,7 +82,7 @@ const routes: RouteObject[] = [
   {
     path: "about",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <AboutPage />
       </Suspense>
     ),
@@ -90,7 +90,7 @@ const routes: RouteObject[] = [
   {
     path: "*",
     element: (
-      <Suspense fallback={Loading}>
+      <Suspense fallback={<ProjectSpinner />}>
         <NotFoundPage />
       </Suspense>
     ),
