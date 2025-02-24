@@ -16,6 +16,7 @@ import site.paircoding.paircoding.config.oauth.CustomUserDetails;
 import site.paircoding.paircoding.entity.User;
 import site.paircoding.paircoding.global.exception.UnauthorizedException;
 import site.paircoding.paircoding.repository.UserRepository;
+import site.paircoding.paircoding.util.CookieUtil;
 import site.paircoding.paircoding.util.JwtUtil;
 
 @Component
@@ -23,30 +24,22 @@ import site.paircoding.paircoding.util.JwtUtil;
 public class JwtFilter extends OncePerRequestFilter {
 
   private final JwtUtil jwtUtil;
+  private final CookieUtil cookieUtil;
   private final UserRepository userRepository;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
-    String bearerToken = request.getHeader("Authorization");
 
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-      String token = bearerToken.substring(7);
-      User user;
-
-      if (jwtUtil.validateToken(token, response)) {
-        user = userRepository.findById(jwtUtil.getId(token))
-            .orElseThrow(() -> new UnauthorizedException("Invalid token"));
-        OAuth2User oAuth2User = new CustomUserDetails(user);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(oAuth2User, "",
-            oAuth2User.getAuthorities());
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      } else {
-        return;
-      }
-    }
-
+    cookieUtil.getAccessToken(request).ifPresent(accessToken -> {
+      User user = userRepository.findById(jwtUtil.getId(accessToken))
+          .orElseThrow(() -> new UnauthorizedException("Invalid token"));
+      OAuth2User oAuth2User = new CustomUserDetails(user);
+      Authentication authentication = new UsernamePasswordAuthenticationToken(oAuth2User, "",
+          oAuth2User.getAuthorities());
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+    });
+    
     filterChain.doFilter(request, response);
   }
 }

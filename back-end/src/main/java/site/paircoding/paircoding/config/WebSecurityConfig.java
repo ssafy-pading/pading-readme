@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import site.paircoding.paircoding.config.jwt.JwtFilter;
 import site.paircoding.paircoding.config.oauth.OAuth2MemberSuccessHandler;
+import site.paircoding.paircoding.util.CookieUtil;
 import site.paircoding.paircoding.util.JwtUtil;
 
 /*
@@ -32,6 +33,7 @@ import site.paircoding.paircoding.util.JwtUtil;
 public class WebSecurityConfig {
 
   private final JwtUtil jwtUtil;
+  private final CookieUtil cookieUtil;
   private final JwtFilter jwtFilter;
   private final AppConfig appConfig;
 
@@ -49,12 +51,10 @@ public class WebSecurityConfig {
         .httpBasic(HttpBasicConfigurer::disable) // HTTP Basic 인증 비활성화
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 관리 설정
-//        .authorizeHttpRequests(request -> request
-//            .requestMatchers("v1/auth/**").permitAll() // 인증없이 허용 주소
-//            .anyRequest()
-//            .authenticated())
-        .authorizeHttpRequests(authorize -> authorize
-            .anyRequest().permitAll() // 모든 요청 허용
+        .authorizeHttpRequests(request -> request
+//            .requestMatchers("/v1/auth/**", "/oauth2/authorization/**").permitAll() // 인증없이 허용 주소
+//            .anyRequest().authenticated()
+                .anyRequest().permitAll()
         )
         .oauth2Login(oauth2 -> oauth2
                 .successHandler(new OAuth2MemberSuccessHandler(jwtUtil, appConfig))
