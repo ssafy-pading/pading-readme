@@ -16,17 +16,20 @@
     cursor: pointer;
   }
 
+  .editor-wrapper.blur-effect {
+    filter: blur(4px);
+    pointer-events: none; /* 저장 중에는 에디터에 접근하지 못하도록 */
+    transition: filter 0.3s ease;
+  }
+  
   .autosave-indicator {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    /* background: linear-gradient(135deg, #4CAF50, #81C784); */
     color: #fff;
     padding: 8px 16px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: 500;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
     opacity: 0.95;
     transition: opacity 0.3s ease;
   }
+  

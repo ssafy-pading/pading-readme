@@ -1,39 +1,35 @@
-import { LocalVideoTrack, LocalAudioTrack, RemoteVideoTrack, RemoteAudioTrack, Room } from "livekit-client";
+import { LocalVideoTrack, LocalAudioTrack, RemoteVideoTrack, RemoteAudioTrack, Room } from "livekit-client"
 
 // openvidu 참가자 타입
 export interface Participant {
-    id: string;
-    identity: string;
-    isLocal: boolean;
-    videoTrack: LocalVideoTrack | RemoteVideoTrack | undefined;
-    audioTrack?: LocalAudioTrack | RemoteAudioTrack | undefined;
+  id: string
+  identity: string
+  isLocal: boolean
+  image: string | null
+  videoTrack: LocalVideoTrack | RemoteVideoTrack | undefined
+  audioTrack?: LocalAudioTrack | RemoteAudioTrack | undefined
 }
 
 export interface RemoteParticipant extends Participant {
-    name: string;
+  name: string
 }
 
-
 export interface VerticalCarouselProps {
-    isChatOpen: boolean;
-    localParticipant?: Participant;
-    remoteParticipants: RemoteParticipant[];
-    hasJoined: boolean;
-    onJoin: () => void;
-    startVideo: () => void;
-    isVideoOff: boolean;
+  isChatOpen: boolean
+  localParticipant?: Participant
+  remoteParticipants: RemoteParticipant[]
+  hasJoined: boolean
+  onJoin: () => void
+  isVideoOff: boolean
 }
 
 export interface VideoComponentProps {
-  videoTrack: LocalVideoTrack | RemoteVideoTrack;
-  participantIdentity: string;
-  muted?: boolean;
-  isVideoOff?: boolean;
+  videoTrack: LocalVideoTrack | RemoteVideoTrack
+  participantIdentity: string
+  muted?: boolean
+  isVideoOff?: boolean
 }
 
 export interface AudioComponentProps {
-    audioTrack: LocalAudioTrack | RemoteAudioTrack;
+  audioTrack: LocalAudioTrack | RemoteAudioTrack
 }
-
-
-
