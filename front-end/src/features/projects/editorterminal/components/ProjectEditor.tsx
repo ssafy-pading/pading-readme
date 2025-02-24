@@ -128,7 +128,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       // 웹소켓 서버의 바이너리 코드 받기
       ws.current.onmessage = async (event) => {
         if (event.data == "new") {
-          setvalue(content);
+          setTimeout(() => {
+            setvalue(content);
+          }, 1000)
         return
       }
         try {
