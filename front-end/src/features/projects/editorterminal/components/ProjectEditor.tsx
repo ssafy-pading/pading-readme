@@ -107,43 +107,92 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   const [cursorDecorations, setCursorDecorations] = useState<string[]>([])
   // 커서 스타일을 위한 CSS 추가
   // CSS 스타일 수정
-  const cursorStyles = `
-.remote-cursor {
-  height: 18px !important;
-  display: inline-block;
-  position: relative;
-  z-index: 1000;
+  const cursorStyles= `
+  .remote-cursor {
+    height: 18px !important;
+    display: inline-block;
+    position: relative;
+    z-index: 1000;
+  }
+  .remote-cursor::before {
+    content: attr(data-name);
+    bottom: 100%;
+    transform: translateX(-50%);
+  }
+  .remote-cursor-text {
+    color: white;
+    padding: 6px 6px;
+    border-radius: 6px;
+    position: absolute;
+    white-space: nowrap;
+    transform: translateY(-100%) translateX(-50%);
+    margin-left: 1px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.15s ease-in-out;
+  }
+  
+  .remote-cursor-text::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+  }
+  .remote-cursor-0 {
+  background-color: var(--cursor-color, #007BFF);
 }
-.remote-cursor::before {
-  content: attr(data-name);
-  bottom: 100%;
-  transform: translateX(-50%);
-}
-.remote-cursor-text {
-  background-color: var(--cursor-color, #0088ff);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  position: absolute;
-  white-space: nowrap;
-  transform: translateY(-100%) translateX(-50%);
-  margin-left: 1px;
-  font-size: 12px;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: all 0.15s ease-in-out;
+.remote-cursor-0::after { 
+  border-top: 5.5px solid var(--cursor-color, #007BFF);
 }
 
-.remote-cursor-text::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 4px solid var(--cursor-color, #0088ff);
-}`;
+.remote-cursor-1 {
+  background-color: var(--cursor-color, #FFC107);
+}
+.remote-cursor-1::after { 
+  border-top: 5.5px solid var(--cursor-color, #FFC107);
+}
+
+.remote-cursor-2 {
+  background-color: var(--cursor-color, #DC3545);
+}
+.remote-cursor-2::after { 
+  border-top: 5.5px solid var(--cursor-color, #DC3545);
+}
+
+.remote-cursor-3 {
+  background-color: var(--cursor-color, #28A745);
+}
+.remote-cursor-3::after { 
+  border-top: 5.5px solid var(--cursor-color, #28A745);
+}
+
+.remote-cursor-4 {
+  background-color: var(--cursor-color, #17A2B8);
+}
+.remote-cursor-4::after { 
+  border-top: 5.5px solid var(--cursor-color, #17A2B8);
+}
+
+.remote-cursor-5 {
+  background-color: var(--cursor-color, #FD7E14);
+}
+.remote-cursor-5::after { 
+  border-top: 5.5px solid var(--cursor-color, #FD7E14);
+}
+
+.remote-cursor-6 {
+  background-color: var(--cursor-color, #6F42C1);
+}
+.remote-cursor-6::after { 
+  border-top: 5.5px solid var(--cursor-color, #6F42C1);
+}
+
+  `;
+
 
 
   ///////////////////////// 자동완성 기능 /////////////////////////
@@ -349,7 +398,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   useEffect(() => {
     if (!editorRef.current) return;
     const decorations = Object.entries(cursorPositions)
-      .map(([name, pos]) => {
+      .map(([name, pos], idx) => {
         // pos가 유효한지 확인
         if (!pos || !pos.lineNumber || !pos.column) return null;
 
@@ -367,10 +416,11 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
               visualColumn + 1
             ),
             options: {
-              className: `remote-cursor cursor-${name.replace(/[^a-zA-Z0-9]/g, '-')}`,
-              afterContentClassName: 'remote-cursor-text',
+              // className: `remote-cursor cursor-${name.replace(/[^a-zA-Z0-9]/g, '-')}`,
+              className: `remote-cursor`,
+              afterContentClassName: `remote-cursor-text remote-cursor-${idx}`,
               after: {
-                content: name, 
+                // content: name, 
                 margin: isLastColumn ? '0 0 0 1px' : '0 0 0 3px' // 마지막 컬럼일 때 마진 조정
               },
               hoverMessage: {
