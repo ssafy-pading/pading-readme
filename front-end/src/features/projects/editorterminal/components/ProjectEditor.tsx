@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import Editor from "@monaco-editor/react";
+import Editor, {useMonaco} from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { MonacoBinding } from "y-monaco";
@@ -9,7 +9,7 @@ import { Payload } from "../../fileexplorer/type/directoryTypes";
 // Redux 관련 임포트
 import { useDispatch } from "react-redux";
 import { setCode, setFileName } from "../../../../app/redux/codeSlice";
-
+import EditorUserList from "../widgets/buttons/EditorUserList";
 interface ProjectEditorProps {
   groupId?: string;
   projectId?: string;
@@ -84,6 +84,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   isSaving,
   setIsSaving
 }) => {
+  const monaco: any = useMonaco()
   const dispatch = useDispatch();
   const { sendActionRequest, activeFile } = useProjectEditor();
   const room: string = `${groupId}-${projectId}-${fileRouteAndName}`;
@@ -456,9 +457,9 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
   return (
     <div className="h-full w-full">
       <style>{cursorStyles}</style>
-      <div className="absolute top-2 right-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-md shadow">
-        {fileName} 편집 유저: {users.length > 0 ? users.join(", ") : "없음"}
-      </div>
+      <div className="absolute top-2 right-1/2 transform translate-x-1/2 z-10">
+      <EditorUserList fileName={fileName} users={users} />
+    </div>
       <Editor
         height="100%"
         width="100%"
