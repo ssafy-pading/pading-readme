@@ -50,11 +50,6 @@ const OpenViduComponent: React.FC<{
   const dispatch = useDispatch()
   const onLeave = useSelector((state: RootState) => state.videoConference.onLeave)
 
-  useEffect(()=>{
-    console.log("localParticipant: ", localParticipant);
-    console.log("grouId: ", groupId)
-  }, [localParticipant])
-
   useEffect(() => {
     const fetchMembersAndUpdateParticipants = async () => {
       try {
@@ -102,7 +97,7 @@ const OpenViduComponent: React.FC<{
           };
         });
   
-        console.log("newRemoteParticipants: ", newRemoteParticipants);
+        // console.log("newRemoteParticipants: ", newRemoteParticipants);
         setRemoteParticipants(newRemoteParticipants);
       } catch (error) {
         console.error("Error fetching project member status:", error);
@@ -159,7 +154,7 @@ const OpenViduComponent: React.FC<{
     setJoiningRoom(true)
     const room = new Room()
     setRoom(room)
-    console.log("room", room);
+    // console.log("room", room);
 
     room.on(RoomEvent.TrackSubscribed, (_track, publication, participant) => {
       setRemoteTracks((prev) => [...prev, { trackPublication: publication, participantIdentity: participant.identity }])
@@ -269,7 +264,6 @@ const OpenViduComponent: React.FC<{
 
   useEffect(() => {
     dispatch({ type: "videoConference/setOnLeave", payload: leaveRoom })
-    console.log("leaveRoom")
     return () => {
       dispatch({ type: "videoConference/setOnLeave", payload: null })
     }

@@ -138,7 +138,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
       return
     }
 
-    if(await confirmToast("프로젝트를 정지하시겠습니까?")){
+    if(await confirmToast("프로젝트를 비활성화하시겠습니까?")){
       await turnProjectOff(groupId, id)
       .catch((error) => {
         if(!error.response || (error.response.status !== 400)){
@@ -147,13 +147,13 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         }
       })
       setCardStatus(false);
-      toast.success("프로젝트를 정지했습니다.");
+      toast.success("프로젝트를 비활성화했습니다.");
     }
   };
 
   return (
     <div 
-      className={`${cardStatus ? 'border border-[#bdbdc3] border-2 ' : 'border border-[#d0d0d7] '} 
+      className={`${cardStatus ? 'border-[#bdbdc3] border-2 ' : 'border border-[#d0d0d7] '} 
         w-full h-[200px] bg-white shadow-md rounded-lg p-4 relative transform transition-transform duration-300 z-10 hover:shadow-xl`}
     >
 

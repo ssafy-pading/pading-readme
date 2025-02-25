@@ -59,7 +59,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ isChatOpen, localPa
                     </div>
                   ) : (
                     <div className="h-full w-full bg-[#2F3336] flex justify-center items-center p-2 rounded-md">
-                      <img src={localParticipant.image || profileImage} alt="profileImg" className="rounded-full w-[20%] h-[20%]" />
+                      <img src={localParticipant.image || profileImage} alt={localParticipant.id} className="rounded-full w-10 h-10 object-cover" />
                     </div>
                   )}
                   <div className="absolute top-0 left-4 mt-2 text-xs text-white font-bold">{localParticipant.identity && "(You)"}</div>
@@ -72,7 +72,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ isChatOpen, localPa
                 <div className="relative w-full h-full p-2 pt-0">
                   {participant.videoTrack && (
                     <div className="relative h-full w-full bg-[#2F3336] flex justify-center items-center rounded-md">
-                      <img src={participant.image || profileImage} alt="profileImg" className="absolute rounded-full w-[20%] h-[20%]" />
+                      <img src={participant.image || profileImage} alt={participant.id} className="absolute rounded-full w-10 h-10 object-cover" />
                       {participant.videoTrack && <VideoComponent videoTrack={participant.videoTrack} participantIdentity={participant.identity} />}
                       {participant.audioTrack && <AudioComponent audioTrack={participant.audioTrack} />}
                     </div>

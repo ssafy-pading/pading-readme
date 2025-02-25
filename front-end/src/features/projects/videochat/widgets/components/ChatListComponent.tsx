@@ -13,6 +13,9 @@ import { fetchUserInfo } from '../../../../../app/redux/user';
 import type { RootState, AppDispatch } from '../../../../../app/redux/store';
 import { useParams } from 'react-router-dom';
 
+// Axios 요청
+import useProjectAxios from '../../../../../shared/apis/useProjectAxios';
+
 interface ChatMessage {
   id: string;
   userId: number;
@@ -21,15 +24,23 @@ interface ChatMessage {
   createdAt: string;
 }
 
+interface UserImage {
+  id: number;
+  image: string | null;
+}
 
 const ChatRoom: React.FC = () => {
     const [chatList, setChatList] = useState<ChatMessage[]>([]);
+    const [userImageList, setUserImageList] = useState<UserImage[]>([]);
     const [message, setMessage] = useState<string>('');
     const chatContainerRef = useRef<HTMLDivElement | null>(null);
     const stompClientRef = useRef<Client | null>(null);
     // URL 파라미터에서 groupId 추출 (nogroup 페이지에서는 undefined)
     const groupIdParams = useParams<{ groupId?: string }>().groupId;
     const groupId: number | undefined = groupIdParams ? Number(groupIdParams) : undefined;
+
+    // 프로젝트 ID
+    const { projectId } = useParams();
     
     const extractParams = (): { groupId: number; projectId: number } | null => {
       const path = window.location.pathname; // e.g., "/project/8/1"
@@ -49,6 +60,31 @@ const ChatRoom: React.FC = () => {
   // redux dispatch, 유저 객체 사용
   const dispatch = useDispatch<AppDispatch>();
   const { user, status } = useSelector((state: RootState) => state.user);
+
+  // user image 받아오기.(해당 그룹에 해당하는 유저 이미지만 받앙서 배열로 저장 후, 채팅 리스트에 매핑)
+  const { getProjectMemberStatus } = useProjectAxios();
+
+  useEffect(() => {
+    if (!groupId || !projectId) return;
+  
+    const fetchMemberList = async () => {
+      try {
+        const memberList = await getProjectMemberStatus(groupId.toString(), projectId);
+  
+        const updatedUserImages = memberList.map((member: UserImage) => ({
+          id: member.id,
+          image: member.image || "",
+        }));
+  
+        setUserImageList(updatedUserImages);
+      } catch (error) {
+        console.error("Failed to fetch project members:", error);
+      }
+    };
+  
+    fetchMemberList();
+  }, []);
+  
 
   // 스크롤을 맨 아래로 이동시키는 함수
   const scrollToBottom = () => {
@@ -198,8 +234,8 @@ const ChatRoom: React.FC = () => {
               <div className={`flex items-start w-full ${isMe ? 'justify-end' : 'justify-start'} mb-3`}>
                 {!isMe && (
                   <img
-                    src={profileImage}
-                    className="w-5 h-5 rounded-full mr-1 mt-1"
+                    src={userImageList.find((user) => user.id === chat.userId)?.image || profileImage}
+                    className="w-5 h-5 rounded-full mr-1 mt-1 object-cover"
                     alt="profile"
                   />
                 )}
@@ -238,7 +274,7 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* 채팅 입력창 + 전송 버튼 */}
-      <div className='bg-[#212426] w-full h-[50px]'>
+      <div className='bg-[#212426] w-full'>
         <form
           onSubmit={handleSendChat}
           className="flex w-full justify-between px-1.5 py-2"
@@ -251,15 +287,15 @@ const ChatRoom: React.FC = () => {
               onChange={handleMessageChange}
               placeholder="메시지 입력"
               autoComplete="off"
-              className="flex-1 w-[22vh] rounded-lg px-2 py-1 text-sm text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
+              className="flex-1 w-[23vh] rounded-lg px-2 py-1 text-xs text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
           <div className="ml-1">
             <button
               type="submit"
-              className="bg-[#3B82F6] hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+              className="bg-[#3B82F6] hover:bg-[#5692f3] text-white px-3 py-1.5 rounded-lg"
             >
-              <img src={paperPlane} alt="send" className="w-[16px] h-[16px]" />
+              <img src={paperPlane} alt="send" className="w-[14px] h-[14px]" />
             </button>
           </div>
         </form>

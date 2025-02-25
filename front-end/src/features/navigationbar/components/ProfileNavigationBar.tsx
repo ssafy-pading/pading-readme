@@ -339,7 +339,7 @@ const ProfileNavigationBar: React.FC = () => {
               <img
                 src={userProfile?.image || profileImage}
                 alt="ProfileImage"
-                className="w-full h-full rounded-full"
+                className="w-full h-full rounded-full object-cover"
               />
             </div>
             <div className="col-span-3 relative" ref={dropdownRef}>
@@ -362,7 +362,7 @@ const ProfileNavigationBar: React.FC = () => {
                     <div className="absolute right-0 top-full mt-2 w-28 bg-white text-xs rounded-lg shadow-md overflow-hidden z-10">
                       <button
                         onClick={handleLogout}
-                        className="block px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
+                        className="px-2 py-2 w-full text-left text-gray-700 hover:bg-gray-100 flex items-center"
                       >
                         <ArrowLeftOnRectangleIcon className="w-4 h-4 mr-2" />
                         로그아웃
@@ -472,7 +472,7 @@ const ProfileNavigationBar: React.FC = () => {
                             <img
                               src={user.image}
                               alt={user.name}
-                              className="w-full h-full rounded-full border-2 border-gray-300"
+                              className="w-full h-full rounded-full border-2 border-gray-300 object-cover"
                             />
                             <span
                               className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
@@ -506,7 +506,7 @@ const ProfileNavigationBar: React.FC = () => {
                             <img
                               src={user.image}
                               alt={user.name}
-                              className="w-full h-full rounded-full border-2 border-gray-300"
+                              className="w-full h-full rounded-full border-2 border-gray-300 object-cover"
                             />
                             <span
                               className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
