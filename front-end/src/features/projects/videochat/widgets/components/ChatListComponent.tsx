@@ -206,7 +206,7 @@ const ChatRoom: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#212426] text-white">
+    <div className="flex flex-col h-full bg-[#2d2d2d] text-white">
       {/* 메시지 목록 영역 */}
       <div
         className='custom-scrollbar flex-1 overflow-y-auto p-1 flex flex-col space-y-4'
@@ -250,7 +250,7 @@ const ChatRoom: React.FC = () => {
                   {/* 채팅 메시지 */}
                   <div
                     className={`px-2 py-[0.3rem] rounded-lg ${
-                      isMe ? 'bg-[#3B82F6]' : 'bg-[#273654]'
+                      isMe ? 'bg-[#3B82F6]' : 'bg-[#404040]'
                     } mr-2 text-white relative`}
                   >
                     <div className="w-full break-all whitespace-pre-wrap text-[10px]">
@@ -274,7 +274,7 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* 채팅 입력창 + 전송 버튼 */}
-      <div className='bg-[#212426] w-full'>
+      <div className='bg-[#2d2d2d] w-full'>
         <form
           onSubmit={handleSendChat}
           className="flex w-full justify-between px-1.5 py-2"
@@ -287,7 +287,7 @@ const ChatRoom: React.FC = () => {
               onChange={handleMessageChange}
               placeholder="메시지 입력"
               autoComplete="off"
-              className="flex-1 w-[23vh] rounded-lg px-2 py-1 text-xs text-white bg-[#2F3336] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
+              className="flex-1 w-[23vh] rounded-lg px-2 py-1 text-xs text-white bg-[#404040] focus:ring-2 focus:ring-[#3B82F6] focus:outline-none"
             />
           </div>
           <div className="ml-1">

@@ -45,7 +45,7 @@ const ResourceMonitorBar = ({ monitoringDataList }: MonitoringDataProps) => {
   return (
     <div
       ref={containerRef}
-      className="flex items-center bg-[#212426] text-gray-400 text-xs h-6 px-2 border-t border-gray-700"
+      className="flex items-center bg-[#404040] text-gray-400 text-xs h-6 px-2 border-t border-gray-700"
     >
       <div className={`${isCompact ? "w-[40px] mr-1" : "w-[90px] mr-2"} flex mr-2`}>
         <img src={cpu} alt="cpu" />

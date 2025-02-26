@@ -89,7 +89,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
       rows: 500,
       scrollback: 1000,
       disableStdin: false,
-      theme: { background: "#141617" },
+      theme: { background: "#2d2d2d" },
     });
 
     fitAddon.current = new FitAddon();
@@ -262,7 +262,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({
         height: `${height}px`,
         padding: "4px 8px",
         overflow: "hidden",
-        scrollbarColor: "#4a5568 #2d3748",
+        scrollbarColor: "#2d2d2d #404040",
       }}
     />
   );

@@ -308,7 +308,7 @@ const OpenViduComponent: React.FC<{
 
   return (
     <div className="h-full w-full flex flex-1 flex-col">
-      <div className="h-[27px] w-full bg-[#2F3336] flex items-center font-bold text-white text-xs px-4 border-b border-[#666871] border-opacity-50 justify-between">
+      <div className="h-[27px] w-full bg-[#404040] flex items-center font-bold text-white text-xs px-4 border-b border-[#666871] border-opacity-50 justify-between">
         <div>Video</div>
         <div className="flex gap-3">
           <MuteButton />
@@ -341,11 +341,11 @@ const OpenViduComponent: React.FC<{
           overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
           ariaHideApp={false}
         >
-          <div className="bg-[#212426] text-white p-6 rounded-lg shadow-lg text-center flex-col justify-center">
+          <div className="bg-[#2d2d2d] text-white p-6 rounded-lg shadow-lg text-center flex-col justify-center">
             <h2 className="text-xl font-bold mb-4">카메라 및 마이크 권한 필요</h2>
             <p className="text-gray-400 mb-4">회의에 참여하려면 브라우저에서 카메라와 마이크 권한을 허용해야 합니다.</p>
             <p className="text-gray-400 text-sm mb-4">권한이 차단된 경우, 아래 가이드를 참고하여 브라우저 설정에서 변경해주세요.</p>
-            <div className="text-left text-sm text-gray-300 bg-[#212426] p-3 rounded">
+            <div className="text-left text-sm text-gray-300 bg-[#2d2d2d] p-3 rounded">
               <p className="flex items-center gap-1">
                 <strong>Chrome:</strong> 주소창 왼쪽 <FiInfo /> 아이콘 클릭 → '카메라'와 '마이크'를 '허용'으로 변경
               </p>
@@ -370,7 +370,7 @@ const OpenViduComponent: React.FC<{
           overlayClassName="flex items-center justify-center fixed inset-0 bg-black bg-opacity-40 z-20"
           ariaHideApp={false}
         >
-          <div className="bg-[#212426] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center relative">
+          <div className="bg-[#2d2d2d] h-1/2 w-1/2 p-6 rounded-lg shadow-lg text-center relative">
             <button onClick={closePreview} className="absolute top-2 right-4 text-white text-xl flex items-center justify-center w-8 h-8 rounded-full hover:scale-110">
               <IoClose className="text-xl" />
             </button>

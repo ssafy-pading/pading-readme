@@ -20,7 +20,7 @@ function FileExplorer() {
         <div className="folderContainerBody h-full flex flex-col text-white"
             onContextMenu={(e) => {e.preventDefault();}}
         >
-            <div className="flex justify-between items-center h-[25px] w-full border-b border-[#666871] border-opacity-50 bg-[#2F3336] font-medium">
+            <div className="flex justify-between items-center h-[25px] w-full border-b border-[#666871] border-opacity-50 bg-[#404040] font-medium">
                 <p className="ml-3 text-xs font-bold text-c">Explorer</p>
                 <button 
                     onClick={handleRefreshButton} 

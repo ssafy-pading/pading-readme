@@ -395,6 +395,22 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
         }));
       }
     });
+    monaco.editor.defineTheme("vs-dark-bright", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [
+        { token: "", background: "#2d2d2d", foreground: "#e0e0e0" },
+      ],
+      colors: {
+        "editor.background": "#2d2d2d",
+        "editor.foreground": "#e0e0e0",
+        "editorLineNumber.foreground": "#a0a0a0",
+        "editor.selectionBackground": "#2d2d2d",
+        "editorCursor.foreground": "#ffffff",
+      },
+    });
+
+    monaco.editor.setTheme("vs-dark-bright");
     // 파일 열고 에디터 첫 마운팅 시 파일 값 렌더링!
     // setTimeout(() => {
     //   setvalue(content);
@@ -461,7 +477,7 @@ const ProjectEditor: React.FC<ProjectEditorProps> = ({
       <Editor
         height="100%"
         width="100%"
-        theme={"vs-dark"}
+        theme={"vs-dark-bright"}
         language={language}
         onMount={handleEditorDidMount} // Editor 초기화
         value={value}

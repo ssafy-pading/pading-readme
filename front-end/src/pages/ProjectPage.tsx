@@ -267,7 +267,7 @@ function ProjectPage() {
   return (
     <div className="flex flex-col h-screen">
       {/* 네비게이션 바 */}
-      <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#212426] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
+      <div className="flex flex-row items-center gap-10 justify-between h-[30px] bg-[#2d2d2d] border-b border-[#666871] border-opacity-50 px-5 box-content select-none">
         <div className="flex items-center h-[25px] text-white text-sm">
           <p className="font-semibold text-center">
             프로젝트 이름 : {projectDetail?.project?.name}
@@ -320,7 +320,7 @@ function ProjectPage() {
           }
           handleSize={[5, 5]}
         >
-          <div className="flex flex-col justify-between h-full bg-[#212426] select-none">
+          <div className="flex flex-col justify-between h-full bg-[#2d2d2d] select-none">
             <div className="flex-1 min-h-0 w-full overflow-x-hidden">
               {/* 파일 탐색기 */}
               <FileExplorer />
@@ -334,9 +334,9 @@ function ProjectPage() {
 
         {/* 중앙 컨텐츠 */}
         <div className="flex-1 flex-col flex min-w-[600px]">
-          <div className="h-full w-full top-0 left-0 right-0 bg-[#212426] flex flex-col justify-between text-[#141617]">
+          <div className="h-full w-full top-0 left-0 right-0 bg-[#2d2d2d] flex flex-col justify-between text-[#141617]">
             {/* 파일 탭 자리 */}
-            <div className="w-full h-[25px] bg-[#2F3336] border-b border-[#666871] border-opacity-50 flex">
+            <div className="w-full h-[25px] bg-[#404040] border-b border-[#666871] border-opacity-50 flex">
               <div className="flex flex-1 items-center space-x-2 overflow-x-auto overflow-y-hidden scroll">
               {fileTap.filter((file) => file !== null).map((file) => (
                 <div key={file.fileRouteAndName} className="flex flex-row items-center">
@@ -368,7 +368,7 @@ function ProjectPage() {
               </div>
             </div>
             {/* 코드 편집기 자리 */}
-            <div className="flex-1 w-full bg-[#212426] overflow-hidden text-cyan-100">
+            <div className="flex-1 w-full bg-[#2d2d2d] overflow-hidden text-cyan-100">
               <div>
                 {isSaving && (
                   <div className="autosave-indicator absolute top-1/3 left-2/4 transform -translate-x-1/2 z-10">Code is Saving...</div>
@@ -430,9 +430,9 @@ function ProjectPage() {
                 }}
               >
                 {/* 터미널 */}
-                <div className="bg-[#212426] h-full">
+                <div className="bg-[#2d2d2d] h-full">
                   {/* 상단 탭과 + 버튼 */}
-                  <div className="flex bg-[#212426] h-[30px] box-border pr-2 items-center space-x-2">
+                  <div className="flex bg-[#2d2d2d] h-[30px] box-border pr-2 items-center space-x-2">
                     <div className="flex flex-1 items-center space-x-2 box-border ml-4 gap-x-4 overflow-x-auto flex-grow select-none scroll">
                       {/* Resource 탭 */}
                       <button
@@ -525,7 +525,7 @@ function ProjectPage() {
                   <div className="flex-1 w-full h-[calc(100% - 30px)] relative">
                     {/* 런 패널 */}
                     <div
-                      className="bg-[#141617] w-full h-full"
+                      className="bg-[#2d2d2d] w-full h-full"
                       style={{
                         display: activePanel === "run" ? "block" : "none",
                       }} /* 수정: CSS로 런 패널 보이기/숨기기 */
@@ -545,7 +545,7 @@ function ProjectPage() {
 
                     {/* Resource 패널 */}
                     <div
-                      className="bg-[#141617] w-full h-full overflow-hidden"
+                      className="bg-[#2d2d2d] w-full h-full overflow-hidden"
                       style={{
                         display: activePanel === "resource" ? "block" : "none",
                       }}
@@ -559,7 +559,7 @@ function ProjectPage() {
                     </div>
                     {/* 터미널 패널 */}
                     <div
-                      className="bg-[#141617] w-full h-full"
+                      className="bg-[#2d2d2d] w-full h-full"
                       style={{
                         display: activePanel === "terminal" ? "block" : "none",
                       }} /* 수정: CSS로 터미널 패널 보이기/숨기기 */

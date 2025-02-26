@@ -12,9 +12,9 @@ const ChatReviewTabs: React.FC<ChatReviewTabsProps> = ({ isOpen, onOpenStateChan
   const [activeTab, setActiveTab] = useState<"chat" | "review">("chat"); // 현재 활성 탭
 
   return (
-    <div className="flex flex-col h-full bg-[#212426] text-white">
+    <div className="flex flex-col h-full bg-[#2d2d2d] text-white">
       {/* ✅ 상단 헤더 (탭 선택 & 접기 버튼) */}
-      <div className="h-[30px] bg-[#2F3336] flex items-center justify-between px-4 font-bold text-white text-xs">
+      <div className="h-[30px] bg-[#404040] flex items-center justify-between px-4 font-bold text-white text-xs">
         {/* 탭 선택 버튼 */}
         <div className="flex space-x-4">
           <button
@@ -31,7 +31,7 @@ const ChatReviewTabs: React.FC<ChatReviewTabsProps> = ({ isOpen, onOpenStateChan
             }`}
             onClick={() => setActiveTab("review")}
           >
-            코드 리뷰
+            AI 코드 리뷰
           </button>
         </div>
 

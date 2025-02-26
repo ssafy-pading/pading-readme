@@ -28,7 +28,7 @@ const CodeReviewComponent: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#212426] text-white">
+    <div className="flex flex-col h-full bg-[#2d2d2d] text-white">
 
       {/* 코드 리뷰 결과 영역 */}
       <div className="custom-scrollbar flex-1 overflow-y-auto p-3 flex flex-col space-y-4 relative">
@@ -38,7 +38,7 @@ const CodeReviewComponent: React.FC = () => {
         )}
 
         {review ? (
-          <div className="bg-[#212426] p-3 rounded-lg text-gray-300 text-sm">
+          <div className="bg-[#2d2d2d] p-3 rounded-lg text-gray-300 text-sm">
             <h3 className="text-md font-semibold text-gray-300 mb-2">리뷰 결과</h3>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -77,7 +77,7 @@ const CodeReviewComponent: React.FC = () => {
           </div>
         ) : (
           <div className="text-gray-400 text-sm text-center mt-5">
-            코드 리뷰 결과가 여기에 표시됩니다.
+            AI 코드 리뷰 결과가 여기에 표시됩니다.
           </div>
         )}
       </div>
@@ -85,22 +85,22 @@ const CodeReviewComponent: React.FC = () => {
       {/* 파일이 없을 때 경고 메시지 */}
       {showError && (
         <div className="text-red-500 text-xs text-center mb-2">
-          코드 리뷰를 요청하려면 파일을 선택해야 합니다.
+          AI 코드 리뷰를 요청하려면 파일을 선택해야 합니다.
         </div>
       )}
 
       {/* 코드 리뷰 요청 버튼 */}
-      <div className="bg-[#212426] w-full h-[50px] flex justify-center items-center border-t border-gray-600">
+      <div className="bg-[#2d2d2d] w-full h-[50px] flex justify-center items-center border-t border-gray-600">
         <button
           onClick={handleReviewClick}
           disabled={!fileName || status === 'loading'}
-          className={`px-4 py-2 rounded-lg w-5/6 transition ${
+          className={`px-4 py-2 text-sm rounded-lg w-5/6 transition ${
             !fileName
               ? 'bg-gray-500 cursor-not-allowed'
               : 'bg-[#3B82F6] hover:bg-blue-700 text-white'
           }`}
         >
-          {status === 'loading' ? '리뷰 중...' : '코드 리뷰 요청'}
+          {status === 'loading' ? '리뷰 중...' : 'AI 코드 리뷰 요청'}
         </button>
       </div>
     </div>

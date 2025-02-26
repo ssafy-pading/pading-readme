@@ -46,7 +46,7 @@ const VerticalCarousel: React.FC<VerticalCarouselProps> = ({ isChatOpen, localPa
   }, [isMute, localParticipant])
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#212426] overflow-hidden">
+    <div className="relative w-full h-full flex flex-col bg-[#2d2d2d] overflow-hidden">
       {hasJoined ? (
         <div className="h-full w-full">
           <Slider ref={sliderRef} {...settings}>
