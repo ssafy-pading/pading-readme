@@ -20,40 +20,55 @@
 
 ## 기능 소개
 
-### ✔ 회원가입 & 로그인
+### ✔ 로그인
 - 구글과 카카오톡으로 소셜 로그인
 
-<img src="./resources/gif/main/회원가입.gif" alt="회원가입" width="800"><br/><br/>
+<img src="./docs/img/main/로그인.png" alt="로그인" width="400"><br/><br/>
 
 ### ✔ 사이트 소개 페이지
 - 사이트를 간단하게 소개
 
-<img src="./resources/gif/main/튜토리얼.gif" alt="튜토리얼" width="800"><br/><br/>
+<img src="./docs/img/main/사이트 소개.png" alt="사이트 소개" width="600"><br/><br/>
 
 ### ✔ 그룹 페이지 (HOME)
 - 로그인을 하면 자신이 속한 그룹 페이지로 이동
 - 그룹의 정보와 프로젝트 등을 확인할 수 있음
+
+<img src="./docs/img/group/그룹 페이지.png" alt="그룹 페이지" width="600"><br/><br/>
 
 #### 그룹 네비게이션
 - 자신이 속한 그룹의 리스트를 보여줌
 - 하단에 그룹을 생성하거나 참여할 수 있는 버튼(+)
 - 현재 선택된 그룹의 정보(참여중인 인원, 접속중인 인원, 그룹의 이름 등등)를 확인할 수 있음
 
+<img src="./docs/img/group/그룹 네비게이션.png" alt="그룹 네비게이션" width="200"><br/><br/>
+
 #### 그룹 생성
 - 그룹 이름과 인원제한을 설정할 수 있음
 - 그룹 이름의 경우 중복될 수 없음
+
+<img src="./docs/img/group/그룹 생성.png" alt="그룹 네비게이션" width="400"><br/><br/>
 
 #### 그룹 초대와 참여
 - 그룹에 속해있는 매니저는 초대링크를 생성할 수 있음
 - 그룹 참여는 직접 url로 들어가는 방법과 그룹참여하기 모달, 2가지 방법이 있음
 
+<img src="./docs/gif/group/초대 링크 생성.gif" alt="초대 링크 생성" width="400"><br/><br/>
+
+<img src="./docs/img/group/그룹 참여.png" alt="그룹 참여" width="400"><br/><br/>
+
 #### 그룹 이름 변경 및 그룹 삭제
 - 오너의 경우 그룹의 이름을 변경, 그룹 삭제를 할 수 있음
+
+<img src="./docs/img/group/그룹 이름 변경 및 그룹 삭제.png" alt="그룹 이름 변경 및 그룹 삭제" width="200"><br/><br/>
+<img src="./docs/img/group/그룹 삭제.png" alt="그룹 삭제" width="400"><br/><br/>
 
 #### 멤버 권한 변경 및 제외
 - 매니저는 일반멤버를 그룹에서 제외할 수 있음
 - 오너는 매니저와 일반멤버를 그룹에서 제외할 수 있음
 - 오너는 멤버들의 권한을 변경할 수 있음
+
+<img src="./docs/gif/group/유저 권한 변경.gif" alt="유저 권한 변경" width="600"><br/><br/>
 
 #### 오너 위임
 - 오너는 다른 멤버에게 오너를 위임할 수 있음
@@ -64,11 +79,16 @@
 - 현재 접속중인 인원들과 내가 속해있는 프로젝트를 볼 수 있음
 - 그룹의 매니저의 경우 모든 프로젝트를 볼 수 있음
 
+<img src="./docs/img/project/프로젝트 리스트.png" alt="프로젝트 리스트" width="400"><br/><br/>
+
 #### 프로젝트 상태(On / Off, 입장 인원)
 - 현재 프로젝트의 상태를 확인할 수 있음
 - 누군가가 프로젝트에 입장했을 때 프로젝트 상태가 자동으로 On으로 변경됨
 - 프로젝트에 입장해 있는 인원이 없을 경우, 프로젝트 상태를 Off로 변경할 수 있음
-<img src="./resources/gif/main/메인페이지.gif" alt="메인페이지" width="800"><br/><br/>
+
+<img src="./docs/img/project/프로젝트 상태.png" alt="프로젝트 상태" width="400"><br/><br/>
+
+<img src="./docs/gif/project/프로젝트 멤버 조회.gif" alt="프로젝트 멤버 조회" width="300"><br/><br/>
 
 #### 프로젝트 생성
 - 매니저는 프로젝트를 생성할 수 있음
@@ -76,152 +96,13 @@
 - OS의 경우 언어마다 지원하는 OS가 다르기 때문에 언어를 먼저 선택
 - 생성의 경우 시간이 걸리기 때문에 로딩표시로 진행중이라는 것을 보여줌
 
+<img src="./docs/gif/project/프로젝트 생성.gif" alt="프로젝트 생성" width="300"><br/><br/>
+
 #### 프로젝트 삭제
 - 매니저는 프로젝트를 삭제할 수 있음
 - 삭제의 경우 시간이 걸리기 때문에 로딩표시로 진행중이라는 것을 보여줌
 
-### ✔ 라이트/다크모드
-- 모드 전환 가능
 
-<img src="./resources/gif/main/다크모드토글.gif" alt="다크모드토글" width="800"><br/><br/>
-
-
-
-### ✔ 뉴스 페이지
-#### 뉴스 전체 목록
-- `하이브리드 추천 시스템`에 따른 뉴스 컨텐츠 추천
-- 관심 카테고리 기반 뉴스 컨텐츠 추천
-- 최신 전체 뉴스 목록 제공
-
-<img src="./resources/gif/news/뉴스목록.gif" alt="뉴스목록" width="800"><br/>
-
-#### 뉴스 상세
-- 한/영 토글을 통해 번역본 제공
-
-<img src="./resources/gif/news/뉴스상세.gif" alt="뉴스상세" width="800"><br/>
-
-- `scroll progress bar`를 통해 뉴스 읽음 처리
-- 다 읽은 뉴스에 대해 난이도에 맞는 메달 획득
-
-<img src="./resources/gif/news/뉴스읽음메달.gif" alt="뉴스읽음메달" width="800"><br/>
-
-- 본인 레벨 수준에 맞는 난이도 번역본 기본 제공
-- 원하는 난이도로 변경 가능
-
-<img src="./resources/gif/news/뉴스상세난이도토글.gif" alt="뉴스상세난이도토글" width="800"><br/>
-
-#### 단어 하이라이팅
-- 모르는 단어에 드래그/더블클릭을 통해 `하이라이팅`
-- 하이라이팅한 단어에 대한 뜻과 발음 제공
-
-<img src="./resources/gif/word/단어하이라이팅및취소.gif" alt="단어하이라이팅및취소" width="800"><br/>
-
-#### 뉴스 스크랩
-- 읽고 있는 뉴스에 대해 원하는 난이도를 선택하여 스크랩 가능
-
-<img src="./resources/gif/news/뉴스스크랩.gif" alt="뉴스스크랩" width="800"><br/>
-
-#### Word hunt game
-- 가로/세로 단어를 맞히는 `word hunt game` 기능
-- 뉴스 본문의 단어들 중 랜덤으로 추출된 단어 등장
-- 다 맞힌 경우, 경험치 획득
-
-<img src="./resources/gif/news/워드헌트풀기.gif" alt="워드헌트풀기" width="800"><br/>
-
-- 정답 확인 가능
-
-<img src="./resources/gif/news/워드헌트정답보기.gif" alt="워드헌트정답보기" width="800"><br/>
-
-
-
-### ✔ 나만의 단어장
-#### 단어 목록
-- 저장한 단어에 대해 뜻, 예문, 뉴스원문 제공
-
-<img src="./resources/gif/word/단어장.gif" alt="단어장" width="800"><br/>
-
-#### 단어 외움 처리
-- 암기한 단어는 `drag & drop`으로 외움 처리
-
-<img src="./resources/gif/word/단어외움처리.gif" alt="단어외움처리" width="800"><br/>
-
-#### 망각 곡선 기반 단어 복습
-- `에빙하우스의 망각 곡선 이론`을 바탕으로 한 효율적인 복습 시스템
-- 암기한 단어에 대해 1일, 3일, 7일, 30일 등 점진적으로 `복습 퀴즈` 제공
-
-<img src="./resources/gif/study/망각곡선팝퀴즈.gif" alt="망각곡선팝퀴즈" width="800"><br/>
-
-
-### ✔ 학습 목표 및 경험치
-#### 학습 목표 설정
-- `뉴스 읽기 횟수`, `단어 테스트로 암기한 단어 수`, `발음 테스트 점수 총합`에 대해 원하는 학습 목표 설정
-- 매월 1일 자동으로 목표가 초기화되어, 새로운 달의 목표를 설정 가능
-
-<img src="./resources/gif/study/학습목표설정.gif" alt="학습목표설정" width="800"><br/>
-
-#### 경험치 획득
-- 설정한 학습 목표에 따라, 달성 시 경험치 획득 모달 표시
-
-<img src="./resources/gif/study/학습목표달성경험치모달.gif" alt="학습목표달성경험치모달" width="800"><br/>
-
-
-### ✔ 단어 빈칸 테스트
-#### 테스트 시작
-- `나의 단어장에 저장된 단어들` 기반으로 원하는 문제 갯수만큼 테스트 응시
-- 이전에 진행한 테스트 결과 및 통계 그래프 확인 가능
-
-<img src="./resources/gif/word/단어테스트.gif" alt="단어테스트" width="800"><br/>
-
-#### 테스트 결과
-- 응시한 테스트의 상세 결과 확인 가능
-
-<img src="./resources/gif/word/단어테스트결과.gif" alt="단어테스트결과" width="800"><br/>
-
-
-### ✔ 발음 테스트
-#### 테스트 시작
-- `나의 단어장에 저장된 단어들의 예문`을 기반으로 테스트 응시
-- 녹음 진행 시, STT로 현재 발화에 대해 인식된 문장을 표시
-- 이전에 진행한 테스트 결과 및 통계 그래프 확인 가능
-
-<img src="./resources/gif/study/발음테스트.gif" alt="발음테스트" width="800"><br/>
-
-#### 테스트 결과
-- `azure speech service` 기반의 정확도, 능숙도, 운율, 단어 완전성 등 `발음 평가 점수` 제공
-- 테스트 답안 및 제출한 녹음본 다시 듣기 제공
-
-<img src="./resources/gif/study/발음테스트결과.gif" alt="발음테스트결과" width="800"><br/>
-
-
-### ✔ 검색 페이지
-#### Wordcloud 기반 인기 키워드 검색
-- `Elasticsearch` 통한 검색 최적화
-- 뉴스 빈출 키워드 기반의 `Wordcloud` 제공
-
-<img src="./resources/gif/main/검색.gif" alt="" width="800"><br/><br/>
-
-### ✔ 마이페이지
-- 내 정보, 학습 대시보드(수치, 그래프, 활동량), 스크랩한 뉴스 목록 제공
-
-<img src="./resources/gif/main/마이페이지.gif" alt="" width="800"><br/><br/>
-
-
-### ✔ PWA (Progressive Web Apps)
-|메인 페이지|나만의 단어장|마이 페이지|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobileMainpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileVocapage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileMypage.gif" width="100%"/>|
- 
-|뉴스 전체 목록|뉴스 상세|
-|:---:|:---:|
- <img src="./resources/gif/pwa/MobileNewsList.gif" width="90%"/>|<img src="./resources/gif/pwa/MobileNewsDetail.gif" width="90%"/>
-
-|단어 빈칸 테스트 시작|단어 빈칸 테스트 진행|단어 빈칸 테스트 결과|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobileWordStartpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileWordTestpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileWordTestResultpage.gif" width="100%"/>|
-
-|발음 테스트 시작|발음 테스트 진행|발음 테스트 결과|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobilePronounceStartpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobilePronounceTestpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobilePronounceTestResultpage.gif" width="100%"/>|
 
 
 ## 기술 스택
