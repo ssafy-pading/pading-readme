@@ -5,184 +5,208 @@
 > 🔗 **[Paing](https://pair-coding.site/) 바로가기<br/>**
 
 ### 📌 Contents
- 1. [Overview](#Overview)
- 2. [기능 소개](#기능-소개)
- 3. [기술 스택](#기술-스택)
- 4. [주요 기술](주요-기술)
- 5. [시스템 아키텍처](#시스템-아키텍처)
- 5. [산출물](#산출물)
- 6. [팀원 소개](#팀원-소개)
+- [Overview](#overview)
+- [기능 소개](#기능-소개)
+  - [✔ 메인 페이지](#메인페이지)
+  - [✔ 매니징 시스템](#매니징-시스템)
+  - [✔ 공동 편집 IDE](#공동-편집-ide)
+- [기술 스택](#기술-스택)
+  - [✔ 프론트엔드 기술 스택](#프론트엔드-기술-스택)
+- [주요 기술](#주요-기술)
+- [시스템 아키텍처](#시스템-아키텍처)
+- [산출물](#산출물)
+- [팀원 소개](#팀원-소개)
+    - [🔥 Pading](#-pading)
 
 ## Overview
-🗣 처음 시작하기 어려운 영어 공부, 재미있게 할 방법이 없을까?<br/>
-영어로 뉴스를 읽으며 즐겁게 학습해보는건 어떤가요?<br/>
-최신 국내 뉴스와 함께 영어를 쉽게 공부할 수 있는 곳, **New Learn**🙌🏻
+🗣 기존의 페어 프로그래밍 방식, 너무 불편하지 않나요?
+한 명이 코딩하고, 다른 한 명이 지켜보는 방식은 비효율적일 때가 많죠.
+
+💻 각자의 컴퓨터에서 동시에 코딩하며 실시간 공동 편집!
+🚀 코드 수정 즉시 반영! 자동 배포로 더 빠르게!
+🤝 원격 환경에서도 원활한 협업, 생산성 극대화!
+
+페어 프로그래밍을 더 편리하고 효율적으로!
+이제 **PADING**과 함께 새로운 개발 경험을 시작하세요! 🚀
 
 ## 기능 소개
 
-### ✔ 회원가입 & 로그인
-- 아바타 생성, 영단어 레벨 테스트, 관심 분야 설정
+### ✔ 메인페이지
+#### 사이트 소개
+<img src="./docs/img/main/사이트 소개.png" alt="사이트 소개" width="600"><br/><br/>
 
-<img src="./resources/gif/main/회원가입.gif" alt="회원가입" width="800"><br/><br/>
+#### 로그인
+- 구글과 카카오톡으로 소셜 로그인 지원
 
-### ✔ 튜토리얼
-- 각 컨텐츠에 대한 사용법 제공
+<img src="./docs/img/main/로그인.png" alt="로그인" width="400"><br/><br/>
 
-<img src="./resources/gif/main/튜토리얼.gif" alt="튜토리얼" width="800"><br/><br/>
+### ✔ 매니징 시스템
 
-### ✔ 메인 페이지 (HOME)
-- `Today's Top 10` : 오늘의 탑 10 뉴스
-- 이번 달 학습 현황, 뉴스 읽기 기록에 따른 관심도 그래프 표시
-- `포인트왕/다독왕` 실시간 랭킹 표시
+- **매니징 시스템**: 오너, 매니저, 멤버로 구성
+- **그룹 및 프로젝트 관리**
 
-<img src="./resources/gif/main/메인페이지.gif" alt="메인페이지" width="800"><br/><br/>
+#### 그룹 페이지(Home)
+- 로그인을 하면 자신이 속한 그룹 페이지로 이동
+- 그룹의 정보와 프로젝트 등을 확인할 수 있음
 
-### ✔ 라이트/다크모드
-- 모드 전환 가능
+<img src="./docs/img/group/그룹 페이지.png" alt="그룹 페이지" width="600"><br/><br/>
 
-<img src="./resources/gif/main/다크모드토글.gif" alt="다크모드토글" width="800"><br/><br/>
+#### 그룹 네비게이션
+- 자신이 속한 그룹의 리스트를 보여줌
+- 하단에 그룹을 생성하거나 참여할 수 있는 버튼(+)
+- 현재 선택된 그룹의 정보(참여중인 인원, 접속중인 인원, 그룹의 이름 등등)를 확인할 수 있음
 
+<img src="./docs/img/group/그룹 네비게이션.png" alt="그룹 네비게이션" width="200"><br/><br/>
 
+#### 그룹 생성
+- 그룹 이름과 인원제한을 설정할 수 있음
+- 그룹 이름의 경우 중복될 수 없음
 
-### ✔ 뉴스 페이지
-#### 뉴스 전체 목록
-- `하이브리드 추천 시스템`에 따른 뉴스 컨텐츠 추천
-- 관심 카테고리 기반 뉴스 컨텐츠 추천
-- 최신 전체 뉴스 목록 제공
+<img src="./docs/img/group/그룹 생성.png" alt="그룹 네비게이션" width="400"><br/><br/>
 
-<img src="./resources/gif/news/뉴스목록.gif" alt="뉴스목록" width="800"><br/>
+#### 그룹 초대와 참여
+- 그룹에 속해있는 매니저는 초대링크를 생성할 수 있음
+- 그룹 참여는 직접 url로 들어가는 방법과 그룹참여하기 모달, 2가지 방법이 있음
 
-#### 뉴스 상세
-- 한/영 토글을 통해 번역본 제공
+<img src="./docs/gif/group/초대 링크 생성.gif" alt="초대 링크 생성" width="400"><br/><br/>
 
-<img src="./resources/gif/news/뉴스상세.gif" alt="뉴스상세" width="800"><br/>
+<img src="./docs/img/group/그룹 참여.png" alt="그룹 참여" width="400"><br/><br/>
 
-- `scroll progress bar`를 통해 뉴스 읽음 처리
-- 다 읽은 뉴스에 대해 난이도에 맞는 메달 획득
+#### 그룹 이름 변경 및 그룹 삭제
+- 오너의 경우 그룹의 이름을 변경, 그룹 삭제를 할 수 있음
 
-<img src="./resources/gif/news/뉴스읽음메달.gif" alt="뉴스읽음메달" width="800"><br/>
+<img src="./docs/img/group/그룹 이름 변경 및 그룹 삭제.png" alt="그룹 이름 변경 및 그룹 삭제" width="200"><br/>
+<img src="./docs/img/group/그룹 삭제.png" alt="그룹 삭제" width="400"><br/><br/>
 
-- 본인 레벨 수준에 맞는 난이도 번역본 기본 제공
-- 원하는 난이도로 변경 가능
+#### 멤버 권한 변경 및 제외
+- 매니저는 일반멤버를 그룹에서 제외할 수 있음
+- 오너는 매니저와 일반멤버를 그룹에서 제외할 수 있음
+- 오너는 멤버들의 권한을 변경할 수 있음
 
-<img src="./resources/gif/news/뉴스상세난이도토글.gif" alt="뉴스상세난이도토글" width="800"><br/>
+<img src="./docs/gif/group/유저 권한 변경.gif" alt="유저 권한 변경" width="600"><br/><br/>
 
-#### 단어 하이라이팅
-- 모르는 단어에 드래그/더블클릭을 통해 `하이라이팅`
-- 하이라이팅한 단어에 대한 뜻과 발음 제공
+#### 오너 위임
+- 오너는 다른 멤버에게 오너를 위임할 수 있음
+- 위임 후에는 매니저로 권한이 변경됨
 
-<img src="./resources/gif/word/단어하이라이팅및취소.gif" alt="단어하이라이팅및취소" width="800"><br/>
+- 프로젝트를 생성, 삭제, 상태 관리를 할 수 있음
 
-#### 뉴스 스크랩
-- 읽고 있는 뉴스에 대해 원하는 난이도를 선택하여 스크랩 가능
+#### 프로젝트 리스트
+- 현재 접속중인 인원들과 내가 속해있는 프로젝트를 볼 수 있음
+- 그룹의 매니저의 경우 모든 프로젝트를 볼 수 있음
 
-<img src="./resources/gif/news/뉴스스크랩.gif" alt="뉴스스크랩" width="800"><br/>
+<img src="./docs/img/project/프로젝트 리스트.png" alt="프로젝트 리스트" width="400"><br/><br/>
 
-#### Word hunt game
-- 가로/세로 단어를 맞히는 `word hunt game` 기능
-- 뉴스 본문의 단어들 중 랜덤으로 추출된 단어 등장
-- 다 맞힌 경우, 경험치 획득
+#### 프로젝트 생성
+- 매니저는 프로젝트를 생성할 수 있음
+- 프로젝트 이름, 언어, OS, 성능, 구성원 등을 선택할 수 있음
+- OS의 경우 언어마다 지원하는 OS가 다르기 때문에 언어를 먼저 선택
+- 생성의 경우 시간이 걸리기 때문에 로딩표시로 진행중이라는 것을 보여줌
 
-<img src="./resources/gif/news/워드헌트풀기.gif" alt="워드헌트풀기" width="800"><br/>
+<img src="./docs/gif/project/프로젝트 생성.gif" alt="프로젝트 생성" width="300"><br/><br/>
 
-- 정답 확인 가능
+#### 프로젝트 삭제
+- 매니저는 프로젝트를 삭제할 수 있음
+- 삭제의 경우 시간이 걸리기 때문에 로딩표시로 진행중이라는 것을 보여줌
 
-<img src="./resources/gif/news/워드헌트정답보기.gif" alt="워드헌트정답보기" width="800"><br/>
+#### 프로젝트 상태
+- 현재 프로젝트의 상태 정보를 확인할 수 있음(On / Off, 입장 인원 등등)
+- 누군가가 프로젝트에 입장했을 때 프로젝트 상태가 자동으로 On으로 변경됨
+- 프로젝트에 입장해 있는 인원이 없을 경우, 프로젝트 상태를 Off로 변경할 수 있음
 
+<img src="./docs/img/project/프로젝트 상태.png" alt="프로젝트 상태" width="400">
 
+<img src="./docs/gif/project/프로젝트 상태 변경.gif" alt="프로젝트 상태 변경" width="400">
 
-### ✔ 나만의 단어장
-#### 단어 목록
-- 저장한 단어에 대해 뜻, 예문, 뉴스원문 제공
+<img src="./docs/gif/project/프로젝트 멤버 조회.gif" alt="프로젝트 멤버 조회" width="300"><br/><br/>
 
-<img src="./resources/gif/word/단어장.gif" alt="단어장" width="800"><br/>
+#### 매니저 호출
+- 프로젝트 페이지에서 사용자가 매니저 호출 버튼을 누르면, 바깥에서 붉은 점으로 표시됨
 
-#### 단어 외움 처리
-- 암기한 단어는 `drag & drop`으로 외움 처리
-
-<img src="./resources/gif/word/단어외움처리.gif" alt="단어외움처리" width="800"><br/>
-
-#### 망각 곡선 기반 단어 복습
-- `에빙하우스의 망각 곡선 이론`을 바탕으로 한 효율적인 복습 시스템
-- 암기한 단어에 대해 1일, 3일, 7일, 30일 등 점진적으로 `복습 퀴즈` 제공
-
-<img src="./resources/gif/study/망각곡선팝퀴즈.gif" alt="망각곡선팝퀴즈" width="800"><br/>
-
-
-### ✔ 학습 목표 및 경험치
-#### 학습 목표 설정
-- `뉴스 읽기 횟수`, `단어 테스트로 암기한 단어 수`, `발음 테스트 점수 총합`에 대해 원하는 학습 목표 설정
-- 매월 1일 자동으로 목표가 초기화되어, 새로운 달의 목표를 설정 가능
-
-<img src="./resources/gif/study/학습목표설정.gif" alt="학습목표설정" width="800"><br/>
-
-#### 경험치 획득
-- 설정한 학습 목표에 따라, 달성 시 경험치 획득 모달 표시
-
-<img src="./resources/gif/study/학습목표달성경험치모달.gif" alt="학습목표달성경험치모달" width="800"><br/>
+<img src="./docs/img/project/호출벨.png" alt="호출벨" width="400"><br/>
+<img src="./docs/img/project/매니저 호출.png" alt="매니저 호출" width="400"><br/><br/>
 
 
-### ✔ 단어 빈칸 테스트
-#### 테스트 시작
-- `나의 단어장에 저장된 단어들` 기반으로 원하는 문제 갯수만큼 테스트 응시
-- 이전에 진행한 테스트 결과 및 통계 그래프 확인 가능
 
-<img src="./resources/gif/word/단어테스트.gif" alt="단어테스트" width="800"><br/>
+### ✔ 공동 편집 IDE
 
-#### 테스트 결과
-- 응시한 테스트의 상세 결과 확인 가능
+- **에디터**: 
+  - **Monaco Editor** + **Yjs**를 활용하여 실시간 공동 편집 구현
+  - WebSocket 기반 시그널링 서버를 구축하여 다중 사용자 동기화
+- **터미널**:
+  - **Xterm.js**를 사용하여 터미널 환경 구현
+  - **STOMP.js** 및 **SockJS**를 활용하여 각 프로젝트 컨테이너와 실시간 통신
 
-<img src="./resources/gif/word/단어테스트결과.gif" alt="단어테스트결과" width="800"><br/>
+#### 프로젝트 페이지
+- 프로젝트에서 파일을 작성하고, 협업을 할 수 있는 페이지
 
+<img src="./docs/img/projectpage/프로젝트 페이지.png" alt="프로젝트 페이지" width="600">
 
-### ✔ 발음 테스트
-#### 테스트 시작
-- `나의 단어장에 저장된 단어들의 예문`을 기반으로 테스트 응시
-- 녹음 진행 시, STT로 현재 발화에 대해 인식된 문장을 표시
-- 이전에 진행한 테스트 결과 및 통계 그래프 확인 가능
+#### 채팅
+- 프로젝트에 인원들과 실시간으로 채팅
 
-<img src="./resources/gif/study/발음테스트.gif" alt="발음테스트" width="800"><br/>
+<img src="./docs/gif/projectpage/채팅.gif" alt="채팅" width="200"><br/><br/>
 
-#### 테스트 결과
-- `azure speech service` 기반의 정확도, 능숙도, 운율, 단어 완전성 등 `발음 평가 점수` 제공
-- 테스트 답안 및 제출한 녹음본 다시 듣기 제공
+#### 화상회의
+- 참여하기 전 마이크와 비디오를 체크할 수 있음
+- 화상회의 부분은 슬라이더로 다른 사용자를 확인
+- 해당 섹션의 크기를 늘릴 수 있음
 
-<img src="./resources/gif/study/발음테스트결과.gif" alt="발음테스트결과" width="800"><br/>
+<img src="./docs/gif/projectpage/화상회의 참여.gif" alt="화상회의 참여" width="600">
 
-
-### ✔ 검색 페이지
-#### Wordcloud 기반 인기 키워드 검색
-- `Elasticsearch` 통한 검색 최적화
-- 뉴스 빈출 키워드 기반의 `Wordcloud` 제공
-
-<img src="./resources/gif/main/검색.gif" alt="" width="800"><br/><br/>
-
-### ✔ 마이페이지
-- 내 정보, 학습 대시보드(수치, 그래프, 활동량), 스크랩한 뉴스 목록 제공
-
-<img src="./resources/gif/main/마이페이지.gif" alt="" width="800"><br/><br/>
+<img src="./docs/gif/projectpage/화상회의.gif" alt="화상회의" width="200"><br/><br/>
 
 
-### ✔ PWA (Progressive Web Apps)
-|메인 페이지|나만의 단어장|마이 페이지|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobileMainpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileVocapage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileMypage.gif" width="100%"/>|
- 
-|뉴스 전체 목록|뉴스 상세|
-|:---:|:---:|
- <img src="./resources/gif/pwa/MobileNewsList.gif" width="90%"/>|<img src="./resources/gif/pwa/MobileNewsDetail.gif" width="90%"/>
+#### 파일 탐색기
+- 해당 프로젝트에 있는 파일을 확인할 수 있음
+- 파일을 클릭하여 열 수 있음
+- 삭제, 생성 등을 할 수 있음
 
-|단어 빈칸 테스트 시작|단어 빈칸 테스트 진행|단어 빈칸 테스트 결과|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobileWordStartpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileWordTestpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobileWordTestResultpage.gif" width="100%"/>|
+<img src="./docs/gif/projectpage/파일 탐색기.gif" alt="파일 탐색기" width="600"><br/><br/>
 
-|발음 테스트 시작|발음 테스트 진행|발음 테스트 결과|
-|:---:|:---:|:---:|
- <img src="./resources/gif/pwa/MobilePronounceStartpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobilePronounceTestpage.gif" width="100%"/>|<img src="./resources/gif/pwa/MobilePronounceTestResultpage.gif" width="100%"/>|
+#### 파일 편집기
+- 연 파일을 수정할 수 있음
+- 다른사람과 동시에 수정할 수 있음
+- 다른사람이 편집하는 부분은 색깔이 다른 커서로 표시되어있음
+
+<img src="./docs/gif/projectpage/파일 편집기.gif" alt="파일 편집기" width="600"><br/><br/>
+
+
+#### 실행
+- 버튼을 눌러 해당 프로젝트를 실행할 수 있음
+- 실행에 실패할 경우 실패한 원인도 콘솔에 띄워줌
+
+<img src="./docs/gif/projectpage/실행하기.gif" alt="실행하기" width="500"><br/><br/>
+
+
+#### 배포
+- 실행되고 있는 프로젝트는 자동으로 배포됨
+- 버튼을 눌러 배포된 화면을 볼 수 있음
+
+<img src="./docs/gif/projectpage/배포.gif" alt="배포" width="500"><br/><br/>
+
+#### AI 코드리뷰
+- 현재 열려있는 파일을 AI코드리뷰를 받을 수 있음
+- 코드를 바로 복사할 수 있도록 코드블록 지원
+
+<img src="./docs/gif/projectpage/AI코드리뷰.gif" alt="AI코드리뷰" width="200"><br/><br/>
+
+#### 리소스 모니터링
+- 현재 사용중인 리소르를 확인할 수 있음
+- 탭을 열지 않아도 왼쪽 아래에 간략하게 보여줌
+- 특정 수치가 넘어가면 색상이 빨간색으로 변경됨
+
+<img src="./docs/gif/projectpage/모니터링.gif" alt="모니터링" width="500"><br/><br/>
+<img src="./docs/img/projectpage/미니 모니터링.png" alt="프로젝트 페이지" width="300">
 
 
 ## 기술 스택
 <img src="./resources/image/development_environment.png" width="80%"><br>
+
+### ✔ 프론트엔드 기술 스택
+- **TypeScript + React** 기반
+- **Tailwind CSS**를 활용한 UI 스타일링
+- **Vite**를 빌드 툴로 사용하여 빠른 개발 환경 구축
 
 ## 주요 기술
 - **데이터 파이프라인 구축**
