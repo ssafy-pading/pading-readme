@@ -1,4 +1,4 @@
-<img src="./resources/image/logo.png"><br>
+<img src="./docs/pading_logo.png"><br>
 
 > C202 Pading 공통 PJT 우수상/ 웹기술 Track<br/>
 > 2025.01.06 ~ 2024.02.21 (7주)<br/>
@@ -213,7 +213,7 @@
 | API 명세서 | [📡 API 명세서](https://aback-mandolin-01e.notion.site/API-96e24c73ae4f43ff8ce1cdf464d804f7) |
 | 와이어 프레임 | [🎨 와이어 프레임](https://www.figma.com/design/dgzYzuJbAeYHOXEp3LYs8M/%ED%99%94%EB%A9%B4-%EC%84%A4%EA%B3%84?node-id=0-1&p=f&t=HkpWcjM3jrOzOSsT-0) |
 | E-R Diagram | [🖥️ E-R Diagram](https://www.erdcloud.com/d/Q75Bv3GSFP2C6mu8F) 
-| 최종 발표 자료 | [📊 최종 발표 자료](./exec/D105_NEWLEARN_발표자료.pdf) | |
+| 최종 발표 자료 | [📊 최종 발표 자료](./docs/C202_공통프로젝트_발표.pdf) | |
 
 
 ## 팀원 소개
