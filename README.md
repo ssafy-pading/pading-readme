@@ -239,9 +239,7 @@
   <img src="./resources/image/elasticsearch_Jmeter.png" width="800">
 
 ## 시스템 아키텍처
-- **Blue/Green 무중단 배포 전략**
-  - 애플리케이션의 두 개의 환경(Blue와 Green)을 활용하여 서비스의 가용성과 안정성을 높이는 배포 방식<br/>
-  <img src="./docs/img/아키텍처.png"><br>
+<img src="./docs/img/아키텍처.png"><br>
 
 ## 산출물
 | 종류 | 바로가기 |
